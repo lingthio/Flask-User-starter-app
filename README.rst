@@ -87,6 +87,19 @@ Though the product name is 'Fabric', the command line tool is 'fab'.
   workon app
   fab update_env
 
+**Update configuration settings**
+
+Before we can use this application, we will have to configure the SMTP account that it will be using to send emails.
+
+Make sure that app/config/local_settings.py exists, or create it from a copy of local_settings_example.py file
+
+Edit app/config/local_settings.py and configure the following settings:
+
+* MAIL_USERNAME
+* MAIL_PASSWORD
+* MAIL_DEFAULT_SENDER
+* ADMINS
+
 
 Automated tests and code coverage
 ------
