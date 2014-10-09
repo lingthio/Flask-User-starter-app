@@ -1,0 +1,11 @@
+# Configuration for the test coverage tool (py.test --cov)
+#
+# Copyright 2014 SolidBuilds.com. All rights reserved
+#
+# Authors: Ling Thio <ling.thio@gmail.com>
+
+[run]
+omit = app/config/local_settings_example.py
+
+[report]
+show_missing = True

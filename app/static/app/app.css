@@ -1,0 +1,12 @@
+/**** element styles ****/
+hr { border-color: #cccccc; margin: }
+
+/**** header, main and footer divs ****/
+
+/**** class-based style modifiers ****/
+
+.no-margins { margin: 0px; }
+
+.with-margins { margin: 10px; }
+
+.col-centered { float: none; margin: 0 auto; }
