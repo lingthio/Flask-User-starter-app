@@ -13,12 +13,12 @@ from app.users.forms import UserProfileForm
 #
 # User Profile form
 #
-@app.route('/user/profile')
+@app.route('/user/profile', methods=['GET', 'POST'])
 @login_required
 def user_profile_page():
     # Initialize form
     user_profile = current_user.user_profile
-    form = UserProfileForm(request.form)
+    form = UserProfileForm(request.form, user_profile)
 
     # Process valid POST
     if request.method=='POST' and form.validate():
@@ -28,6 +28,9 @@ def user_profile_page():
 
         # Save user_profile
         db.session.commit()
+
+        # Redirect to home page
+        return redirect(url_for('home_page'))
 
     # Process GET or invalid POST
     return render_template('users/user_profile_page.html',
