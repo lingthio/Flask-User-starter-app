@@ -151,7 +151,7 @@ Creating a user account
 ~~~~~~~
 * Make sure that app/config/local_settings.py has the appropriate ``MAIL_*`` settings.
 * Point your web browser to http://localhost:5000/
-* Click on 'Register' and register a new user account.
+* Click on 'Sign in' and then 'Register' and register a new user account.
 * Confirm your email address
 
 
