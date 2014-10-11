@@ -49,13 +49,23 @@ Open a command line shell and type:
   git clone https://github.com/lingthio/Flask-User-starter-app.git app
   cd ~/dev/app
 
-**Install virtualenv and virtualenvwrapper**
+**Install virtualenvwrapper**
 
-virtualenv allows multiple Python applications to switch between multiple Python environments.
+Install it with::
+
+  sudo pip install virtualenvwrapper
+
+Configure it with::
+
+  export WORKON_HOME=$HOME/.virtualenvs
+  export PROJECT_HOME=$HOME/dev
+  source /usr/local/bin/virtualenvwrapper.sh
+
+You may want to place the above in your .bashrc or .profile or .bash_profile file
 
 See http://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
-**Make a virtualenv**
+**Create a new virtualenv**
 
 Find a Python 2.7 executable using ``python --version`` and ``which python``.
 
@@ -77,14 +87,18 @@ Though the product name is 'Fabric', the command line tool is 'fab'.
 ::
 
   workon app
+  pip install python-dev
+  pip install python-setuptools
   pip install fabric
+
+See also: http://www.fabfile.org/installing.html
 
 **Install required Python packages**
 
 ::
 
-  cd ~/dev/app
   workon app
+  cd ~/dev/app
   fab update_env
 
 **Update configuration settings**
@@ -105,9 +119,15 @@ Automated tests and code coverage
 ------
 The tests are in the tests/ directory.
 
-pytest is used to run the automated tests. Use ``fab test`` to run them.
+pytest is used to run the automated tests.
 
-pytest is also used to run the code coverage assessment. Use ``fab test_cov`` to run them.
+pytest is also used to run the code coverage assessment.
+
+::
+  workon app
+  cd ~/dev/app
+  fab test
+  fab test_cov
 
 
 Running the app
@@ -119,14 +139,21 @@ Flask comes with a convenient WSGI web application server for development enviro
 
 ::
 
-  cd ~/dev/app
   workon app
+  cd ~/dev/app
   fab runserver
 
 Point your web browser to http://localhost:5000/
 
 
+Creating a user account
+~~~~~~~
+* Make sure that app/config/local_settings.py has the appropriate ``MAIL_*`` settings.
+* Point your web browser to http://localhost:5000/
+* Click on 'Register' and register a new user account.
+* Confirm your email address
+
+
 Acknowledgements
 ~~~~~~~~
-| This project used the Flask-User starter app as a starting point.
-| See https://github.com/lingthio/Flask-User-starter-app
+This project used `Flask-User-starter-app <https://github.com/lingthio/Flask-User-starter-app>`_ as a starting point.
