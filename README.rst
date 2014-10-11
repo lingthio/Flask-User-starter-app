@@ -124,6 +124,7 @@ pytest is used to run the automated tests.
 pytest is also used to run the code coverage assessment.
 
 ::
+
   workon app
   cd ~/dev/app
   fab test
