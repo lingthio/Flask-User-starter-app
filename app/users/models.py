@@ -20,6 +20,8 @@ class User(db.Model, UserMixin):
 
     # Relationships
     user_profile = db.relationship('UserProfile', uselist=False, backref="user")
+    roles = db.relationship('Role', secondary='user_roles',
+            backref=db.backref('users', lazy='dynamic'))
 
 
 # Define the UserProfile model
@@ -51,8 +53,4 @@ class UserRoles(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
-
-    # Relationships
-    user = db.relationship('User', backref='roles')
-    role = db.relationship('Role', backref='users')
 
