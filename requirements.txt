@@ -6,7 +6,7 @@ Flask==0.10.1
 Flask-SQLAlchemy==2.0
 
 # Flask Packages
-Flask-User==0.5.4
+Flask-User==0.6
 Flask-WTF==0.10.2
 
 # Development tools

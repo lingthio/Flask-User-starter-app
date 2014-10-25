@@ -28,7 +28,7 @@ It's a great starting point for new Flask applications -- whether you plan to us
 
 * Flask
 * Flask-SQLAlchemy
-* Flask-User
+* Flask-User v0.6 and up (v0.5 does not support UserAuthClass)
 
 
 Installation
