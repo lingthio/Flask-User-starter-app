@@ -17,14 +17,13 @@ from app.users.forms import UserProfileForm
 @login_required
 def user_profile_page():
     # Initialize form
-    user_profile = current_user.user_profile
-    form = UserProfileForm(request.form, user_profile)
+    form = UserProfileForm(request.form, current_user)
 
     # Process valid POST
     if request.method=='POST' and form.validate():
 
         # Copy form fields to user_profile fields
-        form.populate_obj(user_profile)
+        form.populate_obj(current_user)
 
         # Save user_profile
         db.session.commit()
