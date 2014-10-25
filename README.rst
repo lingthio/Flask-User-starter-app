@@ -114,6 +114,8 @@ Edit app/config/local_settings.py and configure the following settings:
 * MAIL_DEFAULT_SENDER
 * ADMINS
 
+or use similarly named OS Environment settings to change these settings
+
 
 Automated tests and code coverage
 ------
