@@ -1,12 +1,12 @@
-#!/Users/lingthio/envs/glamdring/bin/python
-
-# The 'runserver.py' file is used to run a Flask application
-# using the development WSGI web server provided by Flask.
-# Run 'python runserver.py' and point your web browser to http://localhost:5000/
-
+# This file starts the WSGI web application.
+# - Heroku starts gunicorn, which loads Procfile, which starts runserver.py
+# - Developers can run it from the command line: python runserver.py
 
 from app.app_and_db import app, db
 from app.startup.init_app import init_app
 
 init_app(app, db)
-app.run(port=5000, debug=True)
+
+# Start a development web server if executed from the command line
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)

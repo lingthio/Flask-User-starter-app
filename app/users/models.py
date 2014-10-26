@@ -5,7 +5,7 @@
 from flask_user import UserMixin
 from app.app_and_db import db
 
-# Define the UserProfile model. Make sure to add the flask_user.UserMixin !!
+# Define the User data model. Make sure to add the flask_user.UserMixin !!
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -14,7 +14,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
 
     # User information
-    active = db.Column(db.Boolean(), nullable=False, server_default='0')
+    is_enabled = db.Column(db.Boolean(), nullable=False, server_default='0')
     first_name = db.Column(db.String(50), nullable=False, server_default='')
     last_name = db.Column(db.String(50), nullable=False, server_default='')
 
@@ -24,10 +24,10 @@ class User(db.Model, UserMixin):
             backref=db.backref('users', lazy='dynamic'))
 
     def is_active(self):
-        return self.active
+        return self.is_enabled
 
 
-# Define the UserAuth model.
+# Define the UserAuth data model.
 class UserAuth(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
@@ -42,7 +42,7 @@ class UserAuth(db.Model, UserMixin):
     user = db.relationship('User', uselist=False)
 
 
-# Define the Role model
+# Define the Role data model
 class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)

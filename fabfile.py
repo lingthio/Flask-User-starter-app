@@ -5,20 +5,13 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from contextlib import contextmanager
 
-@task
-def runserver():
-    """
-    Start the web application using a development WSGI webserver provided by Flask
-    """
-    local('python runserver.py')
-
 
 @task
-def test_cov():
+def update_env():
     """
-    Run the automated test suite using py.test
+    Install required Python packages using pip and requirements.txt
     """
-    local('py.test --tb=short -s  --cov app  --cov-config tests/.coveragerc  --cov-report term-missing  tests/')
+    local('pip install -r requirements.txt')
 
 
 @task
@@ -30,12 +23,28 @@ def test():
 
 
 @task
-def update_env():
+def test_cov():
     """
-    Install required Python packages using pip and requirements.txt
+    Run the automated test suite using py.test
     """
-    local('if [ ! -f app/config/local_settings.py ]; then cp app/config/local_settings_example.py app/config/local_settings.py; fi')
-    local('pip install -r requirements.txt')
+    local('py.test --tb=short -s  --cov app  --cov-config tests/.coveragerc  --cov-report term-missing  tests/')
+
+
+@task
+def runserver():
+    """
+    Start the web application using a development WSGI webserver provided by Flask
+    """
+    local('python runserver.py')
+
+
+@task
+def deploy():
+    """
+    Deploy web application to Heroku.
+    Requires: heroku git:remote -a PROJECTNAME
+    """
+    local('git push heroku master')
 
 
 @contextmanager

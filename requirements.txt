@@ -1,6 +1,10 @@
 # This file is used by pip to install required python packages
 # Usage: pip install -r requirements.txt
 
+# Heroku environment
+gunicorn==19.1.1
+psycopg2==2.5.4
+
 # Flask Framework
 Flask==0.10.1
 Flask-SQLAlchemy==2.0

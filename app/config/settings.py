@@ -34,8 +34,12 @@ MAIL_PORT =           int(os.getenv('MAIL_PORT',            '465'))
 MAIL_USE_SSL =        int(os.getenv('MAIL_USE_SSL',         True))
 
 ADMINS = []
-admin1 = os.getenv('ADMIN1', '"ADMIN1" <ADMIN1@gmail.com>')
-admin2 = os.getenv('ADMIN2', '"ADMIN2" <ADMIN1@gmail.com>')
+admin1 = os.getenv('ADMIN1', '"Admin One" <admin1@gmail.com>')
+admin2 = os.getenv('')
+admin3 = os.getenv('')
+admin4 = os.getenv('')
 if admin1: ADMINS.append(admin1)
 if admin2: ADMINS.append(admin2)
+if admin3: ADMINS.append(admin3)
+if admin4: ADMINS.append(admin4)
 
