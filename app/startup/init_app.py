@@ -6,6 +6,7 @@ import logging
 from logging.handlers import SMTPHandler
 from flask_mail import Mail
 from flask_user import UserManager, SQLAlchemyAdapter
+from app.startup.init_db import init_db
 
 def init_app(app, db, extra_config_settings={}):
     """
@@ -42,8 +43,7 @@ def init_app(app, db, extra_config_settings={}):
     from app.pages import views
     from app.users import views
 
-    # Automatically create all DB tables in app/app.sqlite file
-    db.create_all()
+    init_db(app, db)
 
     return app
 
