@@ -32,6 +32,7 @@ MAIL_DEFAULT_SENDER =     os.getenv('MAIL_DEFAULT_SENDER',  '"MyApp" <noreply@ex
 MAIL_SERVER =             os.getenv('MAIL_SERVER',          'smtp.gmail.com')
 MAIL_PORT =           int(os.getenv('MAIL_PORT',            '465'))
 MAIL_USE_SSL =        int(os.getenv('MAIL_USE_SSL',         True))
+MAIL_USE_TLS =        int(os.getenv('MAIL_USE_TLS',         False))
 
 ADMINS = []
 admin1 = os.getenv('ADMIN1', '"Admin One" <admin1@gmail.com>')
