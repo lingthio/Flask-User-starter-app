@@ -36,9 +36,9 @@ MAIL_USE_TLS =        int(os.getenv('MAIL_USE_TLS',         False))
 
 ADMINS = []
 admin1 = os.getenv('ADMIN1', '"Admin One" <admin1@gmail.com>')
-admin2 = os.getenv('')
-admin3 = os.getenv('')
-admin4 = os.getenv('')
+admin2 = os.getenv('ADMIN2', '')
+admin3 = os.getenv('ADMIN3', '')
+admin4 = os.getenv('ADMIN4', '')
 if admin1: ADMINS.append(admin1)
 if admin2: ADMINS.append(admin2)
 if admin3: ADMINS.append(admin3)
