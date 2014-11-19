@@ -1,14 +1,12 @@
-# Copyright 2014 SolidBuilds.com. All rights reserved
-#
-# Authors: Ling Thio <ling.thio@gmail.com>
+{% extends "base_templates/page_base.html" %}  {# base_templates/page_base.html extends base_templates/base.html #}
 
+{% block main %}
+<h1>Admin page</h1>
 
-from flask import render_template
-from flask_user import login_required, roles_required
+<p>This page is accessible to authenticated users with the 'admin' role.</p>
 
-from app.app_and_db import app
-
-
+<p>The code:</p>
+<pre>
 # The Home page is accessible to anyone
 @app.route('/')
 def home_page():
@@ -25,3 +23,6 @@ def member_page():
 @roles_required('admin')    # Limits access to users with the 'admin' role
 def admin_page():
     return render_template('pages/admin_page.html')
+</pre>
+
+{% endblock %}

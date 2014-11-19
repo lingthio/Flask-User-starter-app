@@ -6,7 +6,6 @@ import logging
 from logging.handlers import SMTPHandler
 from flask_mail import Mail
 from flask_user import UserManager, SQLAlchemyAdapter
-from app.startup.init_db import init_db
 
 def init_app(app, db, extra_config_settings={}):
     """
@@ -14,8 +13,8 @@ def init_app(app, db, extra_config_settings={}):
     """
 
     # Initialize app config settings
-    app.config.from_object('app.config.settings')           # Read config from 'app/settings.py' file
-    app.config.update(extra_config_settings)                       # Overwrite with 'extra_config_settings' parameter
+    app.config.from_object('app.startup.settings')          # Read config from 'app/startup/settings.py' file
+    app.config.update(extra_config_settings)                # Overwrite with 'extra_config_settings' parameter
     if app.testing:
         app.config['WTF_CSRF_ENABLED'] = False              # Disable CSRF checks while testing
 
@@ -42,8 +41,6 @@ def init_app(app, db, extra_config_settings={}):
     # Load all views.py files to register @app.routes() with Flask
     from app.pages import views
     from app.users import views
-
-    init_db(app, db)
 
     return app
 

@@ -21,7 +21,7 @@
 
 <body>
     <div id="header-div" class="clearfix with-margins">
-        <div class="pull-left"><a href="{{ url_for('home_page') }}">MyApp</a></div>
+        <div class="pull-left"><a href="{{ url_for('home_page') }}"><span class="header-title">MyApp</span></a></div>
         <div class="pull-right">
             {% if current_user.is_authenticated() %}
                 <a href="{{ url_for('user_profile_page') }}">{{ current_user.first_name }}</a>
@@ -31,6 +31,12 @@
                 <a href="{{ url_for('user.login') }}">Sign in</a>
             {% endif %}
         </div>
+    </div>
+    <div class="with-margins">
+        <a href="{{ url_for('home_page') }}">Home</a> &nbsp; | &nbsp;
+        <a href="{{ url_for('member_page') }}">Member</a> &nbsp; | &nbsp;
+        <a href="{{ url_for('admin_page') }}">Admin</a> &nbsp; | &nbsp;
+        <a href="{{ url_for('user_profile_page') }}">User profile</a>
     </div>
     <hr class="no-margins"/>
 

@@ -1,7 +1,8 @@
 /**** element styles ****/
-hr { border-color: #cccccc; margin: }
+hr { border-color: #cccccc; margin: 0px; }
 
 /**** header, main and footer divs ****/
+.header-title { font-size: 30px; }
 
 /**** class-based style modifiers ****/
 

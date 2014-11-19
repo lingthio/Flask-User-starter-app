@@ -32,7 +32,7 @@ It's a great starting point for new Flask applications -- whether you plan to us
 
 
 Installation
-~~~~~~~~
+--------
 
 **Install git**
 
@@ -46,8 +46,8 @@ Open a command line shell and type:
 
   mkdir -p ~/dev
   cd ~/dev
-  git clone https://github.com/lingthio/Flask-User-starter-app.git app
-  cd ~/dev/app
+  git clone https://github.com/lingthio/Flask-User-starter-app.git my_app
+  cd ~/dev/my_app
 
 **Install virtualenvwrapper**
 
@@ -73,11 +73,11 @@ Run this command once:
 
 ::
 
-  mkvirtualenv -p /full/path/to/python2.7 app
-  workon app
+  mkvirtualenv -p /full/path/to/python2.7 my_app
+  workon my_app
 
 where the result of ``which python`` can be used instead of ``/full/path/to/python2.7``,
-and where ``app`` is the name of the new virtualenv.
+and where ``my_app`` is the name of the new virtualenv.
 
 **Install Fabric**
 
@@ -86,7 +86,7 @@ Though the product name is 'Fabric', the command line tool is 'fab'.
 
 ::
 
-  workon app
+  workon my_app
   pip install python-dev
   pip install python-setuptools
   pip install fabric
@@ -97,9 +97,17 @@ See also: http://www.fabfile.org/installing.html
 
 ::
 
-  workon app
-  cd ~/dev/app
+  workon my_app
+  cd ~/dev/my_app
   fab update_env
+
+**Initialize the Database**
+
+::
+
+  workon my_app
+  cd ~/dev/my_app
+  fab reset_db         # Warning: This will delete all data in the database!
 
 **Update configuration settings**
 
@@ -124,8 +132,26 @@ in your ``.bashrc`` or ``.bash_profile`` shell configuration file.
     export ADMIN1='"Admin One" <admin1@example.com>'
 
 
+Running the app
+--------
+
+**Start the development webserver**
+
+Flask comes with a convenient WSGI web application server for development environments.
+
+::
+
+  workon my_app
+  cd ~/dev/my_app
+  fab runserver
+
+Point your web browser to http://localhost:5000/
+
+``fab reset_db`` will create one user with username 'admin' and password 'Password1'.
+
+
 Automated tests and code coverage
-------
+--------
 The tests are in the tests/ directory.
 
 pytest is used to run the automated tests.
@@ -134,36 +160,12 @@ pytest is also used to run the code coverage assessment.
 
 ::
 
-  workon app
-  cd ~/dev/app
+  workon my_app
+  cd ~/dev/my_app
   fab test
   fab test_cov
 
 
-Running the app
-~~~~~~~~
-
-**Start the development webserver**
-
-Flask comes with a convenient WSGI web application server for development environments.
-
-::
-
-  workon app
-  cd ~/dev/app
-  fab runserver
-
-Point your web browser to http://localhost:5000/
-
-
-Creating a user account
-~~~~~~~
-* Make sure that app/config/local_settings.py has the appropriate ``MAIL_*`` settings.
-* Point your web browser to http://localhost:5000/
-* Click on 'Sign in' and then 'Register' and register a new user account.
-* Confirm your email address
-
-
 Acknowledgements
-~~~~~~~~
+--------
 This project used `Flask-User-starter-app <https://github.com/lingthio/Flask-User-starter-app>`_ as a starting point.

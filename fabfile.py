@@ -15,6 +15,14 @@ def update_env():
 
 
 @task
+def reset_db():
+    """
+    Drop all tables, Create empty tables, and populate tables
+    """
+    local('PYTHONPATH=. python app/startup/reset_db.py')
+
+
+@task
 def test():
     """
     Run the automated test suite using py.test
