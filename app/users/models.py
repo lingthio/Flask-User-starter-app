@@ -14,7 +14,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
 
     # User information
-    is_enabled = db.Column(db.Boolean(), nullable=False, server_default='0')
+    active = db.Column('is_active', db.Boolean(), nullable=False, server_default='0')
     first_name = db.Column(db.String(50), nullable=False, server_default='')
     last_name = db.Column(db.String(50), nullable=False, server_default='')
 
@@ -22,9 +22,6 @@ class User(db.Model, UserMixin):
     user_auth = db.relationship('UserAuth', uselist=False)
     roles = db.relationship('Role', secondary='user_roles',
             backref=db.backref('users', lazy='dynamic'))
-
-    def is_active(self):
-        return self.is_enabled
 
 
 # Define the UserAuth data model.
