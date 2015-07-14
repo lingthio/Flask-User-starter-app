@@ -68,8 +68,6 @@ For convenience, you can set these settings in your ``~/.bashrc`` or ``~/.bash_p
 ## Running the app
 
     # Start the Flask development web server
-    cd ~/dev/my_app
-    workon my_app
     python runserver.py
 
 Point your web browser to http://localhost:5000/
@@ -82,8 +80,6 @@ You can make use of the following users:
 ## Testing the app (with coverage)
 
     # Run all the automated tests in the tests/ directory
-    cd ~/dev/my_app
-    workon my_app
     ./runtests.sh
 
 The output will show a test coverage report.
