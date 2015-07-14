@@ -1,6 +1,6 @@
 # Flask-User starter app
 
-This code base serves as a great starting point to write your next Flask application  
+This code base serves as a great starting point to write your next Flask application
 (With or without Flask-User)
 
 ## Developer benefits
@@ -17,7 +17,7 @@ This code base serves as a great starting point to write your next Flask applica
   * Change username/email/password, Forgot password
 * One generic settings.py file
   * with sensible defaults for development environments
-  * with secure overwrite for production environments through OS environment settings 
+  * with secure overwrite for production environments through OS environment settings
 * SMTPHandler for error-level log messages -- sends emails on unhandled exceptions
 * Includes `py.test` test framework
 * Includes `alembic` database migration framework
@@ -90,7 +90,7 @@ The output will show a test coverage report.
 
 
 ## Acknowledgements
-This project used [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) as a starting point.
+[Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) was used as a starting point for this code repository.
 
-    # Please leave this section in your project's README file. Thank you.
+    # Please consider leaving the line above in your project's README file. Thank you.
 
