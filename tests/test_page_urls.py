@@ -8,34 +8,34 @@ from flask import url_for
 def test_page_urls(client):
     # Visit home page
     response = client.get(url_for('home_page'))
-    assert '<h1>Home page</h1>' in response.data
+    assert b'<h1>Home page</h1>' in response.data
     
     # Login as member and visit Member page
     response = client.post(url_for('user.login'), follow_redirects=True,
             data=dict(username='member', password='Password1'))
-    assert '<h1>Home page</h1>' in response.data
+    assert b'<h1>Home page</h1>' in response.data
     response = client.get(url_for('member_page'))
-    assert '<h1>Member page</h1>' in response.data
+    assert b'<h1>Member page</h1>' in response.data
 
     # Edit User Profile page
     response = client.get(url_for('user_profile_page'))
-    assert '<h1>User Profile</h1>' in response.data
+    assert b'<h1>User Profile</h1>' in response.data
     response = client.post(url_for('user_profile_page'), follow_redirects=True,
             data=dict(first_name='Member', last_name='User'))
     response = client.get(url_for('member_page'))
-    assert '<h1>Member page</h1>' in response.data
+    assert b'<h1>Member page</h1>' in response.data
 
     # Logout
     response = client.get(url_for('user.logout'), follow_redirects=True)
-    assert '<h1>Home page</h1>' in response.data
+    assert b'<h1>Home page</h1>' in response.data
 
     # Login as admin and visit Admin page
     response = client.post(url_for('user.login'), follow_redirects=True,
             data=dict(username='admin', password='Password1'))
-    assert '<h1>Home page</h1>' in response.data
+    assert b'<h1>Home page</h1>' in response.data
     response = client.get(url_for('admin_page'))
-    assert '<h1>Admin page</h1>' in response.data
+    assert b'<h1>Admin page</h1>' in response.data
 
     # Logout
     response = client.get(url_for('user.logout'), follow_redirects=True)
-    assert '<h1>Home page</h1>' in response.data
+    assert b'<h1>Home page</h1>' in response.data
