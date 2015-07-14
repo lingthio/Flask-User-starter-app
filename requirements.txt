@@ -2,7 +2,7 @@
 # Usage: pip install -r requirements.txt
 
 # Heroku environment
-gunicorn==19.1.1
+gunicorn==19.3.0
 psycopg2==2.5.4
 
 # Flask Framework
@@ -10,9 +10,11 @@ Flask==0.10.1
 Flask-SQLAlchemy==2.0
 
 # Flask Packages
-Flask-User==0.6.1
-Flask-WTF==0.10.2
+Flask-User==0.6.3
+Flask-WTF==0.12
 
 # Development tools
-pytest==2.6.3
+pytest==2.7.2
+pytest-flask==0.8.1
+pytest-cov==1.8.1
 

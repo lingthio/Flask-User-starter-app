@@ -6,7 +6,7 @@
 from flask import render_template
 from flask_user import login_required, roles_required
 
-from app.app_and_db import app
+from app import app
 
 
 # The Home page is accessible to anyone

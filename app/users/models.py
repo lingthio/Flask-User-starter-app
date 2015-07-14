@@ -3,11 +3,17 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 from flask_user import UserMixin
-from app.app_and_db import db
+from app import db
 
 # Define the User data model. Make sure to add the flask_user.UserMixin !!
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+
+    # User authentication information (required for Flask-User)
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False, server_default='')
+    reset_password_token = db.Column(db.String(100), nullable=False, server_default='')
+    active = db.Column(db.Boolean(), nullable=False, server_default='0')
 
     # User email information (required for Flask-User)
     email = db.Column(db.String(255), nullable=False, unique=True)
@@ -19,31 +25,15 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(50), nullable=False, server_default='')
 
     # Relationships
-    user_auth = db.relationship('UserAuth', uselist=False)
     roles = db.relationship('Role', secondary='user_roles',
             backref=db.backref('users', lazy='dynamic'))
-
-
-# Define the UserAuth data model.
-class UserAuth(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-
-    # User authentication information (required for Flask-User)
-    username = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False, server_default='')
-    reset_password_token = db.Column(db.String(100), nullable=False, server_default='')
-    active = db.Column(db.Boolean(), nullable=False, server_default='0')
-
-    # Relationships
-    user = db.relationship('User', uselist=False)
 
 
 # Define the Role data model
 class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
-    description = db.Column(db.String(255))
+    description = db.Column(db.String(255), server_default='')
 
 
 # Define the UserRoles association model

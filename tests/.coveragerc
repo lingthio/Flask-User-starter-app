@@ -5,7 +5,7 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 [run]
-omit = app/config/local_settings_example.py
+omit = app/startup/reset_db.py
 
 [report]
 show_missing = True

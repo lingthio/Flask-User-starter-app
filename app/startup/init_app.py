@@ -2,12 +2,16 @@
 #
 # Authors: Ling Thio <ling.thio@gmail.com>
 
-import logging
-from logging.handlers import SMTPHandler
+from datetime import datetime
 from flask_mail import Mail
 from flask_user import UserManager, SQLAlchemyAdapter
+import logging
+from logging.handlers import SMTPHandler
+from app import app, db
+from app.users.models import User, Role
 
-def init_app(app, db, extra_config_settings={}):
+
+def create_app(extra_config_settings={}):
     """
     Initialize Flask applicaton
     """
@@ -25,11 +29,10 @@ def init_app(app, db, extra_config_settings={}):
     init_error_logger_with_email_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.users.models import UserAuth, User
+    from app.users.models import User
     from app.users.forms import MyRegisterForm
     from app.users.views import user_profile_page
-    db_adapter = SQLAlchemyAdapter(db, User,        # Setup the SQLAlchemy DB Adapter
-            UserAuthClass=UserAuth)                 #   using separated UserAuth/User data models
+    db_adapter = SQLAlchemyAdapter(db, User)        # Setup the SQLAlchemy DB Adapter
     user_manager = UserManager(db_adapter, app,     # Init Flask-User and bind to app
             register_form=MyRegisterForm,           #   using a custom register form with UserProfile fields
             user_profile_view_function = user_profile_page,
@@ -43,6 +46,27 @@ def init_app(app, db, extra_config_settings={}):
     from app.users import views
 
     return app
+
+
+def create_users():
+    """ Create users when app starts """
+    from app.users.models import User, Role
+
+    # Create all tables
+    print('Creating all tables')
+    db.create_all()
+
+    # Adding roles
+    print('Adding roles')
+    admin_role = find_or_create_role('admin')
+
+    # Add users
+    print('Adding users')
+    user = find_or_create_user('admin',  'Admin',  'User', 'admin@example.com',  'Password1', admin_role)
+    user = find_or_create_user('member', 'Member', 'User', 'member@example.com', 'Password1')
+
+    # Save to DB
+    db.session.commit()
 
 
 def init_error_logger_with_email_handler(app):
@@ -77,3 +101,31 @@ def init_error_logger_with_email_handler(app):
     app.logger.addHandler(mail_handler)
 
     # Log errors using: app.logger.error('Some error message')
+
+
+def find_or_create_role(name):
+    """ Find existing role or create new role """
+    role = Role.query.filter(Role.name==name).first()
+    if not role:
+        role = Role(name=name)
+        db.session.add(role)
+    return role
+
+
+def find_or_create_user(username, first_name, last_name, email, password, role=None):
+    """ Find existing user or create new user """
+    user = User.query.filter(User.username==username).first()
+    if not user:
+        user = User(username=username, first_name=first_name, last_name=last_name, email=email,
+                    password=app.user_manager.hash_password(password),
+                    active=True,
+                    confirmed_at=datetime.now())
+        if role:
+            user.roles.append(role)
+        db.session.add(user)
+    return user
+
+
+@app.before_first_request
+def initialize_app_on_first_request():
+    create_users()

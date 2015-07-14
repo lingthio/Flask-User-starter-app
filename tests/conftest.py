@@ -7,33 +7,29 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 import pytest
-from app.app_and_db import app as flask_app, db as sqlalchemy_db
-from app.startup.init_app import init_app
+from app import create_app, db as the_db
 
-@pytest.fixture(scope='module')
+# Initialize the Flask-App with test-specific settings
+the_app = create_app(dict(
+    TESTING=True,               # Propagate exceptions
+    LOGIN_DISABLED=False,       # Enable @register_required
+    MAIL_SUPPRESS_SEND=True,    # Disable Flask-Mail send
+    SERVER_NAME='localhost',    # Enable url_for() without request context
+    SQLALCHEMY_DATABASE_URI='sqlite:///:memory:', # In-memory SQLite DB
+    WTF_CSRF_ENABLED=False,     # Disable CSRF form validation
+    ))
+
+# Setup an application context (since the tests run outside of the webserver context)
+the_app.app_context().push()
+
+@pytest.fixture(scope='session')
 def app():
-    """
-    Initializes and returns a Flask application object
-    """
-    # Initialize the Flask-App with test-specific settings
-    test_config_settings = dict(
-        TESTING=True,               # Propagate exceptions
-        LOGIN_DISABLED=False,       # Enable @register_required
-        MAIL_SUPPRESS_SEND=True,    # Disable Flask-Mail send
-        SERVER_NAME='localhost',    # Enable url_for() without request context
-        SQLALCHEMY_DATABASE_URI='sqlite:///:memory:', # In-memory SQLite DB
-        WTF_CSRF_ENABLED=False,     # Disable CSRF form validation
-        )
-    init_app(flask_app, sqlalchemy_db, test_config_settings)
 
-    # Setup an application context (since the tests run outside of the webserver context)
-    flask_app.app_context().push()
+    return the_app
 
-    return flask_app
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def db():
     """
     Initializes and returns a SQLAlchemy DB object
     """
-    return sqlalchemy_db
+    return the_db
