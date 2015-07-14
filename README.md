@@ -91,5 +91,6 @@ The output will show a test coverage report.
 
 ## Acknowledgements
 This project used [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) as a starting point.
-(Please leave this line in your project's README file. Thank you.)
+
+    # Please leave this section in your project's README file. Thank you.
 
