@@ -3,7 +3,11 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 from flask_user import UserMixin
+from flask_user.forms import RegisterForm
+from flask_wtf import Form
+from wtforms import StringField, SubmitField, validators
 from app import db
+
 
 # Define the User data model. Make sure to add the flask_user.UserMixin !!
 class User(db.Model, UserMixin):
@@ -42,3 +46,20 @@ class UserRoles(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
+
+# Define the User registration form
+# It augments the Flask-User RegisterForm with additional fields
+class MyRegisterForm(RegisterForm):
+    first_name = StringField('First name', validators=[
+        validators.DataRequired('First name is required')])
+    last_name = StringField('Last name', validators=[
+        validators.DataRequired('Last name is required')])
+
+
+# Define the User profile form
+class UserProfileForm(Form):
+    first_name = StringField('First name', validators=[
+        validators.DataRequired('First name is required')])
+    last_name = StringField('Last name', validators=[
+        validators.DataRequired('Last name is required')])
+    submit = SubmitField('Save')

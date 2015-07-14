@@ -6,9 +6,8 @@
 from flask import redirect, render_template, render_template_string
 from flask import request, url_for
 from flask_user import current_user, login_required
-
 from app import app, db
-from app.users.forms import UserProfileForm
+from app.models import UserProfileForm
 
 #
 # User Profile form

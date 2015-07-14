@@ -8,7 +8,7 @@ from flask_user import UserManager, SQLAlchemyAdapter
 import logging
 from logging.handlers import SMTPHandler
 from app import app, db
-from app.users.models import User, Role
+from app.models import User, Role
 
 
 def create_app(extra_config_settings={}):
@@ -29,8 +29,7 @@ def create_app(extra_config_settings={}):
     init_error_logger_with_email_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.users.models import User
-    from app.users.forms import MyRegisterForm
+    from app.models import User, MyRegisterForm
     from app.users.views import user_profile_page
     db_adapter = SQLAlchemyAdapter(db, User)        # Setup the SQLAlchemy DB Adapter
     user_manager = UserManager(db_adapter, app,     # Init Flask-User and bind to app
@@ -39,7 +38,7 @@ def create_app(extra_config_settings={}):
             )
 
     # Load all models.py files to register db.Models with SQLAlchemy
-    from app.users import models
+    from app import models
 
     # Load all views.py files to register @app.routes() with Flask
     from app.pages import views
@@ -50,7 +49,7 @@ def create_app(extra_config_settings={}):
 
 def create_users():
     """ Create users when app starts """
-    from app.users.models import User, Role
+    from app.models import User, Role
 
     # Create all tables
     print('Creating all tables')

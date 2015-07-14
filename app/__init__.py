@@ -1,4 +1,5 @@
-# The __init__.py files make Python's import statement work inside subdirectories.
+# __init__.py is a special Python file that allows a directory to become
+# a Python package so it can be accessed using the 'import' statement.
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
