@@ -30,7 +30,7 @@ def create_app(extra_config_settings={}):
 
     # Setup Flask-User to handle user account related forms
     from app.models import User, MyRegisterForm
-    from app.users.views import user_profile_page
+    from app.views.user_views import user_profile_page
     db_adapter = SQLAlchemyAdapter(db, User)        # Setup the SQLAlchemy DB Adapter
     user_manager = UserManager(db_adapter, app,     # Init Flask-User and bind to app
             register_form=MyRegisterForm,           #   using a custom register form with UserProfile fields
@@ -41,8 +41,7 @@ def create_app(extra_config_settings={}):
     from app import models
 
     # Load all views.py files to register @app.routes() with Flask
-    from app.pages import views
-    from app.users import views
+    from app.views import page_views, user_views
 
     return app
 
