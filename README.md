@@ -69,7 +69,7 @@ For convenience, you can set these settings in your ``~/.bashrc`` or ``~/.bash_p
 ## Running the app
 
     # Start the Flask development web server
-    ./runserver.sh    # will run "python app.py runserver"
+    ./runserver.sh    # will run "python manage.py runserver"
 
 Point your web browser to http://localhost:5000/
 
@@ -96,7 +96,7 @@ The output will show a test coverage report.
 
 ## Database migrations
 
-    python app.py db      # Show all DB migration commands
+    python manage.py db      # Show all DB migration commands
 
 See [the Alembic docs](alembic.readthedocs.org) for more information.
 
