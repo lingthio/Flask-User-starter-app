@@ -1,6 +1,6 @@
 # Flask-User starter app
 
-This code base serves as a great starting point to write your next Flask application
+This code base serves as a great starting point to write your next Flask application  
 (With or without Flask-User)
 
 ## Developer benefits
