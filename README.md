@@ -78,7 +78,7 @@ You can make use of the following users:
 - username `admin` with password `Password1`.
 
 
-## Testing the app (without coverage)
+## Testing the app
 
     # Run all the automated tests in the tests/ directory
     ./runtests.sh    # will run "py.test -s tests/"
@@ -86,9 +86,9 @@ You can make use of the following users:
 The output will show a test coverage report.
 
 
-## Testing the app (with coverage)
+## Showing test coverage
 
-    # Run all the automated tests in the tests/ directory
+    # Show test coverage
     ./runcoverage.sh    # will run py.test with coverage options
 
 The output will show a test coverage report.
@@ -96,7 +96,8 @@ The output will show a test coverage report.
 
 ## Database migrations
 
-    python manage.py db      # Show all DB migration commands
+    # Show all DB migration commands
+    python manage.py db
 
 See [the Alembic docs](alembic.readthedocs.org) for more information.
 
