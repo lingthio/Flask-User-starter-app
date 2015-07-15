@@ -38,7 +38,8 @@ We assume that you have `git` and `virtualenvwrapper` installed.
     cd ~/dev/my_app
     workon my_app
     pip install -r requirements.txt
-
+    
+    
 ## Configuring the app
 
 Before we can use this application, we will have to configure the database URL and SMTP account
@@ -68,7 +69,7 @@ For convenience, you can set these settings in your ``~/.bashrc`` or ``~/.bash_p
 ## Running the app
 
     # Start the Flask development web server
-    python runserver.py
+    ./runserver.sh    # will run "python app.py runserver"
 
 Point your web browser to http://localhost:5000/
 
@@ -77,12 +78,27 @@ You can make use of the following users:
 - username `admin` with password `Password1`.
 
 
+## Testing the app (without coverage)
+
+    # Run all the automated tests in the tests/ directory
+    ./runtests.sh    # will run "py.test -s tests/"
+
+The output will show a test coverage report.
+
+
 ## Testing the app (with coverage)
 
     # Run all the automated tests in the tests/ directory
-    ./runtests.sh
+    ./runcoverage.sh    # will run py.test with coverage options
 
 The output will show a test coverage report.
+
+
+## Database migrations
+
+    python app.py db      # Show all DB migration commands
+
+See [the Alembic docs](alembic.readthedocs.org) for more information.
 
 
 ## Acknowledgements
