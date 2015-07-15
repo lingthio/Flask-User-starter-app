@@ -7,9 +7,10 @@ psycopg2==2.5.4
 
 # Flask Framework
 Flask==0.10.1
-Flask-SQLAlchemy==2.0
 
 # Flask Packages
+Flask-Migrate==1.4.0
+Flask-SQLAlchemy==2.0
 Flask-User==0.6.3
 Flask-WTF==0.12
 

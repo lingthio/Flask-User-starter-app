@@ -4,10 +4,9 @@
 
 from datetime import datetime
 from flask_mail import Mail
+from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
-import logging
-from logging.handlers import SMTPHandler
-from app import app, db
+from app import app, db, manager
 from app.models import User, Role
 
 
@@ -22,11 +21,15 @@ def create_app(extra_config_settings={}):
     if app.testing:
         app.config['WTF_CSRF_ENABLED'] = False              # Disable CSRF checks while testing
 
+    # Setup Flask-Migrate
+    migrate = Migrate(app, db)
+    manager.add_command('db', MigrateCommand)
+
     # Setup Flask-Mail
     mail = Mail(app)
 
     # Setup an error-logger to send emails to app.config.ADMINS
-    init_error_logger_with_email_handler(app)
+    init_email_error_handler(app)
 
     # Setup Flask-User to handle user account related forms
     from app.models import User, MyRegisterForm
@@ -67,7 +70,7 @@ def create_users():
     db.session.commit()
 
 
-def init_error_logger_with_email_handler(app):
+def init_email_error_handler(app):
     """
     Initialize a logger to send emails on error-level messages.
     Unhandled exceptions will now send an email message to app.config.ADMINS.
@@ -87,6 +90,8 @@ def init_error_logger_with_email_handler(app):
     subject = app.config.get('APP_SYSTEM_ERROR_SUBJECT_LINE', 'System Error')
 
     # Setup an SMTP mail handler for error-level messages
+    import logging
+    from logging.handlers import SMTPHandler
     mail_handler = SMTPHandler(
         mailhost=(host, port),                  # Mail host and port
         fromaddr=from_addr,                     # From address
@@ -117,7 +122,7 @@ def find_or_create_user(username, first_name, last_name, email, password, role=N
         user = User(username=username, first_name=first_name, last_name=last_name, email=email,
                     password=app.user_manager.hash_password(password),
                     active=True,
-                    confirmed_at=datetime.now())
+                    confirmed_at=datetime.utcnow())
         if role:
             user.roles.append(role)
         db.session.add(user)

@@ -1,5 +1,6 @@
 # app directory
-This is the Flask application directory.
+
+This directory contains the Flask application code.
 
 The code has been organized into the following directories:
 

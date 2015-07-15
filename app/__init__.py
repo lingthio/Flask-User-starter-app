@@ -2,12 +2,11 @@
 # a Python package so it can be accessed using the 'import' statement.
 
 from flask import Flask
+from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 
-# This is the WSGI compliant web application object
-app = Flask(__name__)
-
-# Setup Flask-SQLAlchemy
-db = SQLAlchemy(app)
+app = Flask(__name__)           # The WSGI compliant web application object
+db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
+manager = Manager(app)          # Setup Flask-Script
 
 from app.startup.init_app import create_app, create_users

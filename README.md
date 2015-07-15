@@ -5,7 +5,7 @@ This code base serves as a great starting point to write your next Flask applica
 
 ## Developer benefits
 * Tested on Python 2.7, 3.3, and 3.4
-* Few dependencies (Flask-SQLAlchemy, Flask-User, Flask-WTF)
+* Few dependencies (Flask-Migrate, Flask-SQLAlchemy, Flask-User, Flask-WTF)
 * Carefully chosen names for files, classes and methods
 * Well organized directories with lots of comments
   * app/models
@@ -86,6 +86,12 @@ The output will show a test coverage report.
 
 
 ## Acknowledgements
+With thanks to the following Flask extensions:
+
+* [Alembic](alembic.readthedocs.org)
+* [Flask-Migrate](flask-migrate.readthedocs.org)
+* [Flask-User](pythonhosted.org/Flask-User/)
+
 [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) was used as a starting point for this code repository.
 
     # Please consider leaving the line above in your project's README file. Thank you.
