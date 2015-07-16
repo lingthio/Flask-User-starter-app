@@ -6,6 +6,7 @@ from datetime import datetime
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
+from flask_wtf.csrf import CsrfProtect
 from app import app, db, manager
 from app.models import User, Role
 
@@ -28,6 +29,15 @@ def create_app(extra_config_settings={}):
     # Setup Flask-Mail
     mail = Mail(app)
 
+    # Setup WTForms CsrfProtect
+    CsrfProtect(app)
+
+    # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
+    from wtforms.fields import HiddenField
+    def is_hidden_field_filter(field):
+        return isinstance(field, HiddenField)
+    app.jinja_env.globals['bootstrap_is_hidden_field'] = is_hidden_field_filter
+
     # Setup an error-logger to send emails to app.config.ADMINS
     init_email_error_handler(app)
 
@@ -47,27 +57,6 @@ def create_app(extra_config_settings={}):
     from app.views import page_views, user_views
 
     return app
-
-
-def create_users():
-    """ Create users when app starts """
-    from app.models import User, Role
-
-    # Create all tables
-    print('Creating all tables')
-    db.create_all()
-
-    # Adding roles
-    print('Adding roles')
-    admin_role = find_or_create_role('admin')
-
-    # Add users
-    print('Adding users')
-    user = find_or_create_user('admin',  'Admin',  'User', 'admin@example.com',  'Password1', admin_role)
-    user = find_or_create_user('member', 'Member', 'User', 'member@example.com', 'Password1')
-
-    # Save to DB
-    db.session.commit()
 
 
 def init_email_error_handler(app):
@@ -104,6 +93,27 @@ def init_email_error_handler(app):
     app.logger.addHandler(mail_handler)
 
     # Log errors using: app.logger.error('Some error message')
+
+
+def create_users():
+    """ Create users when app starts """
+    from app.models import User, Role
+
+    # Create all tables
+    print('Creating all tables')
+    db.create_all()
+
+    # Adding roles
+    print('Adding roles')
+    admin_role = find_or_create_role('admin')
+
+    # Add users
+    print('Adding users')
+    user = find_or_create_user('admin',  'Admin',  'User', 'admin@example.com',  'Password1', admin_role)
+    user = find_or_create_user('member', 'Member', 'User', 'member@example.com', 'Password1')
+
+    # Save to DB
+    db.session.commit()
 
 
 def find_or_create_role(name):
