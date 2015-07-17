@@ -4,7 +4,7 @@
 
 
 from flask import render_template
-from flask_user import login_required, roles_required
+from flask_user import login_required, roles_accepted
 
 from app import app
 
@@ -14,14 +14,14 @@ from app import app
 def home_page():
     return render_template('pages/home_page.html')
 
-# The Member page is accessible to authenticated users (users that have logged in)
-@app.route('/member')
+# The User page is accessible to authenticated users (users that have logged in)
+@app.route('/user')
 @login_required             # Limits access to authenticated users
-def member_page():
-    return render_template('pages/member_page.html')
+def user_page():
+    return render_template('pages/user_page.html')
 
 # The Admin page is accessible to users with the 'admin' role
 @app.route('/admin')
-@roles_required('admin')    # Limits access to users with the 'admin' role
+@roles_accepted('admin')    # Limits access to users with the 'admin' role
 def admin_page():
     return render_template('pages/admin_page.html')

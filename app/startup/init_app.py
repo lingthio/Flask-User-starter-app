@@ -2,13 +2,17 @@
 #
 # Authors: Ling Thio <ling.thio@gmail.com>
 
-from datetime import datetime
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
 from flask_wtf.csrf import CsrfProtect
 from app import app, db, manager
-from app.models import User, Role
+
+
+@app.before_first_request
+def initialize_app_on_first_request():
+    from .create_users import create_users
+    create_users()
 
 
 def create_app(extra_config_settings={}):
@@ -95,50 +99,5 @@ def init_email_error_handler(app):
     # Log errors using: app.logger.error('Some error message')
 
 
-def create_users():
-    """ Create users when app starts """
-    from app.models import User, Role
-
-    # Create all tables
-    print('Creating all tables')
-    db.create_all()
-
-    # Adding roles
-    print('Adding roles')
-    admin_role = find_or_create_role('admin')
-
-    # Add users
-    print('Adding users')
-    user = find_or_create_user('admin',  'Admin',  'User', 'admin@example.com',  'Password1', admin_role)
-    user = find_or_create_user('member', 'Member', 'User', 'member@example.com', 'Password1')
-
-    # Save to DB
-    db.session.commit()
 
 
-def find_or_create_role(name):
-    """ Find existing role or create new role """
-    role = Role.query.filter(Role.name==name).first()
-    if not role:
-        role = Role(name=name)
-        db.session.add(role)
-    return role
-
-
-def find_or_create_user(username, first_name, last_name, email, password, role=None):
-    """ Find existing user or create new user """
-    user = User.query.filter(User.username==username).first()
-    if not user:
-        user = User(username=username, first_name=first_name, last_name=last_name, email=email,
-                    password=app.user_manager.hash_password(password),
-                    active=True,
-                    confirmed_at=datetime.utcnow())
-        if role:
-            user.roles.append(role)
-        db.session.add(user)
-    return user
-
-
-@app.before_first_request
-def initialize_app_on_first_request():
-    create_users()

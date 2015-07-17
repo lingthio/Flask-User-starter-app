@@ -3,7 +3,6 @@
 {% block main %}
 <h1>User Profile</h1>
 
-<p><a href="{{ url_for('user.change_username') }}">Change username</a></p>
 <p><a href="{{ url_for('user.change_password') }}">Change password</a></p>
 
 {% from "base_templates/form_macros.html" import render_field, render_submit_field %}
