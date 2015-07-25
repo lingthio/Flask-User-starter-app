@@ -9,6 +9,15 @@ This directory contains all the automated tests for the test tool `py.test`.
 **`test_*`**: py.test will load any file that starts with the name `test_`
 and run any function that starts with the name `test_`.
 
-## Run the tests
 
-    py.test -s --cov-report term-missing --cov-config tests/.coveragerc --cov app tests/
+## Testing the app
+
+    # Run all the automated tests in the tests/ directory
+    ./runtests.sh         # will run "py.test -s tests/"
+
+
+## Generating a test coverage report
+
+    # Run tests and show a test coverage report
+    ./runcoverage.sh      # will run py.test with coverage options
+

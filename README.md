@@ -81,18 +81,13 @@ You can make use of the following users:
 ## Testing the app
 
     # Run all the automated tests in the tests/ directory
-    ./runtests.sh    # will run "py.test -s tests/"
-
-The output will show a test coverage report.
+    ./runtests.sh         # will run "py.test -s tests/"
 
 
-## Showing test coverage
+## Generating a test coverage report
 
-    # Show test coverage
-    ./runcoverage.sh    # will run py.test with coverage options
-
-The output will show a test coverage report.
-
+    # Run tests and show a test coverage report
+    ./runcoverage.sh      # will run py.test with coverage options
 
 ## Database migrations
 

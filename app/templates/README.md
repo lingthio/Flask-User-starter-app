@@ -5,7 +5,7 @@ data into HTML files.
 
 The template files are organized into the following directories:
 
-    base_templates    # Base templates that other templates extend from
+    common            # Common base templates and macros
     flask_user        # Flask-User template files (register, login, etc.)
     pages             # Templates for Page objects
     users             # Templates for User objects
