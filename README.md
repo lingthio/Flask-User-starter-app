@@ -5,19 +5,15 @@ This code base serves as a great starting point to write your next Flask applica
 
 ## Developer benefits
 * Tested on Python 2.7, 3.3, and 3.4
-* Few dependencies (Flask-Migrate, Flask-SQLAlchemy, Flask-User, Flask-WTF)
-* Carefully chosen names for files, classes and methods
 * Well organized directories with lots of comments
   * app/models
   * app/startup
   * app/views
-* Customizable base templates that defaults to Bootstrap3
-* Includes user management pages using Flask-User
+* HTML5 BoilerPlate / jQuery / Bootstrap layout template
+* Few dependencies (Flask-SQLAlchemy, Flask-WTF, Flask-User, Flask-Migrate)
+* Includes Flask-User user management
   * Register, Confirm email, Login, Logout
   * Change username/email/password, Forgot password
-* One generic settings.py file
-  * with sensible defaults for development environments
-  * with secure overwrite for production environments through OS environment settings
 * SMTPHandler for error-level log messages -- sends emails on unhandled exceptions
 * Includes `py.test` test framework
 * Includes `alembic` database migration framework
