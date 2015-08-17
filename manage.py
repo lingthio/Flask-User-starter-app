@@ -13,4 +13,5 @@ if __name__ == "__main__":
     # - python manage.py runserver
     # - python manage.py db
     from app import manager
+
     manager.run()

@@ -11,21 +11,26 @@ from app import create_app, db as the_db
 
 # Initialize the Flask-App with test-specific settings
 the_app = create_app(dict(
-    TESTING=True,               # Propagate exceptions
-    LOGIN_DISABLED=False,       # Enable @register_required
-    MAIL_SUPPRESS_SEND=True,    # Disable Flask-Mail send
-    SERVER_NAME='localhost',    # Enable url_for() without request context
-    SQLALCHEMY_DATABASE_URI='sqlite:///:memory:', # In-memory SQLite DB
-    WTF_CSRF_ENABLED=False,     # Disable CSRF form validation
-    ))
+    TESTING=True,  # Propagate exceptions
+    LOGIN_DISABLED=False,  # Enable @register_required
+    MAIL_SUPPRESS_SEND=True,  # Disable Flask-Mail send
+    SERVER_NAME='localhost',  # Enable url_for() without request context
+    SQLALCHEMY_DATABASE_URI='sqlite:///:memory:',  # In-memory SQLite DB
+    WTF_CSRF_ENABLED=False,  # Disable CSRF form validation
+))
+
+# Create and populate roles and users tables
+from app.startup.create_users import create_users
+create_users()
 
 # Setup an application context (since the tests run outside of the webserver context)
 the_app.app_context().push()
 
+
 @pytest.fixture(scope='session')
 def app():
-
     return the_app
+
 
 @pytest.fixture(scope='session')
 def db():

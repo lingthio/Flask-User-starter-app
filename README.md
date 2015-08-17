@@ -62,6 +62,11 @@ the code repository, these settings can be overruled by the following OS environ
 For convenience, you can set these settings in your ``~/.bashrc`` or ``~/.bash_profile`` shell configuration file.
 
 
+## Initializing the Database
+    # Create DB tables and populate the roles and users tables
+    python manage.py init_db
+
+
 ## Running the app
 
     # Start the Flask development web server
