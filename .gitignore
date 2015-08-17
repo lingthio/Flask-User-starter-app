@@ -62,5 +62,5 @@ target/
 # Application specific settings
 #
 .idea/
-*.sqlite
-app/config/local_settings.py
+app.sqlite
+app/app.sqlite

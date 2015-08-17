@@ -6,7 +6,15 @@ from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
 from flask_wtf.csrf import CsrfProtect
+import os
 from app import app, db, manager
+
+
+@app.before_first_request
+def initialize_app_on_first_request():
+    """ Create users and roles tables on first HTTP request """
+    from .create_users import create_users
+    create_users()
 
 
 def create_app(extra_config_settings={}):
@@ -14,11 +22,17 @@ def create_app(extra_config_settings={}):
     Initialize Flask applicaton
     """
 
-    # Initialize app config settings
-    app.config.from_object('app.startup.settings')  # Read config from 'app/startup/settings.py' file
+    # ***** Initialize app config settings *****
+    # Read common settings from 'app/startup/common_settings.py' file
+    app.config.from_object('app.startup.common_settings')
+    # Read environment-specific settings from file defined by OS environment variable 'ENV_SETTINGS_FILE'
+    env_settings_file = os.environ.get('ENV_SETTINGS_FILE', 'env_settings.py')
+    app.config.from_pyfile(env_settings_file)
+    # Read extra config settings from function parameter 'extra_config_settings'
     app.config.update(extra_config_settings)  # Overwrite with 'extra_config_settings' parameter
     if app.testing:
         app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF checks while testing
+
 
     # Setup Flask-Migrate
     migrate = Migrate(app, db)
