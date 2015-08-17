@@ -41,25 +41,26 @@ We assume that you have `git` and `virtualenvwrapper` installed.
 Before we can use this application, we will have to configure the database URL and SMTP account
 that will be used to access the database and to send emails.
 
-Instead of editing app/config/settings.py and checking in sensitive information into
-the code repository, these settings can be overruled by the following OS environment settings:
+Settings common to all environments are found in app/startup/common_settings.py
 
-    # Configure your Database
-    export DATABASE_URL='sqlite:///app.sqlite'
+The example environment-specific settings are found in app/env_settings_example.py
 
-    # Configure your SMTP provider
-    export MAIL_USERNAME='email@example.com'
-    export MAIL_PASSWORD='password'
-    export MAIL_DEFAULT_SENDER='"MyApp" <noreply@example.com>'
-    export MAIL_SERVER='smtp.gmail.com'
-    export MAIL_PORT='465'
-    export MAIL_USE_SSL='1'
+Note: DO NOT edit app/config/settings.py because checking this into the core repository
+will expose security sensitive information.
 
-    # Configure the admin that is going to emails regarding system errors
-    export ADMIN1='"Admin One" <user_one@example.com>'
-    export ADMIN2='"Admin Two" <user_two@example.com>'
+Copy the `app/env_settings_example.py` to an `env_settings.py` that resides **outside** the code directory
+and point the OS environment variable `ENV_SETTINGS_FILE` to this file.
 
-For convenience, you can set these settings in your ``~/.bashrc`` or ``~/.bash_profile`` shell configuration file.
+    # Copy env_settings.py and place it outside of the code directory
+    cd /path/to/project
+    cp app/env_settings_example.py ../env_settings.py
+    
+    # Point the OS environment variable `ENV_SETTINGS_FILE` to this file
+    export ENV_SETTINGS_FILE=/path/to/env_settings.py
+
+For convenience, you can set ENV_SETTINGS_FILE in your ``~/.bashrc`` or ``~/.bash_profile`` shell configuration file.
+
+Now edit the /path/to/env_settings.py file.
 
 
 ## Initializing the Database
