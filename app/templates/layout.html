@@ -26,7 +26,7 @@
         <div id="header-div" class="clearfix with-margins">
             <div class="pull-left"><a href="{{ url_for('core.home_page') }}"><span class="header-title">MyApp</span></a></div>
             <div class="pull-right">
-                {% if current_user.is_authenticated() %}
+                {% if current_user.is_authenticated %}
                     <a href="{{ url_for('core.user_profile_page') }}">{{ current_user.first_name or current_user.user_auth.username }}</a>
                     &nbsp; | &nbsp;
                     <a href="{{ url_for('user.logout') }}">Sign out</a>
