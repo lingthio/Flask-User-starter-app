@@ -1,14 +1,11 @@
 import os
 
-
-
-
 # ***********************************
 # Settings common to all environments
 # ***********************************
 
 # Application settings
-APP_NAME = "AppName"
+APP_NAME = "Flask-User starter app"
 APP_SYSTEM_ERROR_SUBJECT_LINE = APP_NAME + " system error"
 
 # Flask settings

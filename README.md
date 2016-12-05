@@ -63,6 +63,17 @@ For convenience, you can set ENV_SETTINGS_FILE in your ``~/.bashrc`` or ``~/.bas
 Now edit the /path/to/env_settings.py file.
 
 
+## Configuring the SMTP server
+
+Edit the /path/to/env_settings.py file.
+
+Make sure to configure all the MAIL_... settings correctly.
+
+Note: For smtp.gmail.com to work, you MUST set "Allow less secure apps" to ON in Google Accounts.
+Change it in https://myaccount.google.com/security#connectedapps (near the bottom).
+
+
+
 ## Initializing the Database
     # Create DB tables and populate the roles and users tables
     python manage.py init_db
@@ -71,7 +82,7 @@ Now edit the /path/to/env_settings.py file.
 ## Running the app
 
     # Start the Flask development web server
-    ./runserver.sh    # will run "python manage.py runserver"
+    python manage.py runserver
 
 Point your web browser to http://localhost:5000/
 
