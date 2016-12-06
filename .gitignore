@@ -64,3 +64,4 @@ target/
 .idea/
 app.sqlite
 app/app.sqlite
+env_settings.py
