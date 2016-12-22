@@ -57,6 +57,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# Mac files
+.DS_Store
+
 
 #
 # Application specific settings
@@ -64,3 +67,5 @@ target/
 .idea/
 app.sqlite
 app/app.sqlite
+app/env_settings.py
+
