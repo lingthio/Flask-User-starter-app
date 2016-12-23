@@ -1,24 +1,25 @@
-<!doctype html>
-<html class="no-js" lang="">
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <!-- These 3 meta tags MUST come first -->
         <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>{{ user_manager.app_name }}</title>
-        <meta name="description" content="">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- These 3 meta tags MUST come first -->
 
-        <!-- Optional apple-touch-icon
-        <link rel="apple-touch-icon" href="apple-touch-icon.png"> -->
-        <!-- Place favicon.ico in the root directory -->
+        <title>Flask-User Starter App</title>
 
-        <!-- HTML5 boilerplate CSS -->
-        <link rel="stylesheet" href="/static/html5boilerplate/css/normalize.css">
-        <link rel="stylesheet" href="/static/html5boilerplate/css/main.css">
-        <script src="/static/html5boilerplate/js/modernizr-2.8.3.min.js"></script>
+        <!-- Bootstrap CSS and JS -->
+        <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="{{ url_for('static', filename='bootstrap/js/html5shiv.min.js') }}"></script>
+            <script src="{{ url_for('static', filename='bootstrap/js/respond.min.js') }}"></script>
+        <![endif]-->
 
         <!-- Application specific CSS-->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/static/app/app.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     </head>
     <body>
         {% block body %}
@@ -71,12 +72,9 @@
             <div class="pull-right">&copy; 2014 MyCorp</div>
         </div>
 
-        <!-- Application specific JS -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
-        <!-- HTML5 boilerplate JS -->
-        <script src="/static/html5boilerplate/js/main.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="{{ url_for('static', filename='bootstrap/js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 
         <!-- Optional Google Analytics: change UA-XXXXX-X to be your site's ID.
         <script>
