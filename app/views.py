@@ -9,30 +9,30 @@ from flask_user import current_user, login_required, roles_accepted
 from app import app, db
 from app.models import UserProfileForm
 
-core_blueprint = Blueprint('core', __name__, url_prefix='/')
+pages_blueprint = Blueprint('pages', __name__, url_prefix='/')
 
 
 # The Home page is accessible to anyone
-@core_blueprint.route('')
+@pages_blueprint.route('')
 def home_page():
-    return render_template('core/home_page.html')
+    return render_template('pages/home_page.html')
 
 
 # The User page is accessible to authenticated users (users that have logged in)
-@core_blueprint.route('user')
+@pages_blueprint.route('user')
 @login_required  # Limits access to authenticated users
 def user_page():
-    return render_template('core/user_page.html')
+    return render_template('pages/user_page.html')
 
 
 # The Admin page is accessible to users with the 'admin' role
-@core_blueprint.route('admin')
+@pages_blueprint.route('admin')
 @roles_accepted('admin')  # Limits access to users with the 'admin' role
 def admin_page():
-    return render_template('core/admin_page.html')
+    return render_template('pages/admin_page.html')
 
 
-@core_blueprint.route('user/profile', methods=['GET', 'POST'])
+@pages_blueprint.route('pages/profile', methods=['GET', 'POST'])
 @login_required
 def user_profile_page():
     # Initialize form
@@ -47,12 +47,12 @@ def user_profile_page():
         db.session.commit()
 
         # Redirect to home page
-        return redirect(url_for('core.home_page'))
+        return redirect(url_for('pages.home_page'))
 
     # Process GET or invalid POST
-    return render_template('core/user_profile_page.html',
+    return render_template('pages/user_profile_page.html',
                            form=form)
 
 
 # Register blueprint
-app.register_blueprint(core_blueprint)
+app.register_blueprint(pages_blueprint)

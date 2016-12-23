@@ -6,7 +6,7 @@ from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)           # The WSGI compliant web application object
-db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
 manager = Manager(app)          # Setup Flask-Script
+db = SQLAlchemy()               # Setup Flask-SQLAlchemy
 
 from app.create_app import create_app, create_users

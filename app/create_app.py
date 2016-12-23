@@ -27,6 +27,8 @@ def create_app(extra_config_settings={}):
     if app.testing:
         app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF checks while testing
 
+    # Initialize SQL Alchemy _after_ app.config has been read
+    db.init_app(app)
 
     # Setup Flask-Migrate
     migrate = Migrate(app, db)
