@@ -7,7 +7,7 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 import pytest
-from app import create_app, db as the_db
+from app import create_app, create_users, db as the_db
 
 # Initialize the Flask-App with test-specific settings
 the_app = create_app(dict(
@@ -20,7 +20,6 @@ the_app = create_app(dict(
 ))
 
 # Create and populate roles and users tables
-from app.startup.create_users import create_users
 create_users()
 
 # Setup an application context (since the tests run outside of the webserver context)

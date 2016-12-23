@@ -4,11 +4,9 @@
 #
 # Authors: Ling Thio <ling.thio@gmail.com>
 
-from app import manager
+from app import manager, create_users
 
 
 @manager.command
 def init_db():
-    from app.startup.create_users import create_users
-
     create_users()

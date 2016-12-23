@@ -41,26 +41,30 @@ We assume that you have `git` and `virtualenvwrapper` installed.
 Before we can use this application, we will have to configure the database URL and SMTP account
 that will be used to access the database and to send emails.
 
-Settings common to all environments are found in app/startup/common_settings.py
+Settings common to all environments are found in `app/settings.py`. DO NOT store any security
+settings in this file as it's going to be checked into the code repository.
 
-The example environment-specific settings are found in app/env_settings_example.py
+### For Development environments:
 
-Note: DO NOT edit app/config/settings.py because checking this into the core repository
-will expose security sensitive information.
+Create `app/env_settings.py` from the example file `app/env_settings_example.py`::
 
+    cp app/env_settings_example.py app/env_settings.py
+
+Configure `app/env_settings.py`.
+
+### For Production environments:
 Copy the `app/env_settings_example.py` to an `env_settings.py` that resides **outside** the code directory
 and point the OS environment variable `ENV_SETTINGS_FILE` to this file.
 
     # Copy env_settings.py and place it outside of the code directory
-    cd /path/to/project
-    cp app/env_settings_example.py ../env_settings.py
-    
+    cp app/env_settings_example.py /path/to/env_settings.py
+
     # Point the OS environment variable `ENV_SETTINGS_FILE` to this file
     export ENV_SETTINGS_FILE=/path/to/env_settings.py
 
 For convenience, you can set ENV_SETTINGS_FILE in your ``~/.bashrc`` or ``~/.bash_profile`` shell configuration file.
 
-Now edit the /path/to/env_settings.py file.
+Configure `/path/to/env_settings.py`.
 
 
 ## Configuring the SMTP server

@@ -7,7 +7,7 @@ from flask import redirect, render_template, render_template_string, Blueprint
 from flask import request, url_for
 from flask_user import current_user, login_required, roles_accepted
 from app import app, db
-from app.core.models import UserProfileForm
+from app.models import UserProfileForm
 
 core_blueprint = Blueprint('core', __name__, url_prefix='/')
 
