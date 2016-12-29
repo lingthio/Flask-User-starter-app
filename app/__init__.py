@@ -10,4 +10,4 @@ manager = Manager(app)          # Setup Flask-Script
 db = SQLAlchemy()               # Setup Flask-SQLAlchemy
 
 from app.create_app import create_app, create_users
-import manage_commands
+from .manage_commands import init_db      # Explicit import to work with Python3
