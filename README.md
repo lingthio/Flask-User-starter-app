@@ -44,41 +44,25 @@ that will be used to access the database and to send emails.
 Settings common to all environments are found in `app/settings.py`. DO NOT store any security
 settings in this file as it's going to be checked into the code repository.
 
-### For Development environments:
+Environment specific settings are stored in `app/local_settings.py` that is NOT stored in the code repository.
+The example `app/local_settings_example.py` can be used as a starting point::
 
-Create `app/env_settings.py` from the example file `app/env_settings_example.py`::
+    cd ~/dev/my_app
+    cp app/local_settings_example.py app/local_settings.py
 
-    cp app/env_settings_example.py app/env_settings.py
-
-Configure `app/env_settings.py`.
-
-### For Production environments:
-Copy the `app/env_settings_example.py` to an `env_settings.py` that resides **outside** the code directory
-and point the OS environment variable `ENV_SETTINGS_FILE` to this file.
-
-    # Copy env_settings.py and place it outside of the code directory
-    cp app/env_settings_example.py /path/to/env_settings.py
-
-    # Point the OS environment variable `ENV_SETTINGS_FILE` to this file
-    export ENV_SETTINGS_FILE=/path/to/env_settings.py
-
-For convenience, you can set ENV_SETTINGS_FILE in your ``~/.bashrc`` or ``~/.bash_profile`` shell configuration file.
-
-Configure `/path/to/env_settings.py`.
-
+Configure `app/local_settings.py`.
 
 ## Configuring the SMTP server
 
-Edit the /path/to/env_settings.py file.
+Edit ~/dev/my_app/app/env_settings.py.
 
 Make sure to configure all the MAIL_... settings correctly.
 
 Note: For smtp.gmail.com to work, you MUST set "Allow less secure apps" to ON in Google Accounts.
 Change it in https://myaccount.google.com/security#connectedapps (near the bottom).
 
-
-
 ## Initializing the Database
+
     # Create DB tables and populate the roles and users tables
     python manage.py init_db
 
