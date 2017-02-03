@@ -9,7 +9,7 @@ Flask-Login==0.4.0
 Flask-Migrate==2.0.2
 Flask-Script==2.0.5
 Flask-SQLAlchemy==2.1
-Flask-User==0.6.10
+Flask-User==0.6.11
 Flask-WTF==0.13.1
 
 # Development tools
