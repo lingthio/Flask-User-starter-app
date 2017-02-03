@@ -4,7 +4,7 @@
 
 from flask_user import UserMixin
 from flask_user.forms import RegisterForm
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, validators
 from app.init_app import db
 
@@ -57,7 +57,7 @@ class MyRegisterForm(RegisterForm):
 
 
 # Define the User profile form
-class UserProfileForm(Form):
+class UserProfileForm(FlaskForm):
     first_name = StringField('First name', validators=[
         validators.DataRequired('First name is required')])
     last_name = StringField('Last name', validators=[
