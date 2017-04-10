@@ -95,7 +95,7 @@ You can make use of the following users:
     # Show all DB migration commands
     python manage.py db
 
-See [the Alembic docs](alembic.readthedocs.org) for more information.
+See [the Alembic docs](http://alembic.readthedocs.org) for more information.
 
 
 ## Trouble shooting
@@ -105,9 +105,9 @@ If you make changes in the Models and run into DB schema issues, delete the sqli
 ## Acknowledgements
 With thanks to the following Flask extensions:
 
-* [Alembic](alembic.readthedocs.org)
-* [Flask-Migrate](flask-migrate.readthedocs.org)
-* [Flask-User](pythonhosted.org/Flask-User/)
+* [Alembic](http://alembic.readthedocs.org)
+* [Flask-Migrate](http://flask-migrate.readthedocs.org)
+* [Flask-User](http://pythonhosted.org/Flask-User/)
 
 [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) was used as a starting point for this code repository.
 
