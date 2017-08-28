@@ -9,10 +9,9 @@ This code base serves as starting point for writing your next Flask application 
   * app/models
   * app/views
   * tests
-* Bootstrap3 layout template
-* Sends error emails to admins for unhandled exceptions
-* Includes test framework (`py.test`)
+* Includes test framework (`py.test` and `tox`)
 * Includes database migration framework (`alembic`)
+* Sends error emails to admins for unhandled exceptions
 
 
 ## Setting up a development environment
@@ -33,11 +32,11 @@ We assume that you have `git` and `virtualenv` and virtualenvwrapper` installed.
 
 # Configuring SMTP
 
-Copy the example local settings file to local_settings.py
+Copy the `local_settings_example.py` file to `local_settings.py`.
 
     cp app/local_settings_example.py app/local_settings.py
 
-Edit local_settings.py
+Edit the `local_settings.py` file.
 
 Specifically set all the MAIL_... settings to match your SMTP settings
 

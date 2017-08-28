@@ -14,3 +14,7 @@ def test():
 @task
 def test_cov():
     local('py.test -s --cov-report term-missing --cov-config tests/.coveragerc --cov app tests/')
+
+@task
+def tox():
+    local('tox')
