@@ -1,12 +1,13 @@
-# This file starts the WSGI web application.
-# - Heroku starts gunicorn, which loads Procfile, which starts manage.py
-# - Developers can run it from the command line: python runserver.py
+# This file uses the Flask-Script 'manager'
+# to start a Flask development application server.
 
-from app.init_app import app, init_app, manager
+from app.application import init_app
 
-# Start a development web server, processing extra command line parameters. E.g.:
-# - python manage.py init_db
-# - python manage.py runserver
+# Start a development web server if executed from the command line
 if __name__ == "__main__":
-    init_app(app)
+    # Manage the command line parameters such as:
+    # - python manage.py runserver
+    # - python manage.py db
+    the_app = init_app()
+    from app.application import manager
     manager.run()

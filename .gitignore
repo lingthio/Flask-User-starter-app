@@ -66,5 +66,7 @@ target/
 #
 .idea/
 app.sqlite
+app/app.sqlite
+app/env_settings.py
 app/local_settings.py
 

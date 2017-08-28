@@ -3,11 +3,12 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 
-from flask import redirect, render_template, render_template_string, Blueprint
+from flask import redirect, render_template
 from flask import request, url_for
 from flask_user import current_user, login_required, roles_accepted
-from app.init_app import app, db
-from app.models import UserProfileForm
+
+from app.application import app, db
+from app.models.user_models import UserProfileForm
 
 # The Home page is accessible to anyone
 @app.route('/')

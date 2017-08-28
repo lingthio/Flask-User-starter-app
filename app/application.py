@@ -1,41 +1,40 @@
-# Copyright 2014 SolidBuilds.com. All rights reserved
-#
-# Authors: Ling Thio <ling.thio@gmail.com>
+# __init__.py is a special Python file that allows a directory to become
+# a Python package so it can be accessed using the 'import' statement.
 
 from datetime import datetime
+import os
+
 from flask import Flask
-from flask_mail import Mail
-from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
 from flask_wtf.csrf import CsrfProtect
 
+# Setup Flask
 app = Flask(__name__)           # The WSGI compliant web application object
-db = SQLAlchemy()               # Setup Flask-SQLAlchemy
+
+# Load App Config settings
+# Load common settings from 'app/settings.py' file
+app.config.from_object('app.settings')
+# Load local settings from 'app/local_settings.py' or environment setting LOCAL_SETTINGS_FILE
+default_filename = app.root_path + '/local_settings.py'
+local_settings_file = os.environ.get('LOCAL_SETTINGS_FILE', default_filename)
+app.config.from_pyfile(local_settings_file)
+
+# Setup Flask-Script
 manager = Manager(app)          # Setup Flask-Script
 
+# Setup Flask-SQLAlchemy -- Do this _AFTER_ app.config has been loaded
+db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
+
+
 # Initialize Flask Application
-def init_app(app, extra_config_settings={}):
-    # Read common settings from 'app/settings.py'
-    app.config.from_object('app.settings')
+def init_app(extra_config_settings={}):
 
-    # Read environment-specific settings from 'app/local_settings.py'
-    try:
-        app.config.from_object('app.local_settings')
-    except ImportError:
-        print("The configuration file 'app/local_settings.py' does not exist.\n"+
-              "Please copy app/local_settings_example.py to app/local_settings.py\n"+
-              "and customize its settings before you continue.")
-        exit()
-
-    # Add/overwrite extra settings from parameter 'extra_config_settings'
-    app.config.update(extra_config_settings)
-    if app.testing:
-        app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF checks while testing
-
-    # Initialize Flask-SQLAlchemy and Flask-Script _after_ app.config has been read
-    db.init_app(app)
+    # Read extra config settings from function parameter 'extra_config_settings'
+    app.config.update(extra_config_settings)  # Overwrite with 'extra_config_settings' parameter
 
     # Setup Flask-Migrate
     migrate = Migrate(app, db)
@@ -59,8 +58,8 @@ def init_app(app, extra_config_settings={}):
     init_email_error_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.models import User, MyRegisterForm
-    from app.views import user_profile_page
+    from app.models.user_models import User, MyRegisterForm
+    from app.views.misc_views import user_profile_page
 
     db_adapter = SQLAlchemyAdapter(db, User)  # Setup the SQLAlchemy DB Adapter
     user_manager = UserManager(db_adapter, app,  # Init Flask-User and bind to app
@@ -68,7 +67,7 @@ def init_app(app, extra_config_settings={}):
                                user_profile_view_function=user_profile_page,
     )
 
-    import app.manage_commands
+    return app
 
 
 def init_email_error_handler(app):
@@ -108,6 +107,11 @@ def init_email_error_handler(app):
     # Log errors using: app.logger.error('Some error message')
 
 
+# Create DB on first HTTP request
+@app.before_first_request
+def initialize_app_on_first_request():
+    from app.commands.init_db_command import init_db
+    init_db()
 
 
 

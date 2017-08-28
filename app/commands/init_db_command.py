@@ -6,21 +6,20 @@
 
 import datetime
 
-from app.init_app import app, db, manager
-from app.models import User, Role
+from app.application import app, db
+from app.models.user_models import User, Role
 
-@manager.command
+# @manager.command
 def init_db():
     """ Initialize the database."""
+    create_users()
+
+
+def create_users():
+    """ Create users """
+
     # Create all tables
     db.create_all()
-    # Add all Users
-    add_users()
-
-
-def add_users():
-    """ Create users when app starts """
-
 
     # Adding roles
     admin_role = find_or_create_role('admin', u'Admin')
@@ -56,4 +55,6 @@ def find_or_create_user(first_name, last_name, email, password, role=None):
             user.roles.append(role)
         db.session.add(user)
     return user
+
+
 

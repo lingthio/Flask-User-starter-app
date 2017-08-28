@@ -6,7 +6,7 @@ from flask_user import UserMixin
 from flask_user.forms import RegisterForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, validators
-from app.init_app import db
+from app.application import db
 
 
 # Define the User data model. Make sure to add the flask_user.UserMixin !!
