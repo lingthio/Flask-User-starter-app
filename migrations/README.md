@@ -5,6 +5,6 @@ Alembic is a Database Schema Migration tool.
 
 The 'versions' subdirectory contains the Database Schema Migration files.
 
-Use `python app.py db` to see a list of Flask-Migrate commands.
+Use `python manage.py db` to see a list of Flask-Migrate commands.
 
 See also [Flask-Migrate](flask-migrate.readthedocs.org) and [Alembic](alembic.readthedocs.org).

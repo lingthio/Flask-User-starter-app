@@ -2,13 +2,12 @@
 
 This directory contains the Flask application code.
 
-The code has been organized into the following directories:
+The code has been organized into the following sub-directories:
 
-    # Code directories
+    # Sub-directories
+    commands     # Commands made available to manage.py
     models       # Database Models and their Forms
-    startup      # Application startup code and settings.py file
+    static       # Static asset files that will be mapped to the "/static/" URL
+    templates    # Jinja2 HTML template files
     views        # View functions
 
-    # Asset and Template directories
-    static       # This subdirectory will be mapped to the "/static/" URL
-    templates    # Jinja2 HTML template files

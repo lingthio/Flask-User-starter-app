@@ -5,10 +5,9 @@ data into HTML files.
 
 The template files are organized into the following directories:
 
-    common            # Common base templates and macros
+    common            # Common base template files and macros
     flask_user        # Flask-User template files (register, login, etc.)
-    pages             # Templates for Page objects
-    users             # Templates for User objects
+    pages             # Template files for web pages
 
 Flask-User makes use of standard template files that reside in  
 `PATH/TO/VIRTUALENV/lib/PYTHONVERSION/site-packages/flask_user/templates/flask_user/`.  
