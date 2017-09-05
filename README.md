@@ -1,20 +1,25 @@
 # Flask-User starter app
 
-This code base serves as starting point for writing your next Flask application with Flask-User
+This code base serves as starting point for writing your next Flask application.
 
 ## Code characteristics
+
 * Tested on Python 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6
 * Well organized directories with lots of comments
-  * app
-  * app/models
-  * app/views
-  * tests
+    * app
+        * commands
+        * models
+        * static
+        * templates
+        * views
+    * tests
 * Includes test framework (`py.test` and `tox`)
 * Includes database migration framework (`alembic`)
 * Sends error emails to admins for unhandled exceptions
 
 
 ## Setting up a development environment
+
 We assume that you have `git` and `virtualenv` and virtualenvwrapper` installed.
 
     # Clone the code repository into ~/dev/my_app
@@ -29,6 +34,7 @@ We assume that you have `git` and `virtualenv` and virtualenvwrapper` installed.
     cd ~/dev/my_app
     workon my_app
     pip install -r requirements.txt
+
 
 # Configuring SMTP
 
@@ -46,12 +52,15 @@ See https://support.google.com/accounts/answer/6010255?hl=en
 Note that Yahoo's SMTP server requires the configuration of "Allow apps that use less secure sign in".
 See https://help.yahoo.com/kb/SLN27791.html
 
+
 ## Initializing the Database
+
     # Create DB tables and populate the roles and users tables
     python manage.py init_db
 
     # Or if you have Fabric installed:
     fab init_db
+
 
 ## Running the app
 
@@ -77,18 +86,26 @@ You can make use of the following users:
     fab test
 
 
-
 ## Trouble shooting
+
 If you make changes in the Models and run into DB schema issues, delete the sqlite DB file `app.sqlite`.
 
+
 ## Acknowledgements
+
 With thanks to the following Flask extensions:
 
-* [Alembic](alembic.readthedocs.org)
-* [Flask-Migrate](flask-migrate.readthedocs.org)
-* [Flask-User](pythonhosted.org/Flask-User/)
+* [Alembic](http://alembic.zzzcomputing.com/)
+* [Flask](http://flask.pocoo.org/)
+* [Flask-Login](https://flask-login.readthedocs.io/)
+* [Flask-Migrate](https://flask-migrate.readthedocs.io/)
+* [Flask-Script](https://flask-script.readthedocs.io/)
+* [Flask-User](http://flask-user.readthedocs.io/en/v0.6/)
 
+<!-- Please consider leaving this line. Thank you -->
 [Flask-User-starter-app](https://github.com/lingthio/Flask-User-starter-app) was used as a starting point for this code repository.
 
-    # Please consider leaving the line above in your project's README file. Thank you.
 
+## Authors
+
+- Ling Thio -- ling.thio AT gmail DOT com
