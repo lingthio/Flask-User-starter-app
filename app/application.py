@@ -9,7 +9,7 @@ from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
-from flask_user import UserManager, SQLAlchemyAdapter
+from flask_user import UserManager
 from flask_wtf.csrf import CsrfProtect
 
 # Setup Flask
@@ -58,14 +58,11 @@ def init_app(extra_config_settings={}):
     init_email_error_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.models.user_models import User, MyRegisterForm
+    from app.models.user_models import User
     from app.views.misc_views import user_profile_page
 
-    db_adapter = SQLAlchemyAdapter(db, User)  # Setup the SQLAlchemy DB Adapter
-    user_manager = UserManager(db_adapter, app,  # Init Flask-User and bind to app
-                               register_form=MyRegisterForm,  # using a custom register form with UserProfile fields
-                               user_profile_view_function=user_profile_page,
-    )
+    # Setup Flask-User
+    user_manager = UserManager(app, db, User)
 
     return app
 

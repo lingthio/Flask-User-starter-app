@@ -1,5 +1,5 @@
-# Standard Python .gitignore
-# --------------------------
+# Standard Python ignores
+# -----------------------
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -102,8 +102,8 @@ ENV/
 .mypy_cache/
 
 
-# Other standards .gitignore
-# --------------------------
+# Other standard ignores
+# ----------------------
 
 # Mac files
 .DS_Store
@@ -112,8 +112,8 @@ ENV/
 .idea/
 
 
-# Application-specific .gitignores
-# --------------------------------
+# Application-specific ignores
+# ----------------------------
 
 app.sqlite
 app/local_settings.py

@@ -1,4 +1,4 @@
-# Flask-User starter app
+# Flask-User starter app v0.9
 
 This code base serves as starting point for writing your next Flask application.
 

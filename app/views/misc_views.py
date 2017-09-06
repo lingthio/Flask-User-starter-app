@@ -5,7 +5,7 @@
 
 from flask import redirect, render_template
 from flask import request, url_for
-from flask_user import current_user, login_required, roles_accepted
+from flask_user import current_user, login_required, roles_required
 
 from app.application import app, db
 from app.models.user_models import UserProfileForm
@@ -25,7 +25,7 @@ def user_page():
 
 # The Admin page is accessible to users with the 'admin' role
 @app.route('/admin')
-@roles_accepted('admin')  # Limits access to users with the 'admin' role
+@roles_required('admin')  # Limits access to users with the 'admin' role
 def admin_page():
     return render_template('pages/admin_page.html')
 
