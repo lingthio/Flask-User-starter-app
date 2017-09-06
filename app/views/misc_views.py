@@ -17,9 +17,9 @@ def home_page():
 
 
 # The User page is accessible to authenticated users (users that have logged in)
-@app.route('/user')
+@app.route('/member')
 @login_required  # Limits access to authenticated users
-def user_page():
+def member_page():
     return render_template('pages/user_page.html')
 
 

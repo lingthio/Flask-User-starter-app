@@ -1,22 +1,11 @@
-{% extends "common/page_base.html" %}  {# common/page_base.html extends layout.html #}
+{% extends "common/page_base.html" %}
 
 {% block content %}
-<h1>Home page</h1>
-
-<p>This page is accessible to any user (signed in or not)</p>
-
-{% if not current_user.is_authenticated %}
-<p>
-To view the User page, you must
-<a href="{{ url_for('user.login') }}">Sign in</a> or
-<a href="{{ url_for('user.register') }}">Register</a>.
-</p>
-{% endif %}
-
-<p>
-    Test users:<br/>
-    - user@example.com / Password1<br/>
-    - admin@example.com / Password1
-</p>
-
+    <h2>{%trans%}Home page{%endtrans%}</h2>
+    <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
+    <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
+    <p><a href={{ url_for('home_page') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
+    <p><a href={{ url_for('member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
+    <p><a href={{ url_for('admin_page') }}>{%trans%}Admin Page{%endtrans%}</a> (roles_required: admin@example.com / Password1)</p>
+    <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
 {% endblock %}
