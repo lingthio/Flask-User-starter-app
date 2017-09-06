@@ -26,7 +26,7 @@ def create_users():
 
     # Add users
     user = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)
-    user = find_or_create_user(u'User', u'Example', u'user@example.com', 'Password1')
+    user = find_or_create_user(u'Member', u'Example', u'member@example.com', 'Password1')
 
     # Save to DB
     db.session.commit()
