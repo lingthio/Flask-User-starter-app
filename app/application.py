@@ -29,7 +29,6 @@ manager = Manager(app)          # Setup Flask-Script
 # Setup Flask-SQLAlchemy -- Do this _AFTER_ app.config has been loaded
 db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
 
-
 # Initialize Flask Application
 def init_app(extra_config_settings={}):
 
@@ -63,6 +62,8 @@ def init_app(extra_config_settings={}):
 
     # Setup Flask-User
     user_manager = UserManager(app, db, User)
+    from flask_user.email_adapters import SendgridEmailAdapter
+    # user_manager.email_adapter = SendgridEmailAdapter(app)
 
     return app
 
