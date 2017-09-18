@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager
-from flask_wtf.csrf import CsrfProtect
+from flask_wtf.csrf import CSRFProtect
 
 # Setup Flask
 app = Flask(__name__)           # The WSGI compliant web application object
@@ -30,7 +30,7 @@ manager = Manager(app)          # Setup Flask-Script
 db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
 
 # Initialize Flask Application
-def init_app(extra_config_settings={}):
+def init_app(app, extra_config_settings={}):
 
     # Read extra config settings from function parameter 'extra_config_settings'
     app.config.update(extra_config_settings)  # Overwrite with 'extra_config_settings' parameter
@@ -38,12 +38,13 @@ def init_app(extra_config_settings={}):
     # Setup Flask-Migrate
     migrate = Migrate(app, db)
     manager.add_command('db', MigrateCommand)
+    from .commands import init_db_command
 
     # Setup Flask-Mail
     mail = Mail(app)
 
-    # Setup WTForms CsrfProtect
-    CsrfProtect(app)
+    # Setup WTForms CSRFProtect
+    CSRFProtect(app)
 
     # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
     from wtforms.fields import HiddenField
@@ -57,13 +58,11 @@ def init_app(extra_config_settings={}):
     init_email_error_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.models.user_models import User
-    from app.views.misc_views import user_profile_page
+    from .models.user_models import User
+    from .views.misc_views import user_profile_page
 
     # Setup Flask-User
     user_manager = UserManager(app, db, User)
-    from flask_user.email_adapters import SendgridEmailAdapter
-    # user_manager.email_adapter = SendgridEmailAdapter(app)
 
     return app
 

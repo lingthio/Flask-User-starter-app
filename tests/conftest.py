@@ -7,10 +7,10 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 import pytest
-from app.application import init_app, db as the_db
+from app.application import app as the_app, init_app, db as the_db
 
 # Initialize the Flask-App with test-specific settings
-the_app = init_app(dict(
+init_app(the_app, dict(
     TESTING=True,  # Propagate exceptions
     LOGIN_DISABLED=False,  # Enable @register_required
     MAIL_SUPPRESS_SEND=True,  # Disable Flask-Mail send

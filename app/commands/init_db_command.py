@@ -6,12 +6,14 @@
 
 import datetime
 
-from app.application import app, db
+from app.application import app, db, manager
 from app.models.user_models import User, Role
 
-# @manager.command
+@manager.command
 def init_db():
     """ Initialize the database."""
+    db.drop_all()
+    db.create_all()
     create_users()
 
 
