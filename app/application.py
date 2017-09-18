@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager, SQLAlchemyAdapter
-from flask_wtf.csrf import CsrfProtect
+from flask_wtf.csrf import CSRFProtect
 
 # Setup Flask
 app = Flask(__name__)           # The WSGI compliant web application object
@@ -31,7 +31,7 @@ db = SQLAlchemy(app)            # Setup Flask-SQLAlchemy
 
 
 # Initialize Flask Application
-def init_app(extra_config_settings={}):
+def init_app(app, extra_config_settings={}):
 
     # Read extra config settings from function parameter 'extra_config_settings'
     app.config.update(extra_config_settings)  # Overwrite with 'extra_config_settings' parameter
@@ -39,12 +39,13 @@ def init_app(extra_config_settings={}):
     # Setup Flask-Migrate
     migrate = Migrate(app, db)
     manager.add_command('db', MigrateCommand)
+    from .commands import init_db_command
 
     # Setup Flask-Mail
     mail = Mail(app)
 
-    # Setup WTForms CsrfProtect
-    CsrfProtect(app)
+    # Setup WTForms CSRFProtect
+    CSRFProtect(app)
 
     # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
     from wtforms.fields import HiddenField
@@ -58,8 +59,8 @@ def init_app(extra_config_settings={}):
     init_email_error_handler(app)
 
     # Setup Flask-User to handle user account related forms
-    from app.models.user_models import User, MyRegisterForm
-    from app.views.misc_views import user_profile_page
+    from .models.user_models import User, MyRegisterForm
+    from .views.misc_views import user_profile_page
 
     db_adapter = SQLAlchemyAdapter(db, User)  # Setup the SQLAlchemy DB Adapter
     user_manager = UserManager(db_adapter, app,  # Init Flask-User and bind to app
@@ -106,12 +107,6 @@ def init_email_error_handler(app):
 
     # Log errors using: app.logger.error('Some error message')
 
-
-# Create DB on first HTTP request
-@app.before_first_request
-def initialize_app_on_first_request():
-    from app.commands.init_db_command import init_db
-    init_db()
 
 
 
