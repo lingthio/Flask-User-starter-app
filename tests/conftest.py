@@ -7,10 +7,10 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 import pytest
-from app.application import app as the_app, init_app, db as the_db
+from app import create_app, db as the_db
 
 # Initialize the Flask-App with test-specific settings
-init_app(the_app, dict(
+the_app = create_app(dict(
     TESTING=True,  # Propagate exceptions
     LOGIN_DISABLED=False,  # Enable @register_required
     MAIL_SUPPRESS_SEND=True,  # Disable Flask-Mail send
@@ -19,12 +19,12 @@ init_app(the_app, dict(
     WTF_CSRF_ENABLED=False,  # Disable CSRF form validation
 ))
 
-# Create and populate roles and users tables
-from app.commands.init_db_command import init_db
-init_db()
-
 # Setup an application context (since the tests run outside of the webserver context)
 the_app.app_context().push()
+
+# Create and populate roles and users tables
+from app.commands.init_db import init_db
+init_db()
 
 
 @pytest.fixture(scope='session')

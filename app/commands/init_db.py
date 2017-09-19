@@ -6,10 +6,19 @@
 
 import datetime
 
-from app.application import app, db, manager
+from flask import current_app
+from flask_script import Command
+
+from app import db
 from app.models.user_models import User, Role
 
-@manager.command
+class InitDbCommand(Command):
+    """ Initialize the database."""
+
+    def run(self):
+        init_db()
+        print('Database has been initialized.')
+
 def init_db():
     """ Initialize the database."""
     db.drop_all()
@@ -50,7 +59,7 @@ def find_or_create_user(first_name, last_name, email, password, role=None):
         user = User(email=email,
                     first_name=first_name,
                     last_name=last_name,
-                    password=app.user_manager.password_manager.hash_password(password),
+                    password=current_app.user_manager.password_manager.hash_password(password),
                     active=True,
                     email_confirmed_at=datetime.datetime.utcnow())
         if role:
