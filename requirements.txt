@@ -9,8 +9,8 @@ Flask-Login==0.4.0
 Flask-Migrate==2.0.2
 Flask-Script==2.0.5
 Flask-SQLAlchemy==2.1
-Flask-User==0.6.12
-Flask-WTF==0.13.1
+Flask-User==0.6.19
+Flask-WTF==0.14.2
 
 # Automated tests
 pytest==3.0.5
@@ -19,4 +19,3 @@ pytest-cov==2.4.0
 # Development tools
 # Fabric3==1.13.1.post1
 # tox==2.7.0
-
