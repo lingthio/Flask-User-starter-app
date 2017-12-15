@@ -9,8 +9,8 @@ Flask-Login==0.4.0
 Flask-Migrate==2.0.2
 Flask-Script==2.0.5
 Flask-SQLAlchemy==2.1
-Flask-User==0.6.19
 Flask-WTF==0.14.2
+git+https://github.com/lingthio/Flask-User.git@master#egg=Flask-User
 
 # Automated tests
 pytest==3.0.5

@@ -36,7 +36,7 @@ def admin_page():
 @login_required
 def user_profile_page():
     # Initialize form
-    form = UserProfileForm(request.form, current_user)
+    form = UserProfileForm(request.form, obj=current_user)
 
     # Process valid POST
     if request.method == 'POST' and form.validate():
