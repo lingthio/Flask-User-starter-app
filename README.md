@@ -2,8 +2,9 @@
 
 This code base serves as starting point for writing your next Flask application.
 
-| This branch is for Flask-User v1.0.
-| For Flask-User v0.6, see the [Flask-User-Starter-App v0.6 branch](https://github.com/lingthio/Flask-User-starter-app/tree/v0.6).
+This branch is for Flask-User v1.0.
+
+For Flask-User v0.6, see [the Flask-User-Starter-App v0.6 branch](https://github.com/lingthio/Flask-User-starter-app/tree/v0.6).
 
 ## Code characteristics
 
