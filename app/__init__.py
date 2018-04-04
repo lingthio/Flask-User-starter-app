@@ -46,8 +46,8 @@ def create_app(extra_config_settings={}):
     csrf_protect.init_app(app)
 
     # Register blueprints
-    from .views.misc_views import main_blueprint
-    app.register_blueprint(main_blueprint)
+    from .views import register_blueprints
+    register_blueprints(app)
 
     # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
     from wtforms.fields import HiddenField
@@ -62,10 +62,14 @@ def create_app(extra_config_settings={}):
 
     # Setup Flask-User to handle user account related forms
     from .models.user_models import User
-    from .views.misc_views import user_profile_page
+    from .views.main_views import user_profile_page
 
     # Setup Flask-User
     user_manager = UserManager(app, db, User)
+
+    @app.context_processor
+    def context_processor():
+        return dict(user_manager=user_manager)
 
     return app
 
