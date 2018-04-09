@@ -97,8 +97,8 @@ If you make changes in the Models and run into DB schema issues, delete the sqli
 
 ## See also
 
-* [FaskDash](https://github.com/twintechlabs/flaskdash) is a Flask Starter App
-  for [Flask-User](https://readthedocs.org/projects/flask-user/)
+* [FlaskDash](https://github.com/twintechlabs/flaskdash) is a starter app for Flask
+  with [Flask-User](https://readthedocs.org/projects/flask-user/)
   and [CoreUI](https://coreui.io/) (A Bootstrap Admin Template).
 
 ## Acknowledgements
