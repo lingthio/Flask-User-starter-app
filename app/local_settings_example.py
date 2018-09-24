@@ -1,5 +1,3 @@
-import os
-
 # *****************************
 # Environment specific settings
 # *****************************
