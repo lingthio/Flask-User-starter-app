@@ -4,13 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-Flask = "==0.12"
+Flask = "==1.0.2"
 Flask-Login = "==0.4.0"
 Flask-Migrate = "==2.0.2"
 Flask-Script = "==2.0.5"
-Flask-SQLAlchemy = "==2.1"
+Flask-SQLAlchemy = "==2.4.0"
 Flask-WTF = "==0.14.2"
-Flask-User = {git = "https://github.com/lingthio/Flask-User.git", ref = "master"}
+Flask-User = {git = "https://github.com/lingthio/Flask-User.git",ref = "master"}
 pytest = "==3.0.5"
 pytest-cov = "==2.4.0"
 
