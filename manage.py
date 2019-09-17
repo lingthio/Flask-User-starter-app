@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """This file sets up a command line manager.
 
 Use "python manage.py" for a list of available commands.
