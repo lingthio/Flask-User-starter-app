@@ -2,7 +2,9 @@
 #
 # Authors: Ling Thio <ling.thio@gmail.com>
 
+from flask import current_app
 from flask_user import UserMixin
+from sqlalchemy import event
 # from flask_user.forms import RegisterForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, validators
@@ -16,8 +18,11 @@ class User(db.Model, UserMixin):
 
     # User authentication information (required for Flask-User)
     email = db.Column(db.Unicode(255), nullable=False, server_default=u'', unique=True)
-    email_confirmed_at = db.Column(db.DateTime())
-    password = db.Column(db.String(255), nullable=False, server_default='')
+    #email_confirmed_at = db.Column(db.DateTime())
+    
+    # password is automatically hashed in hash_user_password via an event
+    password = db.Column('password', db.String(255), nullable=False, server_default='')
+
     # reset_password_token = db.Column(db.String(100), nullable=False, server_default='')
     active = db.Column(db.Boolean(), nullable=False, server_default='0')
 
@@ -29,6 +34,16 @@ class User(db.Model, UserMixin):
     # Relationships
     roles = db.relationship('Role', secondary='users_roles',
                             backref=db.backref('users', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<User {self.first_name} {self.last_name} (f{self.email})>'
+
+# automatically hash user password
+@event.listens_for(User.password, 'set', retval=True)
+def hash_user_password(target, value, oldvalue, initiator):
+    if value != oldvalue:
+        return current_app.user_manager.password_manager.hash_password(value)
+    return value
 
 
 # Define the Role data model
@@ -37,6 +52,9 @@ class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), nullable=False, server_default=u'', unique=True)  # for @roles_accepted()
     label = db.Column(db.Unicode(255), server_default=u'')  # for display purposes
+
+    def __repr__(self):
+        return f'<Role {self.name}>'
 
 
 # Define the UserRoles association model

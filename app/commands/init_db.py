@@ -34,6 +34,7 @@ def create_users():
 
     # Adding roles
     admin_role = find_or_create_role('admin', u'Admin')
+    admin_role = find_or_create_role('reviewer', u'Reviewer')
 
     # Add users
     user = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)

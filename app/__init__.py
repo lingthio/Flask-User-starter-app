@@ -11,6 +11,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager
 from flask_wtf.csrf import CSRFProtect
+from flask_admin import Admin
 
 
 # Instantiate Flask extensions
@@ -18,6 +19,7 @@ csrf_protect = CSRFProtect()
 db = SQLAlchemy()
 mail = Mail()
 migrate = Migrate()
+flask_admin = Admin(url='/admin/flask_admin')
 
 # Initialize Flask Application
 def create_app(extra_config_settings={}):
@@ -41,6 +43,9 @@ def create_app(extra_config_settings={}):
 
     # Setup Flask-Mail
     mail.init_app(app)
+
+    # Setup Flask-Admin
+    flask_admin.init_app(app)
 
     # Setup WTForms CSRFProtect
     csrf_protect.init_app(app)
