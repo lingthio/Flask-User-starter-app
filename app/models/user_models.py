@@ -5,7 +5,6 @@
 from flask import current_app
 from flask_user import UserMixin
 from sqlalchemy import event
-# from flask_user.forms import RegisterForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, validators
 from app import db
@@ -18,12 +17,10 @@ class User(db.Model, UserMixin):
 
     # User authentication information (required for Flask-User)
     email = db.Column(db.Unicode(255), nullable=False, server_default=u'', unique=True)
-    #email_confirmed_at = db.Column(db.DateTime())
     
     # password is automatically hashed in hash_user_password via an event
     password = db.Column('password', db.String(255), nullable=False, server_default='')
 
-    # reset_password_token = db.Column(db.String(100), nullable=False, server_default='')
     active = db.Column(db.Boolean(), nullable=False, server_default='0')
 
     # User information
@@ -36,7 +33,7 @@ class User(db.Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))
     
     def __repr__(self):
-        return f'<User {self.first_name} {self.last_name} (f{self.email})>'
+        return f'{self.first_name} {self.last_name} (f{self.email})'
 
 # automatically hash user password
 @event.listens_for(User.password, 'set', retval=True)
@@ -54,7 +51,7 @@ class Role(db.Model):
     label = db.Column(db.Unicode(255), server_default=u'')  # for display purposes
 
     def __repr__(self):
-        return f'<Role {self.name}>'
+        return f'{self.name}'
 
 
 # Define the UserRoles association model
@@ -63,15 +60,6 @@ class UsersRoles(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
-
-
-# # Define the User registration form
-# # It augments the Flask-User RegisterForm with additional fields
-# class MyRegisterForm(RegisterForm):
-#     first_name = StringField('First name', validators=[
-#         validators.DataRequired('First name is required')])
-#     last_name = StringField('Last name', validators=[
-#         validators.DataRequired('Last name is required')])
 
 
 # Define the User profile form
