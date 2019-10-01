@@ -5,6 +5,7 @@ from app import db, flask_admin
 from flask_admin.contrib.sqla import ModelView
 from app.models.user_models import User, Role
 from app.models.project_models import Project
+from app.models.data_pool_models import DataPool
 
 
 admin_blueprint = Blueprint('bp_admin', __name__, template_folder='templates')
@@ -18,3 +19,4 @@ def admin_page():
 flask_admin.add_view(ModelView(User, db.session))
 flask_admin.add_view(ModelView(Role, db.session))
 flask_admin.add_view(ModelView(Project, db.session))
+flask_admin.add_view(ModelView(DataPool, db.session))
