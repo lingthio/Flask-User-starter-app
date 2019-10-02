@@ -50,7 +50,7 @@ class Image(DataPool):
 
 
 class ManualSegmentation(DataPool):
-    __tablename__ = 'data_pool_manual_segmentation'
+    __tablename__ = 'data_pool_manual_segmentations'
     id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
 
     #status = na, assigned, submitted, remitted, accepted
@@ -71,7 +71,7 @@ class ManualSegmentation(DataPool):
 
 
 class AutomaticSegmentation(DataPool):
-    __tablename__ = 'data_pool_automatic_segmentation'
+    __tablename__ = 'data_pool_automatic_segmentations'
     id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
 
     #model_id     = db.Column(db.Integer, db.ForeignKey('models.id'), nullable=True)

@@ -10,14 +10,14 @@ class Project(db.Model):
     short_name = db.Column(db.Unicode(16), nullable=False, server_default=u'', unique=True)
     name       = db.Column(db.Unicode(255), nullable=False, server_default=u'')
     active     = db.Column(db.Boolean(), nullable=False, server_default='1')
-    inset_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    insert_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Relationships
-    admins   = db.relationship('User', secondary='projects_admins',
+    admins    = db.relationship('User', secondary='projects_admins',
                                backref=db.backref('admin_for_project', lazy='dynamic'))
-    reviwers = db.relationship('User', secondary='projects_reviewers',
+    reviewers = db.relationship('User', secondary='projects_reviewers',
                                backref=db.backref('reviewer_for_project', lazy='dynamic'))
-    users    = db.relationship('User', secondary='projects_users',
+    users     = db.relationship('User', secondary='projects_users',
                                backref=db.backref('user_for_project', lazy='dynamic'))
     def __repr__(self):
         return f'{self.short_name}'
