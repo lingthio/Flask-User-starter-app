@@ -3,7 +3,10 @@
 
 from .main_views import main_blueprint
 from .admin_views import admin_blueprint
+from .data_views import data_blueprint
+
 
 def register_blueprints(app):
     app.register_blueprint(main_blueprint)
     app.register_blueprint(admin_blueprint)
+    app.register_blueprint(data_blueprint)

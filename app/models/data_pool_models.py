@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import event
 from app import db
 from .user_models import User
@@ -30,19 +30,21 @@ class Image(DataPool):
 
     institution        = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     accession_number   = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    study_date         = db.Column(db.DateTime, nullable=True, server_default=u'')
+    study_date         = db.Column(db.DateTime, nullable=True, default=datetime.now)
     study_name         = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     study_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     series_name        = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     series_number      = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     series_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     patient_id         = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    patient_dob        = db.Column(db.Date, nullable=True, server_default=u'')
+    patient_dob        = db.Column(db.Date, nullable=True, default=datetime.now)
     #contrast_type      = na, nat, art, ven, mixed
     #body_region        = 
     #modality           = # ct, mr, xr ...
     #split              = # training, testing ...
-    
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in DataPool.__table__.columns + Image.__table__.columns}
 
     __mapper_args__ = {
         'polymorphic_identity':'image',

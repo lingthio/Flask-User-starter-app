@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <style type="text/css" class="init">
+
+    </style>
+    <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script type="text/javascript" language="javascript"
+            src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" class="init">
+
+        $(document).ready(function () {
+            $('#example').DataTable({
+                ajax: "/api/data_test",
+                columns: [
+                    {% for column in columns %}
+                    {data: '{{ column }}' },
+                    {% endfor %}
+                ]
+            });
+        });
+    </script>
+</head>
+<body>
+
+<table id="example" class="display" style="width:100%">
+    <thead>
+    <tr>
+        {% for column in columns %}
+        <th> {{ column }} </th>
+        {% endfor %}
+
+    </tr>
+    </thead>
+</table>
+</body>
+</html>
