@@ -10,6 +10,8 @@ from flask import current_app
 from flask_script import Command
 
 from app import db
+from app.models.data_pool_models import Image, DataPool
+from app.models.project_models import Project
 from app.models.user_models import User, Role
 
 class InitDbCommand(Command):
@@ -39,6 +41,9 @@ def create_users():
     user = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)
     user = find_or_create_user(u'Member', u'Example', u'member@example.com', 'Password1')
 
+    # Add projects
+    create_example_projects()
+
     # Save to DB
     db.session.commit()
 
@@ -67,4 +72,15 @@ def find_or_create_user(first_name, last_name, email, password, role=None):
     return user
 
 
+def create_example_projects():
+    """ Add examplary projects with attached data to the project"""
+    # Create projects
+    for i in range(2):
+        project = Project(short_name="proj_" + str(i), name="Project_" + str(i), active=True)
+        db.session.add(project)
+        db.session.commit()
 
+        # Add images
+        for j in range(10):
+            img = Image(project_id=project.id, name="Image_" + str(j))
+            db.session.add(img)

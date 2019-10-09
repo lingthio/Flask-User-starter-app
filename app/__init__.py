@@ -21,6 +21,7 @@ mail = Mail()
 migrate = Migrate()
 flask_admin = Admin(url='/admin/flask_admin')
 
+
 # Initialize Flask Application
 def create_app(extra_config_settings={}):
     """Create a Flask application.

@@ -12,7 +12,7 @@ class DataPool(db.Model):
     type = db.Column(db.String(50), nullable=False)
 
     name = db.Column(db.Unicode(255), nullable=False, server_default=u'')
-    inset_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    insert_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Relationships

@@ -13,6 +13,7 @@ from app.models.user_models import User, Role, UserProfileForm
 
 main_blueprint = Blueprint('main', __name__, template_folder='templates')
 
+
 # The Home page is accessible to anyone
 @main_blueprint.route('/')
 def home_page():
