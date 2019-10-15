@@ -1,7 +1,8 @@
 from datetime import datetime
 from sqlalchemy import event
 from app import db
-from .user_models import User
+from . import user_models
+from . import data_pool_models
 
 
 class Project(db.Model):
@@ -13,12 +14,13 @@ class Project(db.Model):
     insert_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Relationships
-    admins    = db.relationship('User', secondary='projects_admins',
+    admins    = db.relationship('user_models.User', secondary='projects_admins',
                                backref=db.backref('admin_for_project', lazy='dynamic'))
-    reviewers = db.relationship('User', secondary='projects_reviewers',
+    reviewers = db.relationship('user_models.User', secondary='projects_reviewers',
                                backref=db.backref('reviewer_for_project', lazy='dynamic'))
-    users     = db.relationship('User', secondary='projects_users',
+    users     = db.relationship('user_models.User', secondary='projects_users',
                                backref=db.backref('user_for_project', lazy='dynamic'))
+    data_pool_objects = db.relationship('data_pool_models.DataPool', back_populates='project')
     def __repr__(self):
         return f'{self.short_name}'
 

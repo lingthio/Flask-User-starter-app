@@ -1,8 +1,16 @@
 from datetime import datetime, date
 from sqlalchemy import event
 from app import db
-from .user_models import User
-from .project_models import Project
+from . import user_models
+from . import project_models
+
+
+class StatusEnum(db.Enum):
+    na        = 'na'
+    assigned  = 'assigned'
+    submitted = 'submitted'
+    remitted  = 'remitted'
+    accepted  = 'accepted'
 
 
 class DataPool(db.Model):
@@ -16,7 +24,8 @@ class DataPool(db.Model):
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Relationships
-    project = db.relationship('Project', backref=db.backref('data_pool', lazy='dynamic'))
+    project = db.relationship('project_models.Project', back_populates='data_pool_objects')
+    #project = db.relationship('Project', backref=db.backref('data_pool', lazy='dynamic'))
 
     __mapper_args__ = {
         'polymorphic_identity':'datapool',
@@ -43,6 +52,18 @@ class Image(DataPool):
     #modality           = # ct, mr, xr ...
     #split              = # training, testing ...
 
+    # Relationships
+    manual_segmentation    = db.relationship('ManualSegmentation', uselist=False,
+                                             foreign_keys='ManualSegmentation.id', 
+                                             back_populates='image',
+                                             cascade="all, delete-orphan",
+                                             passive_deletes=True)
+    automatic_segmentation = db.relationship('AutomaticSegmentation', uselist=False,
+                                             foreign_keys='AutomaticSegmentation.id', 
+                                             back_populates='image',
+                                             cascade="all, delete-orphan",
+                                             passive_deletes=True)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in DataPool.__table__.columns + Image.__table__.columns}
 
@@ -53,19 +74,23 @@ class Image(DataPool):
 
 class ManualSegmentation(DataPool):
     __tablename__ = 'data_pool_manual_segmentations'
-    id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
+    id       = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
+    image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'), 
+                         nullable=False, unique=True)
 
-    #status = na, assigned, submitted, remitted, accepted
-
+    status = db.Column(StatusEnum, nullable=True)
     assignee_id     = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     assigned_date   = db.Column(db.DateTime, nullable=True)
     validated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     validation_date = db.Column(db.DateTime, nullable=True)
 
-
     # Relationships
-    #assignee     = db.relationship('User', backref=db.backref('assigned_segmentations', lazy='dynamic'))
-    #validated_by = db.relationship('User', backref=db.backref('validated_segmentations', lazy='dynamic'))
+    image        = db.relationship('Image', foreign_keys=[image_id],
+                                   uselist=False, back_populates='manual_segmentation')
+    assignee     = db.relationship('user_models.User', foreign_keys=[assignee_id],
+                                   back_populates='segmentations_assigned')
+    validated_by = db.relationship('user_models.User', foreign_keys=[validated_by_id],
+                                   back_populates='segmentations_validated')
     
     __mapper_args__ = {
         'polymorphic_identity':'manual_segmentation',
@@ -74,12 +99,15 @@ class ManualSegmentation(DataPool):
 
 class AutomaticSegmentation(DataPool):
     __tablename__ = 'data_pool_automatic_segmentations'
-    id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
+    id       = db.Column(db.Integer, db.ForeignKey('data_pool.id', ondelete='CASCADE'), primary_key=True)
+    image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'), 
+                         nullable=False, unique=True)
 
     #model_id     = db.Column(db.Integer, db.ForeignKey('models.id'), nullable=True)
 
     # Relationships
-    # ToDo
+    image = db.relationship('Image', foreign_keys=[image_id],
+                            uselist=False, back_populates='automatic_segmentation')
     
     __mapper_args__ = {
         'polymorphic_identity':'automatic_segmentation',

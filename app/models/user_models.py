@@ -8,6 +8,7 @@ from sqlalchemy import event
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, validators
 from app import db
+from . import data_pool_models
 
 
 # Define the User data model. Make sure to add the flask_user.UserMixin !!
@@ -29,8 +30,14 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.Unicode(50), nullable=False, server_default=u'')
 
     # Relationships
-    roles = db.relationship('Role', secondary='users_roles',
-                            backref=db.backref('users', lazy='dynamic'))
+    roles                   = db.relationship('Role', secondary='users_roles',
+                                              backref=db.backref('users', lazy='dynamic'))
+    segmentations_assigned  = db.relationship('data_pool_models.ManualSegmentation',
+                                              foreign_keys='data_pool_models.ManualSegmentation.assignee_id',
+                                              back_populates='assignee')
+    segmentations_validated = db.relationship('data_pool_models.ManualSegmentation',
+                                              foreign_keys='data_pool_models.ManualSegmentation.validated_by_id',
+                                              back_populates='validated_by')
     
     def __repr__(self):
         return f'{self.first_name} {self.last_name} (f{self.email})'
