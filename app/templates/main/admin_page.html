@@ -1,11 +1,60 @@
 {% extends "main/main_base.html" %}  {# main/main_base.html extends layout.html #}
 
 {% block content %}
-    <h2>{%trans%}Admin Page{%endtrans%}</h2>
-    <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
-    <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
-    <p><a href={{ url_for('main.home_page') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
-    <p><a href={{ url_for('main.member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
-    <p><a href={{ url_for('bp_admin.admin_page') }}>{%trans%}Admin Page{%endtrans%}</a> (roles_required: admin@example.com / Password1)</p>
-    <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
+<script type="text/javascript" class="init">
+    // Function to create drop down menu for user assignment
+    let users = [
+        {% for user in users %}
+            '{{user}}',
+        {% endfor %}
+    ];
+    function createSelect(selItem) {
+
+        var sel = "<select><option>Assign</option>";
+        for (var i = 0; i < users.length; ++i) {
+            if (users[i] == selItem) {
+                sel += "<option selected value = '" + users[0] + "' >" + users[i] + "</option>";
+            } else {
+                sel += "<option  value = '" + users[0] + "' >" + users[i] + "</option>";
+            }
+        }
+        sel += "</select>";
+        return sel;
+    }
+    $(document).ready(function () {
+        $('#admin_overview_table').DataTable({
+            ajax: "/admin/data",
+            columns: [
+                {data: 'project'},
+                {data: 'name'},
+                {
+                    data: null,
+                    render:
+                        function(data){return createSelect(data);}
+                },
+                {data: 'manual_segmentation.status'},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button class="btn"><i class="fa fa-trash"></i></button>';
+                    }
+                },
+
+            ],
+        });
+    });
+
+</script>
+<table id="admin_overview_table" class="display" style="width:100%">
+    <thead>
+    <tr>
+        <th> Project</th>
+        <th> Data ID</th>
+        <th> Assigned To</th>
+        <th> Status</th>
+        <th> Delete</th>
+    </tr>
+    </thead>
+</table>
+<button>Add Data</button>
 {% endblock %}

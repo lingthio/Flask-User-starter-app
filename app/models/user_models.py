@@ -38,7 +38,11 @@ class User(db.Model, UserMixin):
     segmentations_validated = db.relationship('data_pool_models.ManualSegmentation',
                                               foreign_keys='data_pool_models.ManualSegmentation.validated_by_id',
                                               back_populates='validated_by')
-    
+
+    def as_dict(self):
+        result = {c.name: getattr(self, c.name) for c in User.__table__.columns}
+        return result
+
     def __repr__(self):
         return f'{self.first_name} {self.last_name} (f{self.email})'
 

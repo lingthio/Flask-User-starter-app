@@ -10,9 +10,10 @@ from flask import current_app
 from flask_script import Command
 
 from app import db
-from app.models.data_pool_models import Image, DataPool
+from app.models.data_pool_models import Image, DataPool, ManualSegmentation, StatusEnum, AutomaticSegmentation
 from app.models.project_models import Project
 from app.models.user_models import User, Role
+
 
 class InitDbCommand(Command):
     """ Initialize the database."""
@@ -21,30 +22,42 @@ class InitDbCommand(Command):
         init_db()
         print('Database has been initialized.')
 
+
 def init_db():
     """ Initialize the database."""
     db.drop_all()
     db.create_all()
-    create_users()
+    setup_example_data()
+    projects = db.session.query(Project).all()
+    images = db.session.query(Image).all()
+    segmenations = db.session.query(AutomaticSegmentation).all()
+    print("")
 
 
-def create_users():
-    """ Create users """
-
-    # Create all tables
-    db.create_all()
+def setup_example_data():
+    """ Set up example projects with users, images and segmentations """
 
     # Adding roles
     admin_role = find_or_create_role('admin', u'Admin')
+    segmenter_role = find_or_create_role('segmenter', u'Segmenter')
 
     # Add users
-    user = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)
-    user = find_or_create_user(u'Member', u'Example', u'member@example.com', 'Password1')
+    admin = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)
+    segmenter = find_or_create_user(u'Member', u'Example', u'member@example.com', 'Password1',
+                                    segmenter_role)
 
-    # Add projects
-    create_example_projects()
+    # Create projects
+    for project_index in range(3):
+        project = Project(short_name="proj_" + str(project_index),
+                          name="Project_" + str(project_index), active=True)
+        db.session.add(project)
 
-    # Save to DB
+        # Add Images and segmentations
+        images = [Image(project=project, name="Image_" + str(i)) for i in range(10)]
+        man_segmentations = [ManualSegmentation(project=project, image=image) for image in images]
+        auto_segmentations = [AutomaticSegmentation(project=project, image=image) for image in images]
+        db.session.add_all(images + man_segmentations + auto_segmentations)
+
     db.session.commit()
 
 
@@ -71,16 +84,3 @@ def find_or_create_user(first_name, last_name, email, password, role=None):
         db.session.add(user)
     return user
 
-
-def create_example_projects():
-    """ Add examplary projects with attached data to the project"""
-    # Create projects
-    for i in range(2):
-        project = Project(short_name="proj_" + str(i), name="Project_" + str(i), active=True)
-        db.session.add(project)
-        db.session.commit()
-
-        # Add images
-        for j in range(10):
-            img = Image(project_id=project.id, name="Image_" + str(j))
-            db.session.add(img)

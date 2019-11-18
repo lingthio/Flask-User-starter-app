@@ -5,91 +5,92 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- These 3 meta tags MUST come first -->
 
         <title>Image Segmentation Study Manager</title>
 
         <!-- Bootstrap CSS and JS -->
         <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-            <script src="{{ url_for('static', filename='bootstrap/js/html5shiv.min.js') }}"></script>
-            <script src="{{ url_for('static', filename='bootstrap/js/respond.min.js') }}"></script>
-        <![endif]-->
-
-        <!-- Application specific CSS-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="{{ url_for('static', filename='bootstrap/js/html5shiv.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap/js/respond.min.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
-    </head>
-    <body>
-        {% block body %}
-        <!-- Application specific HTML -->
-        <div id="header-div" class="clearfix with-margins">
-            <ul class="nav nav-tabs">
-                <li role="presentation"><a href="{{ url_for('main.home_page') }}">Home</a></li>
-                <li role="presentation"><a href="#">Review</a></li>
-                <li role="presentation"><a href="#">Evaluate</a></li>
-                <li role="presentation"><a href="#">Label</a></li>
-                <li role="presentation"><a href="#">Admin</a></li>
-                <li role="presentation"><a href="/data_test">Datatables Test</a></li>
-                {% if current_user.is_authenticated %}
-                <li role="presentation" class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                        Profile <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li role="presentation"><a href="{{ url_for('main.user_profile_page') }}">{{ current_user.first_name or current_user.username or current_user.email }}</a></li>
-                        <li role="presentation"><a href="{{ url_for('user.logout') }}">Sign out</a></li>
-                    </ul>
-                </li>
-                {% else %}
-                <li role="presentation"><a href="{{ url_for('user.login') }}">Sign in</a></li>
-                {% endif %}
-            </ul>
-        </div>
-        <hr class="no-margins"/>
 
-        <div id="main-div" class="with-margins">
-        {% block pre_content %}{% endblock %}
-
-        {# One-time system messages called Flash messages #}
-        {% block flash_messages %}
-            {%- with messages = get_flashed_messages(with_categories=true) -%}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        {% if category=='error' %}
-                            {% set category='danger' %}
-                        {% endif %}
-                        <div class="alert alert-{{category}}">{{ message|safe }}</div>
-                    {% endfor %}
-                {% endif %}
-            {%- endwith %}
-        {% endblock %}
-
-        {% block content %}{% endblock %}
-
-        {% block post_content %}{% endblock %}
-        </div>
-
-        <br/>
-        <hr class="no-margins"/>
-        <div id="footer-div" class="clearfix with-margins">
-        </div>
-
-        <!-- Bootstrap JS -->
         <script src="{{ url_for('static', filename='bootstrap/js/jquery.min.js') }}"></script>
         <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 
-        <!-- Optional Google Analytics: change UA-XXXXX-X to be your site's ID.
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-            e.src='https://www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
-        </script>
-        -->
+        <!-- Datatables stuff -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+        <style type="text/css" class="init">
+        </style>
+
+        <<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script type="text/javascript" language="javascript"
+                src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
+    </head>
+
+    <body>
+        {% block body %}
+            <!-- Application specific HTML -->
+            <div id="header-div" class="clearfix with-margins">
+                <ul class="nav nav-tabs">
+                    <li role="presentation"><a href="{{ url_for('main.home_page') }}">Home</a></li>
+                    <li role="presentation"><a href="#">Review</a></li>
+                    <li role="presentation"><a href="#">Evaluate</a></li>
+                    <li role="presentation"><a href="#">Label</a></li>
+                    <li role="presentation"><a href="{{ url_for('bp_admin.admin_page') }}">Admin</a></li>
+                    <li role="presentation"><a href="/data_test">Datatables Test</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li role="presentation" class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                                Profile <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li role="presentation"><a href="{{ url_for('main.user_profile_page') }}">{{ current_user.first_name or current_user.username or current_user.email }}</a></li>
+                                <li role="presentation"><a href="{{ url_for('user.logout') }}">Sign out</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li role="presentation"><a href="{{ url_for('user.login') }}">Sign in</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <hr class="no-margins"/>
+
+            <div class="sidebar">
+                <h1>Projects</h1>
+                {% for project in projects %}
+                    <p>{{ project }}</p>
+                {% endfor %}
+                <button>Add project</button>
+            </div>
+            <div id="main-div" class="content">
+                {% block pre_content %}{% endblock %}
+
+                {# One-time system messages called Flash messages #}
+                {% block flash_messages %}
+                    {%- with messages = get_flashed_messages(with_categories=true) -%}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                {% if category=='error' %}
+                                    {% set category='danger' %}
+                                {% endif %}
+                                <div class="alert alert-{{category}}">{{ message|safe }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {%- endwith %}
+                {% endblock %}
+
+
+                {% block content %}{% endblock %}
+
+                {% block post_content %}{% endblock %}
+            </div>
+
+            <br/>
+            <hr class="no-margins"/>
+            <div id="footer-div" class="clearfix with-margins">
+            </div>
         {% endblock %}
     </body>
 </html>
