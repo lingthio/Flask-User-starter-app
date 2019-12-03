@@ -1,0 +1,9 @@
+<div id="header-div">
+    <ul class="nav nav-tabs">
+
+        <li class="nav-item"><a class="nav-link {%if data.role == 'admin'%}active{%else%} {%endif%}" href="/projects/{{data.active_project.id}}/admin">Admin</a></li>
+        <li class="nav-item"><a class="nav-link {%if data.role == 'review'%}active{%else%} {%endif%}" href="/projects/{{data.active_project.id}}/admin">Review</a></li>
+        <li class="nav-item"><a class="nav-link {%if data.role == 'label'%}active{%else%} {%endif%}" href="/projects/{{data.active_project.id}}/admin">Label</a></li>
+        <li class="nav-item"><a class="nav-link {%if data.role == 'admin'%}active{%else%} {%endif%}" href="/projects/{{data.active_project.id}}/admin">Evaluate</a></li>
+    </ul>
+</div>

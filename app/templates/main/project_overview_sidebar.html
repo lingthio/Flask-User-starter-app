@@ -1,0 +1,15 @@
+<div class="sidebar">
+    <h3 style="margin: 0; display: inline-block;">{{data.active_project.long_name}}</h3>
+    <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="modal"
+            data-target="#exampleModal"><i class="fa fa-gear"></i></button>
+
+    <nav class="nav nav-pills flex-column">
+        {% for project in data.projects %}
+        {% if project == data.active_project %}
+        <a class="nav-link active" href="/projects/{{ project.id }}/">{{project.long_name}}</a>
+        {% else %}
+        <a class="nav-link" href="/projects/{{ project.id }}/">{{project.long_name}}</a>
+        {% endif %}
+        {% endfor %}
+    </nav>
+</div>

@@ -1,10 +1,10 @@
-{% extends "main/main_base.html" %}  {# main/main_base.html extends layout.html #}
+{% extends "layout.html" %}
 
 {% block content %}
 <script type="text/javascript" class="init">
     // Function to create drop down menu for user assignment
     let users = [
-        {% for user in users %}
+        {% for user in data.users %}
             '{{user}}',
         {% endfor %}
     ];
@@ -21,11 +21,24 @@
         sel += "</select>";
         return sel;
     }
+
+    // Save meta data like project id, user id and role
+    let project_id = {{data.active_project.id}};
+    let user_id = {{data.user.id}};
+    let role = '{{data.role}}';
     $(document).ready(function () {
         $('#admin_overview_table').DataTable({
-            ajax: "/admin/data",
+            serverSide: true,
+            ajax: {
+                url: "/project_data",
+                beforeSend: function (request) {
+                    request.setRequestHeader("project_id", project_id);
+                    request.setRequestHeader("user_id", user_id);
+                    request.setRequestHeader("role", role);
+                }
+            },
             columns: [
-                {data: 'project'},
+                {data: 'project_id'},
                 {data: 'name'},
                 {
                     data: null,
@@ -41,6 +54,7 @@
                 },
 
             ],
+            dom: '<"top"f>rt<"bottom"lp><"clear">'
         });
     });
 
@@ -48,7 +62,7 @@
 <table id="admin_overview_table" class="display" style="width:100%">
     <thead>
     <tr>
-        <th> Project</th>
+        <th> Project </th>
         <th> Data ID</th>
         <th> Assigned To</th>
         <th> Status</th>

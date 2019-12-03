@@ -9,7 +9,8 @@ class Project(db.Model):
     __tablename__ = 'projects'
     id = db.Column(db.Integer, primary_key=True)
     short_name = db.Column(db.Unicode(16), nullable=False, server_default=u'', unique=True)
-    name       = db.Column(db.Unicode(255), nullable=False, server_default=u'')
+    long_name       = db.Column(db.Unicode(255), nullable=False, server_default=u'')
+    description = db.Column(db.Unicode(255), nullable=False, server_default=u'')
     active     = db.Column(db.Boolean(), nullable=False, server_default='1')
     insert_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -20,7 +21,8 @@ class Project(db.Model):
                                backref=db.backref('reviewer_for_project', lazy='dynamic'))
     users     = db.relationship('user_models.User', secondary='projects_users',
                                backref=db.backref('user_for_project', lazy='dynamic'))
-    data_pool_objects = db.relationship('data_pool_models.DataPool', back_populates='project')
+    data_pool_objects = db.relationship('data_pool_models.DataPool', back_populates='project', cascade="all, delete-orphan")
+
     def __repr__(self):
         return f'{self.short_name}'
 
@@ -29,18 +31,18 @@ class ProjectsAdmins(db.Model):
     __tablename__ = 'projects_admins'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))
+    project_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))
 
 
-class ProjectsReviwers(db.Model):
+class ProjectsReviewers(db.Model):
     __tablename__ = 'projects_reviewers'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))
+    project_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))
 
 
 class ProjectsUsers(db.Model):
     __tablename__ = 'projects_users'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))
+    project_id = db.Column(db.Integer(), db.ForeignKey('projects.id', ondelete='CASCADE'))

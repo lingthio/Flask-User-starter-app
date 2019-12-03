@@ -28,32 +28,35 @@ def init_db():
     db.drop_all()
     db.create_all()
     setup_example_data()
-    projects = db.session.query(Project).all()
-    images = db.session.query(Image).all()
-    segmenations = db.session.query(AutomaticSegmentation).all()
-    print("")
 
 
-def setup_example_data():
+def setup_example_data(n_projects=10, n_images_per_project=80):
     """ Set up example projects with users, images and segmentations """
 
     # Adding roles
     admin_role = find_or_create_role('admin', u'Admin')
-    segmenter_role = find_or_create_role('segmenter', u'Segmenter')
+    reviewer_role = find_or_create_role('reviewer', u'Segmenter')
+    user_role = find_or_create_role('reviewer', u'Segmenter')
 
     # Add users
-    admin = find_or_create_user(u'Admin', u'Example', u'admin@example.com', 'Password1', admin_role)
-    segmenter = find_or_create_user(u'Member', u'Example', u'member@example.com', 'Password1',
-                                    segmenter_role)
+    admin = find_or_create_user('Hinrich', 'Winther', 'hinrich@hinrich.com', 'hinrich', [admin_role, reviewer_role,
+                                                                                         user_role])
+    reviewer = find_or_create_user('Nils', 'Nommensen', 'nils@nils.com', 'nils', [reviewer_role, user_role])
+    user = find_or_create_user('Tobias', 'Vergessen', 'tobias@tobias.com', 'tobias', [user_role])
 
     # Create projects
-    for project_index in range(3):
+    projects = []
+    for project_index in range(n_projects):
         project = Project(short_name="proj_" + str(project_index),
-                          name="Project_" + str(project_index), active=True)
+                          long_name="Project_" + str(project_index), active=True)
+        project.admins.append(admin)
+        project.reviewers.append(reviewer)
+        project.users.append(user)
+        projects.append(project)
         db.session.add(project)
 
         # Add Images and segmentations
-        images = [Image(project=project, name="Image_" + str(i)) for i in range(10)]
+        images = [Image(project=project, name="Image_" + str(i)) for i in range(n_images_per_project)]
         man_segmentations = [ManualSegmentation(project=project, image=image) for image in images]
         auto_segmentations = [AutomaticSegmentation(project=project, image=image) for image in images]
         db.session.add_all(images + man_segmentations + auto_segmentations)
@@ -70,7 +73,7 @@ def find_or_create_role(name, label):
     return role
 
 
-def find_or_create_user(first_name, last_name, email, password, role=None):
+def find_or_create_user(first_name, last_name, email, password, roles=None):
     """ Find existing user or create new user """
     user = User.query.filter(User.email == email).first()
     if not user:
@@ -79,8 +82,8 @@ def find_or_create_user(first_name, last_name, email, password, role=None):
                     last_name=last_name,
                     password=password,
                     active=True)
-        if role:
-            user.roles.append(role)
+        if roles:
+            user.roles.extend(roles)
         db.session.add(user)
     return user
 

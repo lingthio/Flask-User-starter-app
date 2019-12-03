@@ -30,6 +30,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.Unicode(50), nullable=False, server_default=u'')
 
     # Relationships
+    #projects                = db.relationship('project_models.Project', foreign_keys="project_models.Project.id")
     roles                   = db.relationship('Role', secondary='users_roles',
                                               backref=db.backref('users', lazy='dynamic'))
     segmentations_assigned  = db.relationship('data_pool_models.ManualSegmentation',

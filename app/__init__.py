@@ -51,7 +51,7 @@ def create_app(extra_config_settings={}):
     # Setup WTForms CSRFProtect
     csrf_protect.init_app(app)
 
-    # Register blueprints
+    # Register views
     from .views import register_blueprints
     register_blueprints(app)
 
@@ -68,7 +68,7 @@ def create_app(extra_config_settings={}):
 
     # Setup Flask-User to handle user account related forms
     from .models.user_models import User
-    from .views.main_views import user_profile_page
+    #from .views.main_views import user_profile_page
 
     # Setup Flask-User
     user_manager = UserManager(app, db, User)

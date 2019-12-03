@@ -17,7 +17,7 @@ class StatusEnum(enum.Enum):
 class DataPool(db.Model):
     __tablename__ = 'data_pool'
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False,)
     type = db.Column(db.String(50), nullable=False)
 
     name = db.Column(db.Unicode(255), nullable=False, server_default=u'')
@@ -71,7 +71,7 @@ class Image(DataPool):
             result["manual_segmentation"] = self.manual_segmentation.as_dict()
         if self.automatic_segmentation is not None:
             result["automatic_segmentation"] = self.automatic_segmentation.as_dict()
-        result["project"] = self.project.name
+        result["project"] = self.project.long_name
         return result
 
     __mapper_args__ = {
