@@ -13,6 +13,7 @@ admin_blueprint = Blueprint('bp_admin', __name__, template_folder='templates')
 
 # The Admin page is accessible to users with the 'admin' role
 @admin_blueprint.route('/admin')
+@login_required
 @roles_required('admin')  # Limits access to users with the 'admin' role
 def admin_page():
     projects = db.session.query(Project).all()
@@ -23,17 +24,6 @@ def admin_page():
 
     return render_template('main/admin_page.html', projects=projects, users=users)
 
-
-@admin_blueprint.route("/admin/data")
-def get_data():
-    """
-    Get all entries of the Image table in json format
-    """
-    all_entries = db.session.query(Image).all()
-    data = {
-        "data": [entry.as_dict() for entry in all_entries]
-    }
-    return jsonify(data)
 
 flask_admin.add_view(ModelView(User, db.session))
 flask_admin.add_view(ModelView(Role, db.session))

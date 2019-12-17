@@ -1,14 +1,11 @@
 <!-- Project configuration modal -->
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <script>
         function add_remove_button_functionality() {
             /**
              * Add functionality to user remove buttons
-             *
              */
-            console.log("lol");
             $(document).on('click', '.btn-remove', function (e) {
                 $(this).parent().parent().remove();
             });
@@ -25,7 +22,6 @@
 
                 // Add new user by cloning last entry
                 $(lastEntry.clone()).insertAfter(lastEntry);
-
                 add_remove_button_functionality();
             })
         });
@@ -38,7 +34,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="exampleModalLabel">{{data.active_project.name}} configuration</h2>
+                <h2 class="modal-title" id="exampleModalLabel">{{data.active_project.long_name}} configuration</h2>
             </div>
             <div class="modal-body">
                 <form action="/project_change_submission" method="post" role="form">
@@ -78,7 +74,7 @@
                             </div>
                             <div class="col-auto">
                                 <select class="custom-select" name="roles[]">
-                                    {% for current_role in ["admin", "reviewer", "user"] %}
+                                    {% for current_role in ["admin", "validation", "segmentation"] %}
                                     {% if current_user.role == current_role %}
                                     <option selected>{{current_role}}</option>
                                     {% else %}

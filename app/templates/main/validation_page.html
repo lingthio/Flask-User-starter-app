@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script type="text/javascript" class="init">
+    // Setup ajax call to flask server
+    let csrftoken = "{{ csrf_token() }}";
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken)
+            }
+        }
+    });
+
+
+    // Function to make call to API after row has been updated
+    function sendRowUpdateToServer(rowObject) {
+        $.ajax({
+            type: 'POST',
+            url: '/update_image_meta_data',
+
+            data: JSON.stringify(rowObject),
+            error: function (e) {
+                console.log(e);
+            },
+
+            dataType: "json",
+            contentType: "application/json"
+        });
+    }
+
+    // Save meta data like project id, user id and role
+    let project_id = {{data.active_project.id}};
+    let user_id = {{data.user.id}};
+    let role = '{{data.role}}';
+
+
+    $(document).ready(function () {
+        // Table definition
+        $('#admin_overview_table').DataTable({
+            serverSide: true,
+            ajax: {
+                url: "/project_data",
+                beforeSend: function (request) {
+                    request.setRequestHeader("project_id", project_id);
+                    request.setRequestHeader("user_id", user_id);
+                    request.setRequestHeader("role", role);
+                }
+            },
+            columns: [
+                {data: 'name'},
+                {data: 'manual_segmentation.status'},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-danger dataReviewButton">Review</i></button>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-primary dataEditButton">Options</i></button>';
+                    }
+                },
+
+            ],
+            columnDefs: [{"className": "dt-center", "targets": "_all"}],
+            autoWidth: false
+        });
+
+         // Buttons/checkboxes functionality
+        $('#admin_overview_table').on('draw.dt', function () {
+            //Review dialog
+            $('.dataReviewButton').click(function () {
+                // Retrieve the data belonging to a specific row
+                let table = $('#admin_overview_table').DataTable();
+                let data = table.row($(this).closest('tr')).data();
+                console.log(table.ajax.json());
+
+                // Populate data
+                $('#reviewModalHeaderTitle').html(data["name"]);
+                $('#review-submit-btn').attr("value", data["id"]);
+                $('#reviewModal').modal("show");
+            });
+
+            //Row data dialog
+            $('.dataEditButton').click(function () {
+                // Retrieve the data belonging to a specific row
+                let table = $('#admin_overview_table').DataTable();
+                let data = table.row($(this).closest('tr')).data();
+                console.log(table.ajax.json());
+
+                // Populate data
+                $('#dataModalHeaderTitle').html(data["name"]);
+                $('#segmentation-download-btn').attr("value", data["id"]);
+                $('#segmentation-upload-btn').attr("value", data["id"]);
+                $('#dataModal').modal("show");
+            });
+        });
+
+    });
+
+
+
+</script>
+<table id="admin_overview_table" class="table table-striped table-hover dt-responsive nowrap">
+    <thead>
+    <tr>
+        <th> Data ID</th>
+        <th> Status</th>
+        <th> Review </th>
+        <th> Data </th>
+    </tr>
+    </thead>
+</table>
+
+{% endblock %}

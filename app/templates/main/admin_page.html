@@ -2,31 +2,96 @@
 
 {% block content %}
 <script type="text/javascript" class="init">
-    // Function to create drop down menu for user assignment
-    let users = [
-        {% for user in data.users %}
-            '{{user}}',
-        {% endfor %}
-    ];
-    function createSelect(selItem) {
+    // Setup ajax call to flask server
+    let csrftoken = "{{ csrf_token() }}";
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken)
+            }
+        }
+    });
 
-        var sel = "<select><option>Assign</option>";
-        for (var i = 0; i < users.length; ++i) {
-            if (users[i] == selItem) {
-                sel += "<option selected value = '" + users[0] + "' >" + users[i] + "</option>";
+    // Function to create drop down menu for user assignment
+    function createUserAssignSelect(rowObject) {
+        // Fetch users of current project
+        let table = $('#admin_overview_table').DataTable();
+        let project_users = table.ajax.json()["project_users"];
+
+        // Build select
+        let sel = "<select class='userAssign custom-select'><option value=null>Assign</option>";
+
+        for (let user of project_users) {
+            let user_representation = user["first_name"] + " " + user["last_name"] + " (" + user["email"] + ")";
+            if (user["id"] === rowObject["manual_segmentation"]["assignee_id"]) {
+                sel += "<option selected value = '" + user["id"] + "' >" + user_representation + "</option>";
             } else {
-                sel += "<option  value = '" + users[0] + "' >" + users[i] + "</option>";
+                sel += "<option value = '" + user["id"] + "' >" + user_representation + "</option>";
             }
         }
         sel += "</select>";
         return sel;
     }
 
+    // Function to create drop down menu for split assignment
+    function createSplitAssignSelect(rowObject) {
+        // Fetch users of current project
+        let table = $('#admin_overview_table').DataTable();
+        let options = ["train", "test", "validation"];
+
+        // Build select
+        let sel = "<select class='splitAssign custom-select'><option value=null>Assign</option>";
+
+        for (let option of options) {
+            if (option === rowObject["split"]) {
+                sel += "<option selected >" + option + "</option>";
+            } else {
+                sel += "<option >" + option + "</option>";
+            }
+        }
+        sel += "</select>";
+        return sel;
+    }
+
+    // Function to create checkbox to mark image as valid/invalid
+    function createImageValidCheckbox(rowObject) {
+        // Fetch users of current project
+        let table = $('#admin_overview_table').DataTable();
+
+        // Build html
+        let check = "<input class='form-check-input is_valid_checkbox' type='checkbox'";
+        if (rowObject["is_valid"]){
+             check += 'checked>';
+        } else {
+            check += '>';
+        }
+        return check;
+    }
+
+    // Function to make call to API after row has been updated
+    function sendRowUpdateToServer(rowObject) {
+        $.ajax({
+            type: 'POST',
+            url: '/update_image_meta_data',
+
+            data: JSON.stringify(rowObject),
+            error: function (e) {
+                console.log(e);
+            },
+
+            dataType: "json",
+            contentType: "application/json"
+        });
+    }
+
     // Save meta data like project id, user id and role
     let project_id = {{data.active_project.id}};
     let user_id = {{data.user.id}};
     let role = '{{data.role}}';
+
+
     $(document).ready(function () {
+        // Table definition
         $('#admin_overview_table').DataTable({
             serverSide: true,
             ajax: {
@@ -38,37 +103,133 @@
                 }
             },
             columns: [
-                {data: 'project_id'},
                 {data: 'name'},
                 {
                     data: null,
-                    render:
-                        function(data){return createSelect(data);}
+                    render: function(data){return createUserAssignSelect(data);}
+                },
+                {
+                    data: null,
+                    render: function(data){return createSplitAssignSelect(data);}
                 },
                 {data: 'manual_segmentation.status'},
                 {
                     data: null,
+                    render: function(data){return createImageValidCheckbox(data);}
+                },
+                {
+                    data: null,
                     render: function (data, type, row) {
-                        return '<button class="btn"><i class="fa fa-trash"></i></button>';
+                        return '<button class="btn btn-primary dataEditButton">Options</i></button>';
                     }
                 },
 
             ],
-            dom: '<"top"f>rt<"bottom"lp><"clear">'
+            columnDefs: [{"className": "dt-center", "targets": "_all"}],
+            autoWidth: false
         });
+
+        // Add new data
+        $('#addDataButton').click(function () {
+            // Add project id to submit button so that is transmitted with the form
+            $('#new-data-upload-btn').attr("value", project_id);
+            $('#newDataModal').modal("show");
+        });
+
+        // Make sure that every time an assignment is changed, an update is sent to the server
+        $('#admin_overview_table').on('draw.dt', function () {
+            // User assignment
+            $('.userAssign').change(function () {
+                // Get row object of row this select resides in
+                let table = $('#admin_overview_table').DataTable();
+                let rowObject = table.row($(this).closest('tr')).data();
+
+                // Change assignee and status
+                let value = $(this).val();
+                let text = this.options[this.selectedIndex].text;
+
+                if (value === "null"){
+                    rowObject["manual_segmentation"]["assignee_id"] = null;
+                    rowObject["manual_segmentation"]["assignee_id"] = "na";
+                } else {
+                    rowObject["manual_segmentation"]["assignee_id"] = parseInt(value);
+                    rowObject["manual_segmentation"]["assigned_date"] = new Date(Date.now()).toUTCString();
+                    rowObject["manual_segmentation"]["status"] = "assigned";
+                }
+
+                // Send change to server
+                sendRowUpdateToServer(rowObject);
+
+                // Redraw table
+                table.draw(false);
+            });
+
+            // Split assignment
+            $('.splitAssign').change(function () {
+                // Get row object of row this select resides in
+                let table = $('#admin_overview_table').DataTable();
+                let rowObject = table.row($(this).closest('tr')).data();
+
+                // Change assignee
+                let value = $(this).val();
+                let option = $(this).find('option:selected').text();
+
+                if (value === "null"){
+                    rowObject["split"] = null;
+                } else {
+                    rowObject["split"] = option;
+                }
+
+                // Send change to server
+                sendRowUpdateToServer(rowObject);
+            });
+
+            // Image is valid
+            $('.is_valid_checkbox').change(function () {
+                // Get row object of row this select resides in
+                let table = $('#admin_overview_table').DataTable();
+                let rowObject = table.row($(this).closest('tr')).data();
+
+                // Change data
+                rowObject["is_valid"] = $(this).is(":checked");
+
+                // Send change to server
+                sendRowUpdateToServer(rowObject);
+            });
+
+
+            //Row data dialog
+            $('.dataEditButton').click(function () {
+                // Retrieve the data belonging to a specific row
+                let table = $('#admin_overview_table').DataTable();
+                let data = table.row($(this).closest('tr')).data();
+                console.log(table.ajax.json());
+
+                // Populate data
+                $('#dataModalHeaderTitle').html(data["name"]);
+                $('#segmentation-download-btn').attr("value", data["id"]);
+                $('#segmentation-upload-btn').attr("value", data["id"]);
+                $('#dataModal').modal("show");
+            });
+        });
+
     });
 
+
+
 </script>
-<table id="admin_overview_table" class="display" style="width:100%">
+<table id="admin_overview_table" class="table table-striped table-hover dt-responsive nowrap">
     <thead>
     <tr>
-        <th> Project </th>
         <th> Data ID</th>
         <th> Assigned To</th>
+        <th> Split </th>
         <th> Status</th>
-        <th> Delete</th>
+        <th> Valid Image </th>
+        <th> Data </th>
     </tr>
     </thead>
 </table>
-<button>Add Data</button>
+<button class="btn btn-primary" id="addDataButton">Add Data</button>
+
 {% endblock %}

@@ -5,11 +5,12 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 import datetime
+import os
 
 from flask import current_app
 from flask_script import Command
 
-from app import db
+from app import db, settings
 from app.models.data_pool_models import Image, DataPool, ManualSegmentation, StatusEnum, AutomaticSegmentation
 from app.models.project_models import Project
 from app.models.user_models import User, Role
@@ -35,14 +36,12 @@ def setup_example_data(n_projects=10, n_images_per_project=80):
 
     # Adding roles
     admin_role = find_or_create_role('admin', u'Admin')
-    reviewer_role = find_or_create_role('reviewer', u'Segmenter')
-    user_role = find_or_create_role('reviewer', u'Segmenter')
+    user_role = find_or_create_role('user', u'User')
 
     # Add users
-    admin = find_or_create_user('Hinrich', 'Winther', 'hinrich@hinrich.com', 'hinrich', [admin_role, reviewer_role,
-                                                                                         user_role])
-    reviewer = find_or_create_user('Nils', 'Nommensen', 'nils@nils.com', 'nils', [reviewer_role, user_role])
-    user = find_or_create_user('Tobias', 'Vergessen', 'tobias@tobias.com', 'tobias', [user_role])
+    admin = find_or_create_user('Hinrich', 'Winther', 'hinrich@hinrich.com', 'hinrich', [admin_role, user_role])
+    reviewer = find_or_create_user('Nils', 'Nommensen', 'nils@nils.com', 'nils', [user_role])
+    user = find_or_create_user('Tobias', 'Blaaaa', 'tobias@tobias.com', 'tobias', [user_role])
 
     # Create projects
     projects = []
@@ -56,10 +55,25 @@ def setup_example_data(n_projects=10, n_images_per_project=80):
         db.session.add(project)
 
         # Add Images and segmentations
-        images = [Image(project=project, name="Image_" + str(i)) for i in range(n_images_per_project)]
+        images = [Image(project=project, name="Image_" + str(i) + ".nii.gz") for i in range(n_images_per_project)]
         man_segmentations = [ManualSegmentation(project=project, image=image) for image in images]
         auto_segmentations = [AutomaticSegmentation(project=project, image=image) for image in images]
         db.session.add_all(images + man_segmentations + auto_segmentations)
+
+        # Create fake data
+        for image in images:
+            # Create directories
+            image_directory_path = os.path.join(settings.DATA_PATH, project.short_name, "images")
+            segmentation_directory_path = os.path.join(settings.DATA_PATH, project.short_name, "masks")
+            if not os.path.exists(image_directory_path):
+                os.makedirs(image_directory_path, exist_ok=True)
+            if not os.path.exists(segmentation_directory_path):
+                os.makedirs(segmentation_directory_path, exist_ok=True)
+
+            # Create fake images and segmentations
+            for directory_path in [image_directory_path, segmentation_directory_path]:
+                file_path = os.path.join(directory_path, image.name)
+                open(file_path, 'a').close()
 
     db.session.commit()
 

@@ -1,0 +1,46 @@
+<!-- Data configuration modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModal"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="dataModalHeaderTitle"></h2>
+            </div>
+            <div class="modal-body">
+                <form action="/segmentation_data" method=post enctype=multipart/form-data>
+                    {{ data.project_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="customFile">Upload New Segmentation</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input segmentation-file" id="customFile" name="file">
+                            <label class="custom-file-label" for="customFile">Choose file</label>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" name="work_on_checkbox">
+                        <label class="form-check-label" for="defaultCheck1">
+                            Work on segmentation
+                        </label>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" name="segmentation-upload-btn"
+                                id="segmentation-upload-btn">Upload Segmentation
+                        </button>
+                        <button type="submit" class="btn btn-primary" name="segmentation-download-btn"
+                                id="segmentation-download-btn">Download Segmentation
+                        </button>
+                    </div>
+                </form>
+                <script>
+                    // Add the following code if you want the name of the file appear on select
+                    $(".custom-file-input").on("change", function () {
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

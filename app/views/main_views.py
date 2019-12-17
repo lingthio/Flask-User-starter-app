@@ -3,13 +3,13 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 
-from flask import Blueprint, redirect, render_template, current_app
+from flask import Blueprint, redirect, render_template
 from flask import request, url_for
-from flask_user import current_user, login_required, roles_required
+from flask_user import current_user, login_required
 
 from app import db
-from app.models.project_models import Project, ProjectsUsers
-from app.models.user_models import User, Role, UserProfileForm
+from app.models.project_models import Project
+from app.models.user_models import User, UserProfileForm
 from app.views.forms import ProjectForm
 
 main_blueprint = Blueprint('main', __name__, template_folder='templates')
@@ -29,15 +29,16 @@ def default_path():
         return redirect("projects/{}/admin".format(project.id))
     project = current_user.reviewer_for_project.first()
     if project is not None:
-        return redirect("projects/{}/reviewer".format(project.id))
+        return redirect("projects/{}/validation".format(project.id))
     project = current_user.user_for_project.first()
     if project is not None:
-        return redirect("projects/{}/user".format(project.id))
+        return redirect("projects/{}/segmentation".format(project.id))
     else:
         return "You are not part of a project yet"  # ToDo
 
 
 @main_blueprint.route('/projects/<int:project_id>/')
+@login_required
 def project_page(project_id):
     """
     In case a user acceses a project page without specifying the role, he is redirected
@@ -47,15 +48,16 @@ def project_page(project_id):
     project = db.session.query(Project).filter(Project.id == project_id).first()
     user = db.session.query(User).filter(User.id == current_user.id).first()
     if user in project.users:
-        return redirect("/projects/{}/user".format(project.id))
+        return redirect("/projects/{}/segmentation".format(project.id))
     if user in project.reviewers:
-        return redirect("/projects/{}/reviewer".format(project.id))
+        return redirect("/projects/{}/validation".format(project.id))
     if user in project.admins:
         return redirect("/projects/{}/admin".format(project.id))
     print("")
 
 
 @main_blueprint.route('/projects/<int:project_id>/<string:role>')
+@login_required
 def project_role_page(project_id, role):
     """
     A project can be accessed in three different roles: as admin, reviewer and user. This function
@@ -64,14 +66,14 @@ def project_role_page(project_id, role):
     """
     # Find all Projects the current user is a part of
     u = current_user
-    projects = u.admin_for_project.all() + u.reviewer_for_project.all() + u.user_for_project.all()
+    projects = list(set(u.admin_for_project.all() + u.reviewer_for_project.all() + u.user_for_project.all()))
     active_project = db.session.query(Project).filter(Project.id == project_id).first()
 
     # Find all users that are part of this project and add their role in the current project to the object
     for user in active_project.users:
-        user.role = "user"
+        user.role = "segmentation"
     for user in active_project.reviewers:
-        user.role = "reviewer"
+        user.role = "validation"
     for user in active_project.admins:
         user.role = "admin"
     project_users = active_project.users + active_project.reviewers + active_project.admins
@@ -83,10 +85,14 @@ def project_role_page(project_id, role):
     project_form = ProjectForm()
 
     # Build data object that contains all information for flask to use when building the page
-    data = dict(projects=projects, project_users=project_users, active_project=active_project, user=current_user, role=role,
-                project_form=project_form, all_users=all_users)
+    data = dict(projects=projects, project_users=project_users, active_project=active_project, user=current_user,
+                role=role, project_form=project_form, all_users=all_users)
     if role == "admin":
         return render_template('main/admin_page.html', data=data)
+    elif role == "segmentation":
+        return render_template('main/segmentation_page.html', data=data)
+    elif role == "validation":
+        return render_template('main/validation_page.html', data=data)
 
 
 # The User page is accessible to authenticated users (users that have logged in)
