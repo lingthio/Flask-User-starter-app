@@ -3,9 +3,10 @@
 # Authors: Ling Thio <ling.thio@gmail.com>
 
 
-from flask import Blueprint, redirect, render_template
+from flask import Blueprint, redirect, render_template, flash
 from flask import request, url_for
 from flask_user import current_user, login_required
+from werkzeug.local import LocalProxy
 
 from app import db
 from app.models.project_models import Project
@@ -15,34 +16,22 @@ from app.views.forms import ProjectForm
 main_blueprint = Blueprint('main', __name__, template_folder='templates')
 
 
-@main_blueprint.route('/')
+@main_blueprint.route('/projects/overview')
 @login_required
-def default_path():
+def get_projects_overview_page():
     """
-    In case a user acceses the root page, he is redirected to the page of the first
-    project in the database he is a part of with the tab chosen according to his
-    role.
+    Return the projects overview page that contains all projects the current user is part of
     """
-    # Try to find a project and the role of the user in this project
-    project = current_user.admin_for_project.first()
-    if project is not None:
-        return redirect("projects/{}/admin".format(project.id))
-    project = current_user.reviewer_for_project.first()
-    if project is not None:
-        return redirect("projects/{}/validation".format(project.id))
-    project = current_user.user_for_project.first()
-    if project is not None:
-        return redirect("projects/{}/segmentation".format(project.id))
-    else:
-        return "You are not part of a project yet"  # ToDo
+    # Find the role of this user in the project
+    return render_template("main/projects_overview.html")
 
 
-@main_blueprint.route('/projects/<int:project_id>/')
+@main_blueprint.route('/projects/<int:project_id>')
 @login_required
-def project_page(project_id):
+def project_redirect(project_id):
     """
-    In case a user acceses a project page without specifying the role, he is redirected
-    to the corresponding page according to his role in this project
+    This function is used to redirect the user to the correct page, i.e. as admin, reviewer or user, depending
+    on his role in the current project
     """
     # Find the role of this user in the project
     project = db.session.query(Project).filter(Project.id == project_id).first()
@@ -50,10 +39,9 @@ def project_page(project_id):
     if user in project.users:
         return redirect("/projects/{}/segmentation".format(project.id))
     if user in project.reviewers:
-        return redirect("/projects/{}/validation".format(project.id))
+        return redirect("/projects/{}/review".format(project.id))
     if user in project.admins:
         return redirect("/projects/{}/admin".format(project.id))
-    print("")
 
 
 @main_blueprint.route('/projects/<int:project_id>/<string:role>')
@@ -64,35 +52,21 @@ def project_role_page(project_id, role):
     checks that the user is authorised to access the chosen project in this role and returns the according
     page, if allowed.
     """
-    # Find all Projects the current user is a part of
-    u = current_user
-    projects = list(set(u.admin_for_project.all() + u.reviewer_for_project.all() + u.user_for_project.all()))
-    active_project = db.session.query(Project).filter(Project.id == project_id).first()
-
-    # Find all users that are part of this project and add their role in the current project to the object
-    for user in active_project.users:
-        user.role = "segmentation"
-    for user in active_project.reviewers:
-        user.role = "validation"
-    for user in active_project.admins:
-        user.role = "admin"
-    project_users = active_project.users + active_project.reviewers + active_project.admins
-
-    # Find all users that are not part of this project
-    all_users = db.session.query(User).all()
+    # Find the current project
+    current_project = db.session.query(Project).filter(Project.id == project_id).first()
 
     # Data for various forms
     project_form = ProjectForm()
 
     # Build data object that contains all information for flask to use when building the page
-    data = dict(projects=projects, project_users=project_users, active_project=active_project, user=current_user,
-                role=role, project_form=project_form, all_users=all_users)
+    data = dict(current_project=current_project, user=current_user,
+                role=role, project_form=project_form)
     if role == "admin":
         return render_template('main/admin_page.html', data=data)
     elif role == "segmentation":
         return render_template('main/segmentation_page.html', data=data)
-    elif role == "validation":
-        return render_template('main/validation_page.html', data=data)
+    elif role == "review":
+        return render_template('main/review_page.html', data=data)
 
 
 # The User page is accessible to authenticated users (users that have logged in)

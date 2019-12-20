@@ -2,16 +2,6 @@
 
 {% block content %}
 <script type="text/javascript" class="init">
-    // Setup ajax call to flask server
-    let csrftoken = "{{ csrf_token() }}";
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken)
-            }
-        }
-    });
-
 
     // Function to make call to API after row has been updated
     function sendRowUpdateToServer(rowObject) {
@@ -30,7 +20,7 @@
     }
 
     // Save meta data like project id, user id and role
-    let project_id = {{data.active_project.id}};
+    let project_id = {{data.current_project.id}};
     let user_id = {{data.user.id}};
     let role = '{{data.role}}';
 

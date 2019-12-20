@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script type="module" class="init">
+    // Cookie helper functions
+    function setCookie(name, value) {
+        document.cookie = name + "=" + escape(value) + ";";
+    }
+
+    function getCookie(name) {
+        let chunks = document.cookie.split(";");
+        for (let i = chunks.length; i--;) {
+            if (chunks[i].trim().split("=")[0].trim() === name) {
+                return chunks[i].trim().split("=")[1].trim();
+            }
+        }
+        return null;
+    }
+
+    $(document).ready(function () {
+        // Table definition
+        $('#projects_overview_table').DataTable({
+            ajax: {
+                url: "/data/projects",
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data) {
+                        return '<button class="btn btn-primary chooseProjectButton">Choose</button>';
+                    }
+                },
+                {data: 'short_name'},
+                {data: 'long_name'},
+                {data: null},
+
+            ],
+            columnDefs: [{"className": "dt-center", "targets": "_all"}],
+            autoWidth: false
+        });
+
+        // Handle interactions with the table and its elements
+        $('#projects_overview_table').on('draw.dt', function () {
+            // Choose button
+            $('.chooseProjectButton').click(function () {
+                // Get project object of this row
+                let table = $('#projects_overview_table').DataTable();
+                let row = $(this).closest('tr');
+                let rowObject = table.row(row).data();
+
+                // Find project id and redirect to correct page
+                let projectID = rowObject['id'];
+                window.location.replace("/projects/" + projectID)
+            });
+        });
+    });
+
+</script>
+<div>
+    <h1>Project Overview</h1>
+    <table id="projects_overview_table" class="table table-striped table-hover dt-responsive nowrap">
+        <thead>
+        <tr>
+            <th> Project</th>
+            <th> Short Name</th>
+            <th> Long Name</th>
+            <th> Edit</th>
+        </tr>
+        </thead>
+    </table>
+    <button class="btn btn-primary" id="addProjectButton">Add Project</button>
+</div>
+
+
+{% endblock %}

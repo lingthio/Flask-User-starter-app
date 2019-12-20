@@ -26,6 +26,10 @@ class Project(db.Model):
     def __repr__(self):
         return f'{self.short_name}'
 
+    def as_dict(self):
+        result = {c.name: getattr(self, c.name) for c in Project.__table__.columns}
+        return result
+
 
 class ProjectsAdmins(db.Model):
     __tablename__ = 'projects_admins'

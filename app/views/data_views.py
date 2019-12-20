@@ -20,6 +20,26 @@ from app.models.user_models import User
 data_blueprint = Blueprint('bp_data', __name__, template_folder='templates')
 
 
+@data_blueprint.route("/data/projects")
+@login_required
+def get_project_overview():
+    """
+    Return all project objects the current user is part of or all projects if the user is admin
+    """
+    # If the user is admin, return all projects
+    roles = current_user.roles
+    if any(r.name == "admin" for r in roles):
+        projects = db.session.query(Project).all()
+
+    # Else only those he is part of
+    else:
+        projects = current_user.admin_for_project.all() + current_user.reviewer_for_project.all() + \
+                   current_user.user_for_project.all()
+    projects = [p.as_dict() for p in projects]
+    result = jsonify(dict(data=projects))
+    return result
+
+
 @data_blueprint.route("/project_data")
 @login_required
 def get_data():
@@ -275,3 +295,5 @@ def new_data():
 
     db.session.commit()
     return redirect(request.referrer)
+
+

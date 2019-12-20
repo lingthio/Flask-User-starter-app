@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>
 
     <!-- CSS libraries -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
@@ -24,19 +25,25 @@
     <!-- Own JS/CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
+<script>
+    // Setup ajax call to flask server
+    let csrftoken = "{{ csrf_token() }}";
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken)
+            }
+        }
+    });
+</script>
 
 <body>
 {% block body %}
-    {% include 'main/project_overview_sidebar.html' %}
-    <div id="main-div" class="content">
-        {% include 'main/navigation_bar.html' %}
-        {% include 'main/flash_messages.html' %}
-        {% block content %}{% endblock %}
-    </div>
-    {% include 'main/project_configuration_form.html' %}
-    {% include 'main/data_form.html' %}
-    {% include 'main/review_form.html' %}
-    {% include 'main/new_data_form.html' %}
+<div id="main-div" class="content">
+    {% include 'main/navigation_bar.html' %}
+    {% include 'main/flash_messages.html' %}
+    {% block content %}{% endblock %}
+</div>
 {% endblock %}
 
 
