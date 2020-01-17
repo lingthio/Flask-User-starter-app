@@ -21,12 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
 
-
-    <!-- Own JS/CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <script>
-    // Setup ajax call to flask server
+    // Setup ajax calls to flask server
     let csrftoken = "{{ csrf_token() }}";
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
@@ -40,10 +37,12 @@
 <body>
 {% block body %}
 <div id="main-div" class="content">
-    {% include 'main/navigation_bar.html' %}
-    {% include 'main/flash_messages.html' %}
+    {% include 'navigation_bar.html' %}
+    {% include 'flash_messages.html' %}
     {% block content %}{% endblock %}
 </div>
+
+{% block forms %}{% endblock %}
 {% endblock %}
 
 

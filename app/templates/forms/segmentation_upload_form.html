@@ -1,0 +1,81 @@
+<script>
+    function showSegmentationUploadModal(imageObj) {
+        // Row data dialog
+        $('#segmentationUploadButton').click(function (e) {
+            let form = document.querySelector('#segmentationUploadForm');
+            let formData = new FormData(form);
+
+            let image_name = imageObj["image_name"];
+            let project_id = imageObj["project_id"];
+
+            $.ajax({
+                url: '/data/upload_segmentation_data',
+                type: 'POST',
+                data: formData,
+                beforeSend: function(xhr){
+                    xhr.setRequestHeader('image_name', image_name);
+                    xhr.setRequestHeader('project_id', project_id);
+                },
+                contentType: false,
+                processData: false,
+                success: function() {
+                    // Change status
+                    console.log("blaaaa");
+                    imageObj["manual_segmentation"]["status"] = "submitted";
+                    sendRowUpdateToServer(imageObj);
+                    location.reload();
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    location.reload();
+                }
+            });
+
+            e.preventDefault();
+        });
+
+        // Show modal
+        $('#segmentationUploadModal').modal('show');
+    }
+</script>
+
+<div class="modal fade" id="segmentationUploadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <!-- Content body -->
+        <div class="modal-content">
+
+            <!-- Title -->
+            <div class="modal-header">
+                <h2 class="modal-title">Update Segmentation</h2>
+            </div>
+
+            <div class="modal-body">
+                <form action="/new_data" method=post enctype=multipart/form-data id="segmentationUploadForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Input element -->
+                    <div class="form-group">
+                        <label for="image">Upload New Segmentation</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input image-file" id="segmentation" name="segmentation">
+                            <label class="custom-file-label" for="segmentation">Choose file</label>
+                        </div>
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="segmentationUploadButton">Upload</button>
+                    </div>
+                </form>
+
+                <!-- Make file name appear on select -->
+                <script>
+
+                    $(".custom-file-input").on("change", function () {
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

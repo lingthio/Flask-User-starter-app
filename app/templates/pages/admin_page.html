@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
+{% include 'js_util.html' %}
 <script type="text/javascript" class="init">
 
     // Function to create drop down menu for user assignment
@@ -9,8 +10,17 @@
         let table = $('#admin_overview_table').DataTable();
         let project_users = table.ajax.json()["project_users"];
 
-        // Build select
-        let sel = "<select class='userAssign custom-select'><option value=null>Assign</option>";
+        let sel = "<select class='userAssign custom-select'>";
+        if (rowObject["manual_segmentation"]["assignee_id"] != null){
+            sel += "<option>Not Assigned</option>";
+        } else {
+            sel += "<option selected>Not Assigned</option>";
+        }
+        if (rowObject["manual_segmentation"]["status"] === "open_for_segmentation"){
+            sel += "<option selected>Open for Segmentation</option>";
+        } else {
+            sel += "<option>Open for Segmentation</option>";
+        }
 
         for (let user of project_users) {
             let user_representation = user["first_name"] + " " + user["last_name"] + " (" + user["email"] + ")";
@@ -44,36 +54,6 @@
         return sel;
     }
 
-    // Function to create checkbox to mark image as valid/invalid
-    function createImageValidCheckbox(rowObject) {
-        // Fetch users of current project
-        let table = $('#admin_overview_table').DataTable();
-
-        // Build html
-        let check = "<input class='form-check-input is_valid_checkbox' type='checkbox'";
-        if (rowObject["is_valid"]){
-             check += 'checked>';
-        } else {
-            check += '>';
-        }
-        return check;
-    }
-
-    // Function to make call to API after row has been updated
-    function sendRowUpdateToServer(rowObject) {
-        $.ajax({
-            type: 'POST',
-            url: '/update_image_meta_data',
-
-            data: JSON.stringify(rowObject),
-            error: function (e) {
-                console.log(e);
-            },
-
-            dataType: "json",
-            contentType: "application/json"
-        });
-    }
 
     // Save meta data like project id, user id and role
     let project_id = {{data.current_project.id}};
@@ -86,15 +66,22 @@
         $('#admin_overview_table').DataTable({
             serverSide: true,
             ajax: {
-                url: "/project_data",
+                url: "/data/projects_data",
                 beforeSend: function (request) {
                     request.setRequestHeader("project_id", project_id);
                     request.setRequestHeader("user_id", user_id);
                     request.setRequestHeader("role", role);
+                },
+                data: function ( args ) {
+                    return { "args": JSON.stringify( args ) };
                 }
+
             },
             columns: [
-                {data: 'name'},
+                {
+                    name: 'name',
+                    data: 'name'
+                },
                 {
                     data: null,
                     render: function(data){return createUserAssignSelect(data);}
@@ -103,15 +90,16 @@
                     data: null,
                     render: function(data){return createSplitAssignSelect(data);}
                 },
-                {data: 'manual_segmentation.status'},
                 {
+                    name: 'status',
                     data: null,
-                    render: function(data){return createImageValidCheckbox(data);}
+                    render: function(data){return createStatusLabel(data);}
                 },
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return '<button class="btn btn-primary dataEditButton">Options</i></button>';
+                        return '<button class="btn btn-primary segmentationUploadButton">Upload</button> ' +
+                            '<button style="margin-left: 30px" class="btn btn-primary dataDownloadButton">Download</button>';
                     }
                 },
 
@@ -121,11 +109,13 @@
         });
 
         // Add new data
-        $('#addDataButton').click(function () {
-            // Add project id to submit button so that is transmitted with the form
-            $('#new-data-upload-btn').attr("value", project_id);
-            $('#newDataModal').modal("show");
+        $('#imageUploadModalButton').click(function () {
+            let table = $('#admin_overview_table').DataTable();
+            let projectObj = table.ajax.json()["project"];
+            showImageUploadModal(projectObj);
         });
+
+
 
         // Make sure that every time an assignment is changed, an update is sent to the server
         $('#admin_overview_table').on('draw.dt', function () {
@@ -139,19 +129,19 @@
                 let value = $(this).val();
                 let text = this.options[this.selectedIndex].text;
 
-                if (value === "null"){
+                if (text === "Not Assigned"){
                     rowObject["manual_segmentation"]["assignee_id"] = null;
-                    rowObject["manual_segmentation"]["assignee_id"] = "na";
+                    rowObject["manual_segmentation"]["status"] = "not_open";
+                } else if (text === "Open for Segmentation") {
+                    rowObject["manual_segmentation"]["assignee_id"] = null;
+                    rowObject["manual_segmentation"]["status"] = "open_for_segmentation";
                 } else {
                     rowObject["manual_segmentation"]["assignee_id"] = parseInt(value);
                     rowObject["manual_segmentation"]["assigned_date"] = new Date(Date.now()).toUTCString();
                     rowObject["manual_segmentation"]["status"] = "assigned";
                 }
 
-                // Send change to server
                 sendRowUpdateToServer(rowObject);
-
-                // Redraw table
                 table.draw(false);
             });
 
@@ -175,52 +165,40 @@
                 sendRowUpdateToServer(rowObject);
             });
 
-            // Image is valid
-            $('.is_valid_checkbox').change(function () {
-                // Get row object of row this select resides in
+            // Upload new segmentations
+            $('.segmentationUploadButton').click(function () {
+                let table = $('#admin_overview_table').DataTable();
+                let rowObject = table.row($(this).closest('tr')).data();
+                showSegmentationUploadModal(rowObject);
+            });
+
+            // Download data
+            $('.dataDownloadButton').click(function () {
                 let table = $('#admin_overview_table').DataTable();
                 let rowObject = table.row($(this).closest('tr')).data();
 
-                // Change data
-                rowObject["is_valid"] = $(this).is(":checked");
-
-                // Send change to server
-                sendRowUpdateToServer(rowObject);
-            });
-
-
-            //Row data dialog
-            $('.dataEditButton').click(function () {
-                // Retrieve the data belonging to a specific row
-                let table = $('#admin_overview_table').DataTable();
-                let data = table.row($(this).closest('tr')).data();
-                console.log(table.ajax.json());
-
-                // Populate data
-                $('#dataModalHeaderTitle').html(data["name"]);
-                $('#segmentation-download-btn').attr("value", data["id"]);
-                $('#segmentation-upload-btn').attr("value", data["id"]);
-                $('#dataModal').modal("show");
+                showDownloadModal(rowObject);
             });
         });
-
     });
-
-
-
 </script>
 <table id="admin_overview_table" class="table table-striped table-hover dt-responsive nowrap">
     <thead>
     <tr>
         <th> Data ID</th>
-        <th> Assigned To</th>
+        <th> Assign</th>
         <th> Split </th>
         <th> Status</th>
-        <th> Valid Image </th>
         <th> Data </th>
     </tr>
     </thead>
 </table>
-<button class="btn btn-primary" id="addDataButton">Add Data</button>
 
+<button class="btn btn-primary" id="imageUploadModalButton">Upload Image</button>
+{% endblock %}
+
+{% block forms %}
+{% include 'forms/image_upload_form.html' %}
+{% include 'forms/segmentation_upload_form.html' %}
+{% include 'forms/download_form.html' %}
 {% endblock %}

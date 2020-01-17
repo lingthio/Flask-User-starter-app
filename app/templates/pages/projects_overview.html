@@ -1,38 +1,27 @@
 {% extends "layout.html" %}
-
 {% block content %}
 <script type="module" class="init">
-    // Cookie helper functions
-    function setCookie(name, value) {
-        document.cookie = name + "=" + escape(value) + ";";
-    }
-
-    function getCookie(name) {
-        let chunks = document.cookie.split(";");
-        for (let i = chunks.length; i--;) {
-            if (chunks[i].trim().split("=")[0].trim() === name) {
-                return chunks[i].trim().split("=")[1].trim();
-            }
-        }
-        return null;
-    }
-
     $(document).ready(function () {
         // Table definition
         $('#projects_overview_table').DataTable({
             ajax: {
-                url: "/data/projects",
+                url: "/data/projects_overview",
             },
             columns: [
                 {
                     data: null,
                     render: function (data) {
-                        return '<button class="btn btn-primary chooseProjectButton">Choose</button>';
+                        return '<button class="btn btn-success chooseProjectButton">Choose</button>';
                     }
                 },
                 {data: 'short_name'},
                 {data: 'long_name'},
-                {data: null},
+                {
+                    data: null,
+                    render: function (data) {
+                        return '<button class="btn btn-primary editProjectButton">Edit</button>';
+                    }
+                },
 
             ],
             columnDefs: [{"className": "dt-center", "targets": "_all"}],
@@ -52,6 +41,24 @@
                 let projectID = rowObject['id'];
                 window.location.replace("/projects/" + projectID)
             });
+
+            // Edit button
+            $('.editProjectButton').click(function () {
+                // Get project object of this row
+                let table = $('#projects_overview_table').DataTable();
+                let row = $(this).closest('tr');
+                let projectObject = table.row(row).data();
+                let allUsers = table.ajax.json()["users"];
+
+                show_project_modal(projectObject, allUsers);
+            });
+
+            // New project
+            $('#addProjectButton').click(function () {
+                let table = $('#projects_overview_table').DataTable();
+                let allUsers = table.ajax.json()["users"];
+                show_project_modal(null, allUsers)
+            });
         });
     });
 
@@ -70,6 +77,8 @@
     </table>
     <button class="btn btn-primary" id="addProjectButton">Add Project</button>
 </div>
+{% endblock %}
 
-
+{% block forms %}
+{% include 'forms/project_configuration_form.html' %}
 {% endblock %}

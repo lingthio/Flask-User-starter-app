@@ -1,22 +1,21 @@
 import json
 import json
 import os
-from datetime import datetime
 
-from dateutil.parser import parse as parse_date_string
 from flask import jsonify, request, redirect
 from flask_user import login_required, current_user
-from sqlalchemy import DateTime, Date, or_, asc, desc
+from sqlalchemy import or_, asc, desc
 
+from app import app
 from app import db, local_settings
 from app.models.data_pool_models import Image, ManualSegmentation
 from app.models.project_models import Project
 from app.models.user_models import User
 
 
-@data_blueprint.route("/data/projects")
+@app.route("/data/projects_overview")
 @login_required
-def get_project_overview():
+def project_overview():
     """
     Return all project objects the current user is part of or all projects if the user is admin
     """
@@ -41,11 +40,11 @@ def get_project_overview():
     return result
 
 
-@data_blueprint.route("/project_data")
+@app.route("/data/projects_data")
 @login_required
-def get_data():
+def projects_data():
     """
-    Get all entries of the data tables according to the project, role and user id specified in request headers
+    Get all entries of the DataPool tables according to the project, role and user id specified in request headers
     """
     # Extract meta info from request headers
     project_id = int(request.headers.get("project_id"))
@@ -64,9 +63,8 @@ def get_data():
     if role == "segmentation":
         # Find assigned and open cases
         filter_query = filter_query.filter(
-            Image.is_valid == True).filter(
             or_(ManualSegmentation.assignee_id == user_id,
-                ManualSegmentation.status.in_(["na", "submitted", "remitted"])))
+                ManualSegmentation.status.in_(["open_for_segmentation", "submitted", "rejected"])))
     if role == "validation":
         # Find submitted cases
         filter_query = filter_query.filter(
@@ -94,8 +92,9 @@ def get_data():
     records_total = query.count()
     records_filtered = filter_query.count()
 
-    # Also attach the users of the project
-    project_users = db.session.query(Project).filter(Project.id == project_id).first().users
+    # Also attach the project and its users of the project
+    project = db.session.query(Project).filter(Project.id == project_id).first()
+    project_users = project.users
     project_users = [user.as_dict() for user in project_users]
 
     data = {
@@ -103,17 +102,18 @@ def get_data():
         "recordsTotal": records_total,
         "recordsFiltered": records_filtered,
         "project_users": project_users,
+        "project": project.as_dict(),
         "data": [entry.as_dict() for entry in records],
     }
 
     return jsonify(data)
 
 
-@data_blueprint.route("/project_change_submission", methods=['POST'])
+@app.route("/data/update_projects_metadata", methods=['POST'])
 @login_required
-def change_project():
+def update_projects_metadata():
     """
-    View for the project settings dialog that handles form submissions
+    Update the projets meta data like names, description and users
     """
     # Find the project ID by looking at the submit button
     form = request.form
@@ -161,40 +161,3 @@ def change_project():
     os.makedirs(mask_directory, exist_ok=True)
 
     return redirect(request.referrer)
-
-
-@data_blueprint.route("/update_image_meta_data", methods=['POST'])
-@login_required
-def update_image_meta_data():
-    """
-    View for handling changes to datapool objects (assignments etc.)
-    """
-    image_object = request.json
-    segmentation_object = image_object["manual_segmentation"]
-
-    # Find the image and segmentation object
-    image = db.session.query(Image).filter(Image.id == image_object["id"]).first()
-    manual_segmentation = image.manual_segmentation
-
-    # Update values for image
-    for column in Image.__table__.columns:
-        column_name = column.name
-        value = image_object[column_name]
-        if value is None:
-            continue
-        if value is not None and type(column.type) == DateTime or type(column.type) == Date:
-            value = datetime.strptime(image_object[column_name], '%a, %d %b %Y %H:%M:%S %Z')
-        setattr(image, column_name, value)
-
-    # Update values for image
-    for column in ManualSegmentation.__table__.columns:
-        column_name = column.name
-        value = segmentation_object[column_name]
-        if value is not None and type(column.type) == DateTime or type(column.type) == Date:
-            value = parse_date_string(value)
-
-        setattr(manual_segmentation, column_name, value)
-
-    db.session.commit()
-
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}

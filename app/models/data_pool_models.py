@@ -7,10 +7,11 @@ from app import db
 
 
 class StatusEnum(enum.Enum):
-    na = 'na'
+    not_open = 'not_open'
+    open_for_segmentation = 'open_for_segmentation'
     assigned = 'assigned'
     submitted = 'submitted'
-    remitted = 'remitted'
+    rejected = 'rejected'
     valid = 'valid'
 
 
@@ -20,13 +21,31 @@ class SplitEnum(enum.Enum):
     test = "test"
 
 
+class Message(db.Model):
+    __tablename__ = 'message'
+    id = db.Column(db.Integer, primary_key=True)
+    manual_segmentation_id = db.Column(db.Integer, db.ForeignKey('data_pool_manual_segmentations.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    message = db.Column(db.String(500))
+
+    user = db.relationship('user_models.User', foreign_keys=user_id)
+    manual_segmentation = db.relationship('ManualSegmentation', foreign_keys=manual_segmentation_id, uselist=False)
+
+    def as_dict(self):
+        return dict(
+            user=self.user.as_dict(),
+            date=self.date,
+            message=self.message
+        )
+
+
 class DataPool(db.Model):
     __tablename__ = 'data_pool'
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False, )
     type = db.Column(db.String(50), nullable=False)
 
-    name = db.Column(db.Unicode(255), nullable=False, server_default=u'')
     insert_date = db.Column(db.DateTime, nullable=False, default=datetime.now)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -43,6 +62,7 @@ class DataPool(db.Model):
 class Image(DataPool):
     __tablename__ = 'data_pool_images'
     id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
+    name = db.Column(db.Unicode(255), nullable=False, server_default=u'', unique=True)
 
     institution = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     accession_number = db.Column(db.Unicode(255), nullable=True, server_default=u'')
@@ -55,7 +75,6 @@ class Image(DataPool):
     patient_id = db.Column(db.Unicode(255), nullable=True, server_default=u'')
     patient_dob = db.Column(db.Date, nullable=True, default=datetime.now)
     split = db.Column(Enum(SplitEnum), nullable=True)
-    is_valid = db.Column(db.Boolean, nullable=False, default=False)
     # contrast_type      = na, nat, art, ven, mixed
     # body_region        =
     # modality           = # ct, mr, xr ...
@@ -95,7 +114,7 @@ class ManualSegmentation(DataPool):
     image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'),
                          nullable=False, unique=True)
 
-    status = db.Column(Enum(StatusEnum), nullable=False, default="na")
+    status = db.Column(Enum(StatusEnum), nullable=False, default="not_open")
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     assigned_date = db.Column(db.DateTime, nullable=True)
     validated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
@@ -108,6 +127,7 @@ class ManualSegmentation(DataPool):
                                back_populates='segmentations_assigned')
     validated_by = db.relationship('user_models.User', foreign_keys=[validated_by_id],
                                    back_populates='segmentations_validated')
+    messages = db.relationship('Message', foreign_keys=[Message.manual_segmentation_id])
 
     def as_dict(self):
         result = {c.name: getattr(self, c.name) for c in
@@ -119,6 +139,7 @@ class ManualSegmentation(DataPool):
             result["validated_by"] = self.validated_by.as_dict()
         if self.status is not None:
             result["status"] = self.status.value
+        result["messages"] = [m.as_dict() for m in self.messages]
         return result
 
     __mapper_args__ = {

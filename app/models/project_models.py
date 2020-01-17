@@ -27,7 +27,14 @@ class Project(db.Model):
         return f'{self.short_name}'
 
     def as_dict(self):
+        # Project meta data
         result = {c.name: getattr(self, c.name) for c in Project.__table__.columns}
+
+        # Users
+        result["users"] = []
+        result["users"].extend((u.as_dict(), "admin") for u in self.admins)
+        result["users"].extend((u.as_dict(), "review") for u in self.reviewers)
+        result["users"].extend((u.as_dict(), "segmentation") for u in self.users)
         return result
 
 

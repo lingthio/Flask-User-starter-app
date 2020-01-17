@@ -1,0 +1,186 @@
+<!-- Project configuration modal -->
+<script>
+    function show_project_modal(projectObj, allUsers) {
+        // Clear existing users
+        $('#projectUsersContainer').empty();
+
+        // If projectObj is null, a new project needs to be created
+        if (projectObj == null) {
+            $('#project_form_title').html("New Project");
+            $('#project_form_shortname').val("");
+            $('#project_form_longname').val("");
+            $('#project_form_description').html("");
+        } else {
+            // Populate project data
+            $('#project_form_title').html(projectObj["long_name"] + " configuration");
+            $('#project_form_shortname').val(projectObj["short_name"]);
+            $('#project_form_longname').val(projectObj["long_name"]);
+            $('#project_form_description').html(projectObj["description"]);
+
+
+            // Add project users
+            for (let userObj of projectObj["users"]) {
+                let email = userObj[0]["email"];
+                let role = userObj[1];
+                addUser(email, role);
+            }
+
+            // Find all users that are NOT part of the project
+            allUsers = allUsers.filter(user => projectObj["users"].find(prjUser => user["id"] === prjUser[0]["id"]) === undefined);
+        }
+
+        // Add options to add new users
+        let userSelect = $("#newUserSelect");
+        $(userSelect).empty();
+        for (let userObj of allUsers) {
+            $(userSelect).append($('<option>', {
+                text: userObj["email"]
+            }));
+        }
+
+        // Add the project id (if not new project) to the submit button so that server is able to assign correctly
+        if (projectObj == null) {
+            $("#submitBtn").val(null)
+        } else {
+            $("#submitBtn").val(projectObj["id"])
+        }
+
+        $('#projectConfigModal').modal('show');
+    }
+
+    function addUser(email, role) {
+        /**
+         * Add a user to the list of users of the current project
+         */
+        let userContainer = $('#projectUsersContainer');
+        let newEntry = "<div class=\"form-row align-items-center\" id=\"userContainer\">\n" +
+            "                            <div class=\"col-auto\">\n" +
+            "                                <input id=\"userField\" class=\"form-control\" name=\"users[]\" type=\"text\" value=\"\" readonly>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"col-auto\">\n" +
+            "                                <select id=\"roleField\" class=\"custom-select\" name=\"roles[]\">\n" +
+            "                                    <option>admin</option>\n" +
+            "                                    <option>review</option>\n" +
+            "                                    <option>segmentation</option>\n" +
+            "                                </select>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"col-auto\">\n" +
+            "                                <button id=\"rmButton\" class=\"btn btn-remove\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
+            "                                </button>\n" +
+            "                            </div>\n" +
+            "                        </div>";
+        $(userContainer).append(newEntry);
+        newEntry = $(userContainer).children().last();
+
+        // Populate data from form
+        $(newEntry).find("#userField").val(email);
+        $(newEntry).find("#roleField > option").each(function () {
+            if (this.text === role) {
+                $(this).prop("selected", "selected")
+            } else {
+                $(this).removeProp("selected")
+            }
+        });
+        // Make sure that user can be removed
+        $(newEntry).find("#rmButton").click(function (e) {
+            $(this).parent().parent().remove();
+        });
+
+        userContainer.append(newEntry);
+    }
+
+    $(document).ready(function () {
+        /**** Make sure that the form is resetted every time it is opened ****/
+
+        /**** Functionality to add multiple users to project ****/
+        $(function () {
+            $(document).on('click', '.btn-add', function (e) {
+                e.preventDefault();
+
+                // Populate data from form
+                let email = $("#newUserSelect").find("option:selected").text();
+                let role = $("#newUserRole").find("option:selected").text();
+
+                addUser(email, role);
+
+                // Remove user from list
+                $('#newUserSelect option').each(function () {
+                    if ($(this).text() === email) {
+                        $(this).remove();
+                    }
+                });
+
+            })
+        });
+    });
+
+</script>
+<div class="modal fade" tabindex="-1" id="projectConfigModal" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="project_form_title"></h2>
+            </div>
+            <div class="modal-body">
+                <form action="/data/update_projects_metadata" method="post" role="form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <!-- Project short name -->
+                    <div class="form-group row">
+                        <label for="project_form_shortname" class="col-auto col-form-label">Short Name</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" id="project_form_shortname" name="short_name" value="">
+                        </div>
+                    </div>
+
+                    <!-- Project long name -->
+                    <div class="form-group row">
+                        <label for="long_name" class="col-sm-4 col-form-label">Long Name</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" id="project_form_longname" name="long_name" value="">
+                        </div>
+                    </div>
+
+                    <!-- Project description -->
+                    <div class="form-group">
+                        <label for="description">Project Description</label>
+                        <textarea class="form-control" id="project_form_description" rows="4" name="description"></textarea>
+                    </div>
+
+                    <!-- Project users -->
+                    <label>Project Users</label>
+                    <div class="form-group input-group" id="projectUsersContainer">
+
+                    </div>
+
+                    <!-- Add new users -->
+                    <label>Add new User</label>
+                    <div class="form-row align-items-center" id="addUserContainer">
+                        <div class="col-auto">
+                            <select id="newUserSelect" class="custom-select">
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <select id="newUserRole" class="custom-select">
+                                <option>admin</option>
+                                <option>review</option>
+                                <option>segmentation</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-add"><i class="fa fa-plus-circle fa-2x"
+                                                                         style="color: #0099CC;"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Submit form -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" name="submit-btn" value="">Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

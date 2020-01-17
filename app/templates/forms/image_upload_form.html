@@ -1,0 +1,75 @@
+<script>
+    function showImageUploadModal(project) {
+        let project_id = project["id"];
+
+
+        // Row data dialog
+        $('#imageUploadButton').click(function (e) {
+            let form = document.querySelector('#imageUploadForm');
+            console.log(form);
+            let formData = new FormData(form);
+
+            $.ajax({
+                url: '/data/upload_image_data',
+                type: 'POST',
+                data: formData,
+                beforeSend: function(xhr){xhr.setRequestHeader('project_id', project_id);},
+                contentType: false,
+                processData: false,
+                success: function() {
+                    location.reload();
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    location.reload();
+                }
+            });
+
+            e.preventDefault();
+        });
+
+        // Show modal
+        $('#imageUploadModal').modal('show');
+    }
+</script>
+
+<div class="modal fade" id="imageUploadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <!-- Content body -->
+        <div class="modal-content">
+
+            <!-- Title -->
+            <div class="modal-header">
+                <h2 class="modal-title">Upload new data</h2>
+            </div>
+
+            <div class="modal-body">
+                <form action="/new_data" method=post enctype=multipart/form-data id="imageUploadForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Input element -->
+                    <div class="form-group">
+                        <label for="image">Upload New Image</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input image-file" id="image" name="image">
+                            <label class="custom-file-label" for="image">Choose file</label>
+                        </div>
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="imageUploadButton">Upload</button>
+                    </div>
+                </form>
+
+                <!-- Make file name appear on select -->
+                <script>
+
+                    $(".custom-file-input").on("change", function () {
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

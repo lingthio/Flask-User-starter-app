@@ -1,0 +1,84 @@
+<script>
+    function showReviewModal(imageObj) {
+        // Clear messages
+        $('#oldMessagesContainer').empty();
+        $('#rejectMessageField').val("");
+
+        // Append old messages
+        console.log(imageObj);
+        for (let message of imageObj["manual_segmentation"]["messages"]) {
+            $('#oldMessagesContainer').append(
+                "<div class=\"form-group\">\n" +
+                `<label>${message["date"]}(${message["user"]["email"]})</label>\n` +
+                `<textarea class=\"form-control\" disabled>${message["message"]}</textarea>\n` +
+                "</div>"
+            )
+        }
+
+        $('#accept-btn').click(function (e) {
+            imageObj["manual_segmentation"]["status"] = "valid";
+            sendRowUpdateToServer(imageObj);
+            location.reload();
+            e.preventDefault();
+        });
+
+        $('#reject-btn').click(function (e) {
+             imageObj["manual_segmentation"]["status"] = "rejected";
+
+             let reject_message = $('#rejectMessageField').val();
+             imageObj["manual_segmentation"]["new_message"] = reject_message;
+
+             sendRowUpdateToServer(imageObj);
+             location.reload();
+             e.preventDefault();
+        });
+
+        // Show modal
+        $('#reviewModal').modal('show');
+    }
+</script>
+
+<div class="modal fade" id="reviewModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <!-- Content body -->
+        <div class="modal-content">
+
+            <!-- Title -->
+            <div class="modal-header">
+                <h2 class="modal-title">Review</h2>
+            </div>
+
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <!-- Old reject messages -->
+                    <div id="oldMessagesContainer">
+                        <div class="form-group">
+                            <label>16.01.2020 (Nils Nommensen)</label>
+                            <textarea class="form-control" disabled>asdasdasdsa</textarea>
+                        </div>
+                    </div>
+
+
+                    <!-- New Reject message -->
+                    <div class="form-group">
+                        <label for="rejectMessageField">Reject Message</label>
+                        <textarea class="form-control" id="rejectMessageField"></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" name="reject-btn"
+                                id="reject-btn">Reject
+                        </button>
+                        <button class="btn btn-primary" name="accept-btn"
+                                id="accept-btn">Accept
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

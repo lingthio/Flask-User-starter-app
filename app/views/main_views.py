@@ -6,7 +6,6 @@
 from flask import Blueprint, redirect, render_template, flash
 from flask import request, url_for
 from flask_user import current_user, login_required
-from werkzeug.local import LocalProxy
 
 from app import db
 from app.models.project_models import Project
@@ -16,6 +15,16 @@ from app.views.forms import ProjectForm
 main_blueprint = Blueprint('main', __name__, template_folder='templates')
 
 
+@main_blueprint.route('/')
+@login_required
+def default():
+    """
+    Return the projects overview page that contains all projects the current user is part of
+    """
+    # Find the role of this user in the project
+    return redirect("/projects/overview")
+
+
 @main_blueprint.route('/projects/overview')
 @login_required
 def get_projects_overview_page():
@@ -23,7 +32,7 @@ def get_projects_overview_page():
     Return the projects overview page that contains all projects the current user is part of
     """
     # Find the role of this user in the project
-    return render_template("main/projects_overview.html")
+    return render_template("pages/projects_overview.html")
 
 
 @main_blueprint.route('/projects/<int:project_id>')
@@ -54,19 +63,37 @@ def project_role_page(project_id, role):
     """
     # Find the current project
     current_project = db.session.query(Project).filter(Project.id == project_id).first()
+    user = db.session.query(User).filter(User.id == current_user.id).first()
 
     # Data for various forms
     project_form = ProjectForm()
+
+    # Add the permissions to the user object for the navbar
+    if user in current_project.admins:
+        setattr(user, "role", "admin")
+    elif user in current_project.reviewers:
+        setattr(user, "role", "reviewer")
+    else:
+        setattr(user, "role", "user")
 
     # Build data object that contains all information for flask to use when building the page
     data = dict(current_project=current_project, user=current_user,
                 role=role, project_form=project_form)
     if role == "admin":
-        return render_template('main/admin_page.html', data=data)
-    elif role == "segmentation":
-        return render_template('main/segmentation_page.html', data=data)
+        if user not in current_project.admins:
+            flash('No permission to access admin page', category="error")
+            return redirect("/projects/" + str(project_id))
+
+        return render_template('pages/admin_page.html', data=data)
+
     elif role == "review":
-        return render_template('main/review_page.html', data=data)
+        if user not in current_project.admins and user not in current_project.reviewers:
+            flash('No permission to access review page', category="error")
+            return redirect("/projects/" + str(project_id))
+        return render_template('pages/review_page.html', data=data)
+
+    elif role == "segmentation":
+        return render_template('pages/segmentation_page.html', data=data)
 
 
 # The User page is accessible to authenticated users (users that have logged in)

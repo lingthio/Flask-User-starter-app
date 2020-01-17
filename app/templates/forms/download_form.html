@@ -1,0 +1,63 @@
+<script>
+    function showDownloadModal(rowObject) {
+        // Row data dialog
+        $('#downloadButton').click(function (e) {
+            downloadCase(rowObject);
+
+            // Change status if user decided to work on segmentation
+            let work_on_segmentation = $('#workOnSegmentationCheckbox').prop('checked');
+            if (work_on_segmentation){
+                rowObject["manual_segmentation"]["assignee_id"] = user_id;
+                rowObject["manual_segmentation"]["assigned_date"] = new Date(Date.now()).toUTCString();
+                rowObject["manual_segmentation"]["status"] = "assigned";
+
+                sendRowUpdateToServer(rowObject);
+            }
+            location.reload();
+            e.preventDefault();
+        });
+
+        // Show modal
+        $('#downloadModal').modal('show');
+    }
+</script>
+
+<div class="modal fade" id="downloadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <!-- Content body -->
+        <div class="modal-content">
+
+            <!-- Title -->
+            <div class="modal-header">
+                <h2 class="modal-title">Download Data</h2>
+            </div>
+
+            <div class="modal-body">
+                <form id="downloadForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <!-- Checkbox for working on segmentation -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="workOnSegmentationCheckbox">
+                        <label class="form-check-label" for="workOnSegmentationCheckbox">Work on segmentation</label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="downloadButton">Download Case</button>
+                    </div>
+                </form>
+
+                <!-- Make file name appear on select -->
+                <script>
+
+                    $(".custom-file-input").on("change", function () {
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

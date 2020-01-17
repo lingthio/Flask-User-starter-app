@@ -13,6 +13,8 @@ from flask_user import UserManager
 from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
 
+# Instantiate Flask
+app = Flask(__name__)
 
 # Instantiate Flask extensions
 csrf_protect = CSRFProtect()
@@ -26,8 +28,6 @@ flask_admin = Admin(url='/admin/flask_admin')
 def create_app(extra_config_settings={}):
     """Create a Flask application.
     """
-    # Instantiate Flask
-    app = Flask(__name__)
 
     # Load common settings
     app.config.from_object('app.settings')
