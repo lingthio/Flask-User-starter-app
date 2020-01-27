@@ -1,36 +1,26 @@
 <script>
     function showReviewModal(imageObj) {
         // Clear messages
-        $('#oldMessagesContainer').empty();
-        $('#rejectMessageField').val("");
-
-        // Append old messages
-        console.log(imageObj);
-        for (let message of imageObj["manual_segmentation"]["messages"]) {
-            $('#oldMessagesContainer').append(
-                "<div class=\"form-group\">\n" +
-                `<label>${message["date"]}(${message["user"]["email"]})</label>\n` +
-                `<textarea class=\"form-control\" disabled>${message["message"]}</textarea>\n` +
-                "</div>"
-            )
-        }
+        $('#messageField').val("");
 
         $('#accept-btn').click(function (e) {
             imageObj["manual_segmentation"]["status"] = "valid";
+            let message = $('#messageField').val();
+            sendMessage(imageObj, message);
             sendRowUpdateToServer(imageObj);
-            location.reload();
             e.preventDefault();
+            location.reload();
+            $('#reviewModal').modal('hide');
         });
 
         $('#reject-btn').click(function (e) {
-             imageObj["manual_segmentation"]["status"] = "rejected";
-
-             let reject_message = $('#rejectMessageField').val();
-             imageObj["manual_segmentation"]["new_message"] = reject_message;
-
-             sendRowUpdateToServer(imageObj);
-             location.reload();
-             e.preventDefault();
+            imageObj["manual_segmentation"]["status"] = "rejected";
+            let message = $('#messageField').val();
+            sendMessage(imageObj, message);
+            sendRowUpdateToServer(imageObj);
+            e.preventDefault();
+            location.reload();
+            $('#reviewModal').modal('hide');
         });
 
         // Show modal
@@ -52,19 +42,11 @@
             <div class="modal-body">
                 <form id="reviewForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <!-- Old reject messages -->
-                    <div id="oldMessagesContainer">
-                        <div class="form-group">
-                            <label>16.01.2020 (Nils Nommensen)</label>
-                            <textarea class="form-control" disabled>asdasdasdsa</textarea>
-                        </div>
-                    </div>
 
-
-                    <!-- New Reject message -->
+                    <!-- New  message -->
                     <div class="form-group">
-                        <label for="rejectMessageField">Reject Message</label>
-                        <textarea class="form-control" id="rejectMessageField"></textarea>
+                        <label for="messageField">Message</label>
+                        <textarea class="form-control" id="messageField"></textarea>
                     </div>
 
                     <!-- Buttons -->

@@ -7,7 +7,7 @@ from app import db
 
 
 class StatusEnum(enum.Enum):
-    not_open = 'not_open'
+    new = 'new'
     open_for_segmentation = 'open_for_segmentation'
     assigned = 'assigned'
     submitted = 'submitted'
@@ -40,6 +40,16 @@ class Message(db.Model):
         )
 
 
+class Modality(db.Model):
+    __tablename__ = 'modality'
+    name = db.Column(db.Unicode(255), primary_key=True)
+
+
+class ContrastType(db.Model):
+    __tablename__ = 'contrast_type'
+    name = db.Column(db.Unicode(255), primary_key=True)
+
+
 class DataPool(db.Model):
     __tablename__ = 'data_pool'
     id = db.Column(db.Integer, primary_key=True)
@@ -62,23 +72,32 @@ class DataPool(db.Model):
 class Image(DataPool):
     __tablename__ = 'data_pool_images'
     id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
-    name = db.Column(db.Unicode(255), nullable=False, server_default=u'', unique=True)
+    name = db.Column(db.Unicode(255), nullable=False, server_default='', unique=True)
 
-    institution = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    accession_number = db.Column(db.Unicode(255), nullable=True, server_default=u'')
+    institution = db.Column(db.Unicode(255), nullable=True, server_default='')
+    accession_number = db.Column(db.Unicode(255), nullable=True, server_default='')
     study_date = db.Column(db.DateTime, nullable=True, default=datetime.now)
-    study_name = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    study_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    series_name = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    series_number = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    series_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default=u'')
-    patient_id = db.Column(db.Unicode(255), nullable=True, server_default=u'')
+    study_name = db.Column(db.Unicode(255), nullable=True, server_default='')
+    study_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default='')
+    study_number = db.Column(db.Unicode(255), nullable=True, server_default='')
+    study_description = db.Column(db.Unicode(255), nullable=True, server_default='')
+
+    series_name = db.Column(db.Unicode(255), nullable=True, server_default='')
+    series_number = db.Column(db.Unicode(255), nullable=True, server_default='')
+    series_instance_uid = db.Column(db.Unicode(255), nullable=True, server_default='')
+    series_description = db.Column(db.Unicode(255), nullable=True, server_default='')
+
+    patient_name = db.Column(db.Unicode(255), nullable=True, server_default='')
     patient_dob = db.Column(db.Date, nullable=True, default=datetime.now)
     split = db.Column(Enum(SplitEnum), nullable=True)
-    # contrast_type      = na, nat, art, ven, mixed
-    # body_region        =
-    # modality           = # ct, mr, xr ...
-    # split              = # training, testing ...
+    body_region = db.Column(db.Unicode(255), nullable=True, server_default='')
+
+    contrast_type = db.Column(db.ForeignKey('contrast_type.name'), nullable=True, server_default='')
+    modality = db.Column(db.ForeignKey('modality.name'), nullable=True, server_default='')
+
+    custom_1 = db.Column(db.Unicode(255), nullable=True, server_default='')
+    custom_2 = db.Column(db.Unicode(255), nullable=True, server_default='')
+    custom_3 = db.Column(db.Unicode(255), nullable=True, server_default='')
 
     # Relationships
     manual_segmentation = db.relationship('ManualSegmentation', uselist=False,
@@ -114,7 +133,7 @@ class ManualSegmentation(DataPool):
     image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'),
                          nullable=False, unique=True)
 
-    status = db.Column(Enum(StatusEnum), nullable=False, default="not_open")
+    status = db.Column(Enum(StatusEnum), nullable=False, default="new")
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     assigned_date = db.Column(db.DateTime, nullable=True)
     validated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)

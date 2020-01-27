@@ -2,12 +2,17 @@
     function showImageUploadModal(project) {
         let project_id = project["id"];
 
+        // Add projects form
+        let $form = createAttributesForm({}, true, false);
+        $("#image-attributes-container").empty().append($form);
 
-        // Row data dialog
+        // Submit button
         $('#imageUploadButton').click(function (e) {
             let form = document.querySelector('#imageUploadForm');
-            console.log(form);
             let formData = new FormData(form);
+            let attributeData = JSON.stringify($($form).data("formData")());
+            formData.append("attributes", attributeData);
+            console.log(formData);
 
             $.ajax({
                 url: '/data/upload_image_data',
@@ -44,11 +49,14 @@
             </div>
 
             <div class="modal-body">
-                <form action="/new_data" method=post enctype=multipart/form-data id="imageUploadForm">
+                <form id="imageUploadForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
+                    <!-- Image attributes -->
+                    <div id="image-attributes-container"></div>
+
                     <!-- Input element -->
-                    <div class="form-group">
+                    <div class="form-group", style="margin-top: 50px">
                         <label for="image">Upload New Image</label>
                         <div class="custom-file mb-3">
                             <input type="file" class="custom-file-input image-file" id="image" name="image">

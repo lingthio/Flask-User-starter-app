@@ -57,15 +57,23 @@ def upload_image_data():
         return json.dumps({'success': False}), 400, {'ContentType': 'application/json'}
 
     # Save image to correct path
+    r = request
     image_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images", image_file.filename)
     if os.path.exists(image_path):
         flash('File already exists', category="error")
         return json.dumps({'success': False}), 400, {'ContentType': 'application/json'}
     nibabel.save(image_nifti, image_path)
 
-    # Add entry to db (with empty segmentation)
+    # Create entry for db (with empty segmentation)
     image = Image(project=project, name=image_file.filename)
     segmentation = ManualSegmentation(image=image, project=project)
+
+    # Parse attributes
+    attributes = json.loads(request.form["attributes"])
+    for attribute, value in attributes.items():
+        if hasattr(image, attribute) and value != "":
+            setattr(image, attribute, value)
+
     db.session.add(image)
     db.session.add(segmentation)
     db.session.commit()
