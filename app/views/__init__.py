@@ -7,6 +7,7 @@ from .admin_views import admin_blueprint
 import app.views.data_api.case_data
 import app.views.data_api.case_meta_data
 import app.views.data_api.projects
+import app.views.data_api.users
 
 
 def register_blueprints(app):

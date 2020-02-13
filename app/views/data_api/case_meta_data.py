@@ -10,7 +10,7 @@ from sqlalchemy import DateTime, Date
 
 from app import app, local_settings
 from app import db
-from app.models.data_pool_models import Image, ManualSegmentation, Message
+from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
 from app.models.project_models import Project
 
 
@@ -37,6 +37,18 @@ def update_image_meta_data():
             if value is not None and type(column.type) == DateTime or type(column.type) == Date:
                 value = datetime.strptime(image_object[column_name], '%a, %d %b %Y %H:%M:%S %Z')
             setattr(image, column_name, value)
+
+    # Contrast type and modality
+    modality_name = image_object["modality"]
+    modality = db.session.query(Modality).filter(Modality.name == modality_name).filter(
+        Modality.project_id == image.project_id).first()
+    image.modality = modality
+
+    contrast_type_name = image_object["contrast_type"]
+    contrast_type = db.session.query(ContrastType).filter(ContrastType.name == contrast_type_name).filter(
+        ContrastType.project_id == image.project_id).first()
+
+    image.contrast_type = contrast_type
 
     # Update values for segmentation
     for column in ManualSegmentation.__table__.columns:

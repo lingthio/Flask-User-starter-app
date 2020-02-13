@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script type="text/javascript" class="init">
+    $(document).ready(function () {
+        let datatableDefinition = {
+            ajax: {url: "/data/all_users"},
+            columns: [
+                {name: 'First Name', data: 'first_name'},
+                {name: 'Last Name', data: 'last_name'},
+                {name: 'Email', data: 'email'},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-add deleteUserButton"><i class="fa fa-trash" style="font-size:36px;"></i></button>'
+                    }
+                },
+            ],
+            columnDefs: [{"className": "dt-center", "targets": "_all"}],
+            autoWidth: false
+        };
+        $('#userDatatable').DataTable(datatableDefinition);
+        $('#userDatatable').on('draw.dt', function () {
+            // Delete User functionality
+            $('.deleteUserButton').click(function () {
+                let table = $('#userDatatable').DataTable();
+                let userObject = table.row($(this).closest('tr')).data();
+                console.log(userObject);
+
+                $.ajax({
+                    beforeSend: function (request) {
+                        request.setRequestHeader("user_id", userObject["id"]);
+                    },
+                    url: '/data/delete_user',
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function (e) {
+                        console.log(e);
+                    },
+                });
+            });
+
+            // Add new users
+            $('#addUserButton').click(function () {
+                showNewUserModal();
+            });
+        });
+
+    });
+
+</script>
+<h1>Users Overview</h1>
+<table id="userDatatable" class="table table-striped table-hover dt-responsive nowrap">
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+</table>
+
+<button class="btn btn-primary" id="addUserButton">Add User</button>
+{% endblock %}
+
+{% block forms %}
+{% include 'forms/new_user.html' %}
+{% endblock %}
+

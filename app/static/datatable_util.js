@@ -169,11 +169,39 @@ function formatHiddenRowInformation(imageObj) {
     return container;
 }
 
-function createAttributesForm(imageObj, isEditable, drawSubmitButton) {
+function createAttributesForm(imageObj, isEditable, drawSubmitButton){
+    let disabled = "";
+    if (!isEditable)
+        disabled = "disabled";
+
+    let formHTML = "<div>\n";
+    // Create selects for modality and contrast type
+    let table = $('#datatable').DataTable();
+    let projectObj = table.ajax.json()["project"];
+    let modalities = projectObj["modalities"];
+    let contrastTypes = projectObj["contrast_types"];
+    let activeModality = imageObj["modality"];
+    let activeContrastType = imageObj["contrast_type"];
+    formHTML +=
+            '<div class="form-group-sm row">\n' +
+            '    <label for="modality" class="col-sm-4 col-form-label">Modality</label>\n' +
+            '    <div class="col-sm-6">\n';
+    formHTML += buildSelect("modality", modalities, activeModality, isEditable);
+    formHTML +=
+            '    </div>\n' +
+            '  </div>';
+    formHTML +=
+            '<div class="form-group-sm row">\n' +
+            '    <label for="contrast_type" class="col-sm-4 col-form-label">Contrast Type</label>\n' +
+            '    <div class="col-sm-6">\n';
+    formHTML += buildSelect("contrast_type", contrastTypes, activeContrastType, isEditable);
+    formHTML +=
+            '    </div>\n' +
+            '  </div>';
+
+
     // Create form for all relevant editable fields
     let relevantFields = {
-        modality: "Modality",
-        contrast_type: "Contrast Type",
         accession_number: "Accession Number",
         body_region: "Body Region",
         patient_name: "Patiend Name",
@@ -190,11 +218,8 @@ function createAttributesForm(imageObj, isEditable, drawSubmitButton) {
         custom_2: "Custom Field 2",
         custom_3: "Custom Field 3",
     };
+
     // Form for attributes
-    let formHTML = "<div>";
-    let disabled = "";
-    if (!isEditable)
-        disabled = "disabled";
     for (let [id, descr] of Object.entries(relevantFields)) {
         let dataEntry;
         if (id in imageObj)
@@ -209,7 +234,6 @@ function createAttributesForm(imageObj, isEditable, drawSubmitButton) {
             '    </div>\n' +
             '  </div>';
     }
-    //formHTML += "</form>";
 
     if (drawSubmitButton) {
         formHTML += "<button class='btn btn-success' id='submit-attribute-form-btn'>Submit</button>";
@@ -230,15 +254,24 @@ function createAttributesForm(imageObj, isEditable, drawSubmitButton) {
     // If required, add submit button functionality
     $(form).ready(function () {
         $("#submit-attribute-form-btn").click(function () {
+            // Contrast type and modality
+            let selectedContrastType = $( "#contrast_type option:selected" ).text();
+            let selectedModadality = $( "#modality option:selected" ).text();
+            if (selectedContrastType !== "Not Assigned")
+                imageObj["contrast_type"] = selectedContrastType;
+            if (selectedModadality !== "Not Assigned")
+                imageObj["modality"] = selectedModadality;
+
+            // Standard fields
             for (let [id, descr] of Object.entries(relevantFields)) {
                 imageObj[id] = $("#" + id).val();
+
             }
             sendRowUpdateToServer(imageObj);
             location.reload();
         });
     });
     return form;
-
 }
 
 

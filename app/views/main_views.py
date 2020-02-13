@@ -96,6 +96,10 @@ def project_role_page(project_id, role):
         return render_template('pages/segmentation_page.html', data=data)
 
 
+@main_blueprint.route('/users')
+def users_page():
+    return render_template('pages/users_page.html')
+
 # The User page is accessible to authenticated users (users that have logged in)
 @main_blueprint.route('/member')
 @login_required  # Limits access to authenticated users

@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Enum
+from sqlalchemy import Enum, UniqueConstraint
 
 from app import db
 
@@ -42,12 +42,22 @@ class Message(db.Model):
 
 class Modality(db.Model):
     __tablename__ = 'modality'
-    name = db.Column(db.Unicode(255), primary_key=True)
+    __table_args__ = (UniqueConstraint('name', 'project_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(255))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False, )
+
+    project = db.relationship('project_models.Project', back_populates='modalities')
 
 
 class ContrastType(db.Model):
     __tablename__ = 'contrast_type'
-    name = db.Column(db.Unicode(255), primary_key=True)
+    __table_args__ = (UniqueConstraint('name', 'project_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(255))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False, )
+
+    project = db.relationship('project_models.Project', back_populates='contrast_types')
 
 
 class DataPool(db.Model):
@@ -92,8 +102,8 @@ class Image(DataPool):
     split = db.Column(Enum(SplitEnum), nullable=True)
     body_region = db.Column(db.Unicode(255), nullable=True, server_default='')
 
-    contrast_type = db.Column(db.ForeignKey('contrast_type.name'), nullable=True, server_default='')
-    modality = db.Column(db.ForeignKey('modality.name'), nullable=True, server_default='')
+    contrast_type_id = db.Column(db.ForeignKey('contrast_type.id'), nullable=True, server_default='')
+    modality_id = db.Column(db.ForeignKey('modality.id'), nullable=True, server_default='')
 
     custom_1 = db.Column(db.Unicode(255), nullable=True, server_default='')
     custom_2 = db.Column(db.Unicode(255), nullable=True, server_default='')
@@ -110,6 +120,8 @@ class Image(DataPool):
                                              back_populates='image',
                                              cascade="all, delete-orphan",
                                              passive_deletes=True)
+    contrast_type = db.relationship('ContrastType', foreign_keys=[contrast_type_id], uselist=False)
+    modality = db.relationship('Modality', foreign_keys=[modality_id], uselist=False)
 
     def as_dict(self):
         result = {c.name: getattr(self, c.name) for c in DataPool.__table__.columns + Image.__table__.columns}
@@ -120,6 +132,8 @@ class Image(DataPool):
         if result["split"] is not None:
             result["split"] = self.split.value
         result["project"] = self.project.long_name
+        result["modality"] = "" if self.modality is None else self.modality.name
+        result["contrast_type"] = "" if self.contrast_type is None else self.contrast_type.name
         return result
 
     __mapper_args__ = {

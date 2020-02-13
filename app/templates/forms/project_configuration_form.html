@@ -1,8 +1,10 @@
 <!-- Project configuration modal -->
 <script>
     function show_project_modal(projectObj, allUsers) {
-        // Clear existing users
+        // Clear existing contrast types, modals and users
         $('#projectUsersContainer').empty();
+        $('#contrastTypeContainer').empty();
+        $('#modalitiesContainer').empty();
 
         // If projectObj is null, a new project needs to be created
         if (projectObj == null) {
@@ -17,6 +19,17 @@
             $('#project_form_longname').val(projectObj["long_name"]);
             $('#project_form_description').html(projectObj["description"]);
 
+
+            // Add body regions
+            for (let contrastType of projectObj["contrast_types"]) {
+                addContrastType(contrastType);
+            }
+
+            // Add modalities regions
+            for (let modality of projectObj["modalities"]) {
+
+                addModalitiy(modality);
+            }
 
             // Add project users
             for (let userObj of projectObj["users"]) {
@@ -45,7 +58,76 @@
             $("#submitBtn").val(projectObj["id"])
         }
 
+        // Submit button
+        $('#submitBtn').click(function (e) {
+            let form = document.querySelector('#projectForm');
+            let formData = new FormData(form);
+
+            $.ajax({
+                url: '/data/update_projects_metadata',
+                type: 'POST',
+                data: formData,
+                beforeSend: function (xhr) {
+                    let project_id = "";
+                    if (projectObj != null) {
+                        project_id = projectObj["id"]
+                    }
+                    xhr.setRequestHeader('project_id', project_id);
+                },
+                contentType: false,
+                processData: false,
+                success: function () {
+                    location.reload();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    location.reload();
+                }
+            });
+
+            e.preventDefault();
+        });
+
         $('#projectConfigModal').modal('show');
+    }
+
+    function addContrastType(name) {
+        let container = $('#contrastTypeContainer');
+        let newEntry = "<div class=\"form-row align-items-center\">\n" +
+            "                            <div class=\"col-sm-6\">\n" +
+            "                                <input id=\"userField\" class=\"form-control\" name=\"contrast_types[]\" type=\"text\" value=\"" + name + "\" readonly>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"col-sm-2\">\n" +
+            "                                <button class=\"btn btn-remove contrastTypeRemoveBtn\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
+            "                                </button>\n" +
+            "                            </div>\n" +
+            "                        </div>";
+        $(container).append(newEntry);
+        newEntry = $(container).children().last();
+
+        // Make sure that region can be removed can be removed
+        $(newEntry).find(".contrastTypeRemoveBtn").click(function (e) {
+            $(this).parent().parent().remove();
+        });
+    }
+
+    function addModalitiy(name) {
+        let container = $('#modalitiesContainer');
+        let newEntry = "<div class=\"form-row align-items-center\">\n" +
+            "                            <div class=\"col-sm-4\">\n" +
+            "                                <input id=\"userField\" class=\"form-control\" name=\"modalities[]\" type=\"text\" value=\"" + name + "\" readonly>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"col-sm-2\">\n" +
+            "                                <button class=\"btn btn-remove modalityRemoveBtn\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
+            "                                </button>\n" +
+            "                            </div>\n" +
+            "                        </div>";
+        $(container).append(newEntry);
+        newEntry = $(container).children().last();
+
+        // Make sure that region can be removed can be removed
+        $(newEntry).find(".modalityRemoveBtn").click(function (e) {
+            $(this).parent().parent().remove();
+        });
     }
 
     function addUser(email, role) {
@@ -85,16 +167,14 @@
         $(newEntry).find("#rmButton").click(function (e) {
             $(this).parent().parent().remove();
         });
-
-        userContainer.append(newEntry);
     }
 
     $(document).ready(function () {
         /**** Make sure that the form is resetted every time it is opened ****/
 
-        /**** Functionality to add multiple users to project ****/
         $(function () {
-            $(document).on('click', '.btn-add', function (e) {
+            /**** Functionality to add multiple users to project ****/
+            $(document).on('click', '#addUserButton', function (e) {
                 e.preventDefault();
 
                 // Populate data from form
@@ -109,7 +189,24 @@
                         $(this).remove();
                     }
                 });
+            });
 
+            /**** Functionality to add new contrast types****/
+            $(document).on('click', '#newContrastTypeBtn', function (e) {
+                e.preventDefault();
+                // Populate data from form and delete old text
+                let name = $("#newContrastType").val();
+                $("#newContrastType").val("");
+                addContrastType(name);
+            })
+
+            /**** Functionality to add new contrast types****/
+            $(document).on('click', '#newModalityBtn', function (e) {
+                e.preventDefault();
+                // Populate data from form and delete old text
+                let name = $("#newModality").val();
+                $("#newModality").val("");
+                addModalitiy(name);
             })
         });
     });
@@ -123,20 +220,20 @@
                 <h2 class="modal-title" id="project_form_title"></h2>
             </div>
             <div class="modal-body">
-                <form action="/data/update_projects_metadata" method="post" role="form">
+                <form id="projectForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <!-- Project short name -->
                     <div class="form-group row">
-                        <label for="project_form_shortname" class="col-auto col-form-label">Short Name</label>
-                        <div class="col-sm-7">
+                        <label for="project_form_shortname" class="col-sm-2 col-form-label">Short Name</label>
+                        <div class="col-sm-8">
                             <input class="form-control" id="project_form_shortname" name="short_name" value="">
                         </div>
                     </div>
 
                     <!-- Project long name -->
                     <div class="form-group row">
-                        <label for="long_name" class="col-sm-4 col-form-label">Long Name</label>
-                        <div class="col-sm-7">
+                        <label for="project_form_longname" class="col-sm-2 col-form-label">Long Name</label>
+                        <div class="col-sm-8">
                             <input class="form-control" id="project_form_longname" name="long_name" value="">
                         </div>
                     </div>
@@ -144,8 +241,46 @@
                     <!-- Project description -->
                     <div class="form-group">
                         <label for="description">Project Description</label>
-                        <textarea class="form-control" id="project_form_description" rows="4" name="description"></textarea>
+                        <textarea class="form-control" id="project_form_description" rows="4"
+                                  name="description"></textarea>
                     </div>
+
+                    <!-- Modalities and contrast Types-->
+                    <div class="form-group" style="display: flex;">
+                        <div style="flex: 0 0 50%;">
+                            <label>Contrast Types</label>
+                            <div id="contrastTypeContainer" style="padding-left: 10px;">
+
+                            </div>
+                            <div class="form-row align-items-center">
+                                <div class="col-auto">
+                                    <input class="form-control" id="newContrastType" name="contrast_type" value="">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-add" id="newContrastTypeBtn"><i
+                                            class="fa fa-plus-circle fa-2x"
+                                            style="color: #0099CC;"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Modalities</label>
+                            <div id="modalitiesContainer" style="padding-left: 10px;">
+
+                            </div>
+                            <div class="form-row align-items-center">
+                                <div class="col-auto">
+                                    <input class="form-control" id="newModality" name="modality" value="">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-add" id="newModalityBtn"><i
+                                            class="fa fa-plus-circle fa-2x"
+                                            style="color: #0099CC;"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Project users -->
                     <label>Project Users</label>
@@ -168,10 +303,12 @@
                             </select>
                         </div>
                         <div class="col-auto">
-                            <button type="button" class="btn btn-add"><i class="fa fa-plus-circle fa-2x"
-                                                                         style="color: #0099CC;"></i></button>
+                            <button type="button" class="btn btn-add" id="addUserButton"><i
+                                    class="fa fa-plus-circle fa-2x"
+                                    style="color: #0099CC;"></i></button>
                         </div>
                     </div>
+
 
                     <!-- Submit form -->
                     <div class="modal-footer">

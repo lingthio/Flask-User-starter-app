@@ -19,7 +19,7 @@
                 {
                     data: null,
                     render: function (data) {
-                        return '<button class="btn btn-primary editProjectButton">Edit</button>';
+                        return '<button class="btn btn-primary editProjectButton">Settings</button>';
                     }
                 },
 
@@ -75,7 +75,12 @@
         </tr>
         </thead>
     </table>
-    <button class="btn btn-primary" id="addProjectButton">Add Project</button>
+
+    <div>
+        <button class="btn btn-primary" id="addProjectButton">Add Project</button>
+        <button class="btn btn-primary" id="addUsersButton" onclick="window.location.href = '/users';">Add Users</button>
+    </div>
+
 </div>
 {% endblock %}
 

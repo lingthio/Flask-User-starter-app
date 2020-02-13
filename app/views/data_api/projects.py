@@ -8,7 +8,7 @@ from sqlalchemy import or_, asc, desc
 
 from app import app
 from app import db, local_settings
-from app.models.data_pool_models import Image, ManualSegmentation
+from app.models.data_pool_models import Image, ManualSegmentation, ContrastType, Modality
 from app.models.project_models import Project
 from app.models.user_models import User
 
@@ -55,10 +55,11 @@ def projects_data():
     offset = datatable_parameters["start"]
     limit = datatable_parameters["length"]
 
-    # Build query and fetch results
+    # Build query
     query = db.session.query(Image)
     filter_query = query.filter(Image.project_id == project_id)
     filter_query = filter_query.join(ManualSegmentation, Image.id == ManualSegmentation.image_id)
+    filter_query = filter_query.join(Modality, isouter=True).join(ContrastType, isouter=True)
     r = request
     if role == "segmentation":
         # Find assigned and open cases
@@ -84,8 +85,11 @@ def projects_data():
 
     # Searching
     search_input = datatable_parameters["search"]["value"]
-    search_input = "%{}%".format(search_input)
-    filter_query = filter_query.filter(Image.name.like(search_input))
+    if search_input != "":
+        search_input = "%{}%".format(search_input)
+        searchable_columns = [Image.name, Image.patient_name, Modality.name, ContrastType.name, Image.accession_number]
+        filters = [column.like(search_input) for column in searchable_columns]
+        filter_query = filter_query.filter(or_(*filters))
 
     # Limit records
     records = filter_query.slice(offset, offset + limit).all()
@@ -117,7 +121,8 @@ def update_projects_metadata():
     """
     # Find the project ID by looking at the submit button
     form = request.form
-    project_id = form["submit-btn"]
+    r = request
+    project_id = request.headers["project_id"]
 
     # Create new project if not available or update existing one otherwise
     if project_id == "":
@@ -152,6 +157,22 @@ def update_projects_metadata():
             project.users.append(user)
         else:
             return "Error: {} not a role".format(role)
+
+    # Update modalities and contrast type
+    [db.session.query(Modality).filter(Modality.id == m.id).delete() for m in project.modalities]
+    [db.session.query(ContrastType).filter(ContrastType.id == c.id).delete() for c in project.contrast_types]
+    project.modalities.clear()
+    project.contrast_types.clear()
+
+    modalities = form.getlist("modalities[]")
+    contrast_types = form.getlist("contrast_types[]")
+    for modality in modalities:
+        modality = Modality(name=modality, project=project)
+        db.session.add(modality)
+    for contrast_type in contrast_types:
+        contrast_type = ContrastType(name=contrast_type, project=project)
+        db.session.add(contrast_type)
+
     db.session.commit()
 
     # Create directory if not exist

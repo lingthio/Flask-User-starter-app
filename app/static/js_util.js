@@ -60,3 +60,25 @@ function formatDate(dateString){
 
     return `${day}.${month}.${year} - ${hours}:${minutes}`;
 }
+
+function buildSelect(id, options, activeOption, isEditable){
+    let disabled = "";
+    if (!isEditable)
+        disabled = "disabled";
+
+    let select = '<select class="custom-select" id="' + id + '"' + disabled + '>';
+    if (activeOption == null)
+        select += '<option selected>Not Assigned</option>\n';
+    else
+        select += '<option>Not Assigned</option>\n';
+
+    for (let option of options) {
+        if (option === activeOption) {
+            select += "<option selected >" + option + "</option>\n";
+        } else {
+            select += "<option >" + option + "</option>\n";
+        }
+    }
+    select += '</select>\n';
+    return select
+}

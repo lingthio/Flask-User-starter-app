@@ -21,7 +21,10 @@ class Project(db.Model):
                                backref=db.backref('reviewer_for_project', lazy='dynamic'))
     users     = db.relationship('user_models.User', secondary='projects_users',
                                backref=db.backref('user_for_project', lazy='dynamic'))
+
     data_pool_objects = db.relationship('data_pool_models.DataPool', back_populates='project', cascade="all, delete-orphan")
+    modalities = db.relationship('data_pool_models.Modality', back_populates='project', cascade="all, delete-orphan")
+    contrast_types = db.relationship('data_pool_models.ContrastType', back_populates='project', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'{self.short_name}'
@@ -35,6 +38,10 @@ class Project(db.Model):
         result["users"].extend((u.as_dict(), "admin") for u in self.admins)
         result["users"].extend((u.as_dict(), "review") for u in self.reviewers)
         result["users"].extend((u.as_dict(), "segmentation") for u in self.users)
+
+        # Modalities and contrast_types
+        result["modalities"] = [m.name for m in self.modalities]
+        result["contrast_types"] = [c.name for c in self.contrast_types]
         return result
 
 
