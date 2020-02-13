@@ -5,7 +5,7 @@
 import os
 
 # Application settings
-APP_NAME = "Flask-User starter app"
+APP_NAME = "ISSM"
 APP_SYSTEM_ERROR_SUBJECT_LINE = APP_NAME + " system error"
 
 # Flask settings
@@ -26,6 +26,3 @@ USER_REQUIRE_RETYPE_PASSWORD = True  # Prompt for `retype password` in:
 USER_ENABLE_USERNAME = False  # Register and Login with username
 USER_AFTER_LOGIN_ENDPOINT = 'main.get_projects_overview_page'
 USER_AFTER_LOGOUT_ENDPOINT = 'main.get_projects_overview_page'
-
-# Database settings
-DATA_PATH = "data"

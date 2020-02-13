@@ -9,7 +9,8 @@ import shutil
 
 from flask_script import Command
 
-from app import db, settings
+from flask import current_app as c_app
+from app import db
 from app.models.data_pool_models import Image, ManualSegmentation, AutomaticSegmentation
 from app.models.project_models import Project
 from app.models.user_models import User, Role
@@ -38,11 +39,9 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
     user_role = find_or_create_role('user', u'User')
 
     # Add users
-    admin = find_or_create_user('Hinrich', 'Winther', 'hinrich@hinrich.com', 'hinrich', [admin_role, user_role])
-    reviewer = find_or_create_user('Nils', 'Nommensen', 'nils@nils.com', 'nils', [user_role])
-    user = find_or_create_user('Tobias', 'Blaaaa', 'tobias@tobias.com', 'tobias', [user_role])
-    find_or_create_user('user1', 'user1', 'user1@user1.com', 'user', [user_role])
-    find_or_create_user('user1', 'user1', 'user2@user2.com', 'user', [user_role])
+    admin = find_or_create_user('Admin', 'Admin', 'admin@issm.org', 'admin', [admin_role, user_role])
+    reviewer = find_or_create_user('Reviewer', 'Reviewer', 'reviewer@issm.org', 'reviewer', [user_role])
+    user = find_or_create_user('User', 'User', 'user@issm.org', 'user', [user_role])
 
     # Create projects
     projects = []
@@ -56,15 +55,15 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
         db.session.add(project)
 
         # Add Images and segmentations
-        images = [Image(project=project, name="Image_" + str(project_index) + "_" + str(i) + ".nii.gz") for i in
+        images = [Image(project=project, name='Image_' + str(project_index) + '_' + str(i) + '.nii.gz') for i in
                   range(n_images_per_project)]
         man_segmentations = [ManualSegmentation(project=project, image=image) for image in images]
         auto_segmentations = [AutomaticSegmentation(project=project, image=image) for image in images]
         db.session.add_all(images + man_segmentations + auto_segmentations)
 
         # Create directories
-        image_directory_path = os.path.join(settings.DATA_PATH, project.short_name, "images")
-        segmentation_directory_path = os.path.join(settings.DATA_PATH, project.short_name, "masks")
+        image_directory_path = os.path.join(c_app.config['DATA_PATH'], project.short_name, 'images')
+        segmentation_directory_path = os.path.join(c_app.config['DATA_PATH'], project.short_name, 'masks')
         if not os.path.exists(image_directory_path):
             os.makedirs(image_directory_path, exist_ok=True)
         if not os.path.exists(segmentation_directory_path):
