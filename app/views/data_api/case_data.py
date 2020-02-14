@@ -22,7 +22,7 @@ from nibabel.dataobj_images import DataobjImage
 from nibabel.filebasedimages import SerializableImage
 
 from app import app
-from app import db, local_settings
+from app import db
 from app.models.data_pool_models import Image, ManualSegmentation
 from app.models.project_models import Project
 
@@ -58,7 +58,7 @@ def upload_image_data():
 
     # Save image to correct path
     r = request
-    image_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images", image_file.filename)
+    image_path = os.path.join(app.config['DATA_PATH'], project.short_name, "images", image_file.filename)
     if os.path.exists(image_path):
         flash('File already exists', category="error")
         return json.dumps({'success': False}), 400, {'ContentType': 'application/json'}
@@ -111,7 +111,7 @@ def upload_segmentation_data():
 
     # Make sure corresponding image exists
     image_name = request.headers["image_name"]
-    image_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images", image_name)
+    image_path = os.path.join(app.config['DATA_PATH'], project.short_name, "images", image_name)
 
     if not os.path.exists(image_path):
         flash('No corresponding image found', category="error")
@@ -134,7 +134,7 @@ def upload_segmentation_data():
         db.session.add(segmentation)
 
     # Save file
-    segmentation_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "masks",
+    segmentation_path = os.path.join(app.config['DATA_PATH'], project.short_name, "masks",
                                      segmentation_file.filename)
     nibabel.save(segmentation_nifti, segmentation_path)
 
@@ -160,8 +160,8 @@ def download_case_data():
     project = image.project
 
     # Find corresponding files
-    image_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images", image.name)
-    segmentation_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "masks", image.name)
+    image_path = os.path.join(app.config['DATA_PATH'], project.short_name, "images", image.name)
+    segmentation_path = os.path.join(app.config['DATA_PATH'], project.short_name, "masks", image.name)
 
     if not os.path.exists(image_path):
         flash("Image does not exist", category="error")

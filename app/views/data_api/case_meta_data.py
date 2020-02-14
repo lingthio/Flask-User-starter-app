@@ -8,7 +8,7 @@ from flask_login import current_user
 from flask_user import login_required
 from sqlalchemy import DateTime, Date
 
-from app import app, local_settings
+from app import app
 from app import db
 from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
 from app.models.project_models import Project
@@ -103,8 +103,8 @@ def delete_image():
     image_id = data["id"]
     image = db.session.query(Image).filter(Image.id == image_id).first()
     project = db.session.query(Project).filter(Project.id == image.project_id).first()
-    image_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images", image.name)
-    segmentation_path = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "masks", image.name)
+    image_path = os.path.join(app.config['DATA_PATH'], project.short_name, "images", image.name)
+    segmentation_path = os.path.join(app.config['DATA_PATH'], project.short_name, "masks", image.name)
     db.session.query(Image).filter(Image.id == image.id).delete()
     if os.path.exists(image_path):
         os.remove(image_path)

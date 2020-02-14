@@ -7,7 +7,7 @@ from flask_user import login_required, current_user
 from sqlalchemy import or_, asc, desc
 
 from app import app
-from app import db, local_settings
+from app import db
 from app.models.data_pool_models import Image, ManualSegmentation, ContrastType, Modality
 from app.models.project_models import Project
 from app.models.user_models import User
@@ -176,8 +176,8 @@ def update_projects_metadata():
     db.session.commit()
 
     # Create directory if not exist
-    image_directory = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "images")
-    mask_directory = os.path.join(local_settings.DATA_DIRECTORY, project.short_name, "masks")
+    image_directory = os.path.join(app.config['DATA_PATH'], project.short_name, "images")
+    mask_directory = os.path.join(app.config['DATA_PATH'], project.short_name, "masks")
     os.makedirs(image_directory, exist_ok=True)
     os.makedirs(mask_directory, exist_ok=True)
 
