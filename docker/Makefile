@@ -17,7 +17,7 @@ run:
 
 debug:
 	$(DOCKER) run --rm -it \
-		-p 5000:5000 \
+		-p 8080:80 -p 5000:5000 \
 		-e DEBUG=1 \
 		-e ADMINS="admin@issm.org" \
 		--name $(NAME) \
@@ -25,10 +25,9 @@ debug:
 		-w "/issm" \
 		$(NAME):$(VERSION) \
 		/bin/bash -c "\
-			python3 manage.py init_db && \
-			python3 manage.py runserver --host=0.0.0.0"
+			./manage.py init_db && \
+			./manage.py runserver --host=0.0.0.0"
 
-#--rm -it
 daemon:
 	$(DOCKER) run -d \
 		--name $(NAME) \

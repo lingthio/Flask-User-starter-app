@@ -4,19 +4,17 @@ MAINTAINER Hinrich Winther <winther.hinrich@mh-hannover.de>
 WORKDIR /issm
 
 EXPOSE 80
+RUN mkdir -p /data
 COPY . /issm
 COPY docker/local_settings.py app/local_settings.py
-RUN mkdir -p /data
+COPY docker/uwsgi.ini /issm/uwsgi.ini
+COPY docker/nginx.conf /etc/nginx/sites-enabled/default
 
 RUN apt-get update && apt-get install -y \
-    apache2 \
-    libapache2-mod-wsgi-py3 \
+    nginx \
     python3-pip
-RUN a2enmod wsgi
-RUN a2dissite 000-default
-COPY docker/apache2.conf /etc/apache2/sites-available/issm.conf
-RUN a2ensite issm
 RUN pip3 install -r requirements.txt
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 ENV APP_NAME           ISSM
 ENV SECRET_KEY         "changeme"
@@ -34,4 +32,6 @@ ENV MAIL_USERNAME      ""
 ENV MAIL_PASSWORD      ""
 ENV SENDGRID_API_KEY   ""
 
-ENTRYPOINT printenv | grep -v LS_COLORS | awk '{print "export " $0}' >> /etc/apache2/envvars && /etc/init.d/apache2 start && tail -f /var/log/apache2/*.log
+ENTRYPOINT uwsgi --ini /issm/uwsgi.ini && \
+           /etc/init.d/nginx start && \
+           tail -f /var/log/nginx/* /var/log/issm.log

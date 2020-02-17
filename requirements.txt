@@ -17,6 +17,7 @@ Flask-Admin==1.5.5
 pytest==3.0.5
 pytest-cov==2.4.0
 
+uwsgi==2.0.18
 Werkzeug==1.0.0
 nibabel==3.0.1
 numpy==1.18.1
