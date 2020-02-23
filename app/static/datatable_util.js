@@ -5,8 +5,6 @@ let generalTable = {
         url: "/data/projects_data",
         beforeSend: function (request) {
             request.setRequestHeader("project_id", project_id);
-            request.setRequestHeader("user_id", user_id);
-            request.setRequestHeader("role", role);
         },
         data: function (args) {
             return {"args": JSON.stringify(args)};

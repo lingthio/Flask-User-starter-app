@@ -45,6 +45,12 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f'{self.first_name} {self.last_name} (f{self.email})'
+    
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.id == other.id
+
 
 # automatically hash user password
 @event.listens_for(User.password, 'set', retval=True)

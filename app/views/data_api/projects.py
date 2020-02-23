@@ -48,7 +48,6 @@ def projects_data():
     """
     # Extract meta info from request headers
     project_id = int(request.headers.get("project_id"))
-    user_id = int(request.headers.get("user_id"))
     role = request.headers.get("role")
 
     datatable_parameters = json.loads(request.values.get("args"))
@@ -64,7 +63,7 @@ def projects_data():
     if role == "segmentation":
         # Find assigned and open cases
         filter_query = filter_query.filter(
-            or_(ManualSegmentation.assignee_id == user_id,
+            or_(ManualSegmentation.assignee_id == current_user.id,
                 ManualSegmentation.status.in_(["open_for_segmentation", "submitted", "rejected"])))
     if role == "validation":
         # Find submitted cases

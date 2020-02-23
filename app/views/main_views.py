@@ -43,14 +43,16 @@ def project_redirect(project_id):
     on his role in the current project
     """
     # Find the role of this user in the project
-    project = db.session.query(Project).filter(Project.id == project_id).first()
-    user = db.session.query(User).filter(User.id == current_user.id).first()
-    if user in project.users:
-        return redirect(f'/projects/{project.id}/segmentation/cases')
-    if user in project.reviewers:
-        return redirect(f'/projects/{project.id}/review/cases')
-    if user in project.admins:
-        return redirect(f'/projects/{project.id}/admin/cases')
+    current_project = db.session.query(Project).filter(Project.id == project_id).first()
+    if current_user in current_project.role_admins:
+        return redirect(f'/projects/{current_project.id}/admin/cases')
+    elif current_user in current_project.role_reviewers:
+        return redirect(f'/projects/{current_project.id}/review/cases')
+    elif current_user in current_project.role_users:
+        return redirect(f'/projects/{current_project.id}/segmentation/cases')
+    else:
+        flash('You are no member of this project.', category="error")
+        return redirect(f'/projects/overview')
 
 
 @main_blueprint.route('/projects/<int:project_id>/<string:role>/cases')
@@ -63,37 +65,22 @@ def project_role_page(project_id, role):
     """
     # Find the current project
     current_project = db.session.query(Project).filter(Project.id == project_id).first()
-    user = db.session.query(User).filter(User.id == current_user.id).first()
 
     # Data for various forms
     project_form = ProjectForm()
 
-    # Add the permissions to the user object for the navbar
-    if user in current_project.admins:
-        setattr(user, "role", "admin")
-    elif user in current_project.reviewers:
-        setattr(user, "role", "reviewer")
-    else:
-        setattr(user, "role", "user")
-
     # Build data object that contains all information for flask to use when building the page
-    data = dict(current_project=current_project, user=current_user,
+    data = dict(current_project=current_project,
                 role=role, project_form=project_form)
+    
     if role == "admin":
-        if user not in current_project.admins:
-            flash('No permission to access admin page', category="error")
-            return redirect(f'/projects/{project_id}')
-
         return render_template('pages/admin/cases.html', data=data)
 
     elif role == "review":
-        if user not in current_project.admins and user not in current_project.reviewers:
-            flash('No permission to access review page', category="error")
-            return redirect(f'/projects/{project_id}')
         return render_template('pages/review/cases.html', data=data)
 
     elif role == "segmentation":
-        return render_template('pages/segmentation_page.html', data=data)
+        return render_template('pages/segmentation/cases.html', data=data)
 
 
 @main_blueprint.route('/users')
