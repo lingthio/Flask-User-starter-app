@@ -1,33 +1,56 @@
-<div id="header-div">
-    <nav class="navbar navbar-expand-lg bg-light justify-content-between">
-        <form class="form-inline">
-            <button class="btn btn-success btn-lg" type="submit" formaction="/projects/overview">
-                Choose Project
-            </button>
-        </form>
-        <form class="form-inline">
-            {% if data %}
-            <h1 class="display-3">{{data.current_project.long_name}}</h1>
-            {% endif %}
-        </form>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
 
-        <form class="form-inline">
-            <button class="btn btn-primary btn-lg" type="submit" formaction="{{ url_for('user.logout') }}">Sign out
-            </button>
-        </form>
-    </nav>
-    {% if data and "current_project" in data %}
-    <nav class="navbar navbar-light bg-light">
-        <ul class="nav nav-tabs py-4">
-            <li class="nav-item"><a class="nav-link {%if data.role == 'admin'%}active{%else%} {%endif%} {%if data.user.role != 'admin'%} disabled {%endif%}"
-                                    href="/projects/{{data.current_project.id}}/admin">Admin</a></li>
-            <li class="nav-item"><a class="nav-link {%if data.role == 'review'%}active{%else%} {%endif%} {%if data.user.role != 'admin' and data.user.role != 'reviewer'%} disabled {%endif%}"
-                                    href="/projects/{{data.current_project.id}}/review">Review</a></li>
-            <li class="nav-item"><a class="nav-link {%if data.role == 'segmentation'%}active{%else%} {%endif%}"
-                                    href="/projects/{{data.current_project.id}}/segmentation">Segmentation</a></li>
-            <li class="nav-item"><a class="nav-link {%if data.role == 'evaluation'%}active{%else%} {%endif%} disabled"
-                                    href="/projects/{{data.current_project.id}}/admin">Evaluation</a></li>
+            <div class="navbar-collapse collapse">
+                <form class="navbar-nav ml-auto">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" formaction="/projects/overview">Projects</button>
+                </form>
+            </div>
+
+            <!-- project specific navigation -->
+            {% if data and "current_project" in data %}
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {%if current_user not in data.current_project.role_admins%} disabled {%endif%}" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Admin
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/projects/{{data.current_project.id}}/admin/cases">Cases</a>
+                    <a class="dropdown-item" href="/projects/{{data.current_project.id}}/admin/models">Models</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {%if current_user not in data.current_project.role_reviewers%} disabled {%endif%}" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Review
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/projects/{{data.current_project.id}}/review/cases">Cases</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {%if current_user not in data.current_project.role_users%} disabled {%endif%}" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Segmentation
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="/projects/{{data.current_project.id}}/segmentation/cases">Cases</a>
+                </div>
+            </li>
+
+            {% endif %}
+
         </ul>
-    </nav>
+    </div>
+
+    {% if data and "current_project" in data %}
+    <a class="navbar-brand mx-auto" href="#">{{data.current_project.long_name}}</a>
     {% endif %}
-</div>
+
+    <div class="navbar-collapse collapse">
+        <form class="navbar-nav ml-auto">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" formaction="{{ url_for('user.logout') }}">sign out</button>
+        </form>
+    </div>
+  </nav>

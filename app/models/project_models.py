@@ -43,6 +43,21 @@ class Project(db.Model):
         result["modalities"] = [m.name for m in self.modalities]
         result["contrast_types"] = [c.name for c in self.contrast_types]
         return result
+    
+
+    @property
+    def role_admins(self):
+        return self.admins
+
+
+    @property
+    def role_reviewers(self):
+        return self.admins + self.reviewers
+
+
+    @property
+    def role_users(self):
+        return self.admins + self.reviewers + self.users
 
 
 class ProjectsAdmins(db.Model):

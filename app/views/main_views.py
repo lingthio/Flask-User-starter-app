@@ -46,14 +46,14 @@ def project_redirect(project_id):
     project = db.session.query(Project).filter(Project.id == project_id).first()
     user = db.session.query(User).filter(User.id == current_user.id).first()
     if user in project.users:
-        return redirect("/projects/{}/segmentation".format(project.id))
+        return redirect(f'/projects/{project.id}/segmentation/cases')
     if user in project.reviewers:
-        return redirect("/projects/{}/review".format(project.id))
+        return redirect(f'/projects/{project.id}/review/cases')
     if user in project.admins:
-        return redirect("/projects/{}/admin".format(project.id))
+        return redirect(f'/projects/{project.id}/admin/cases')
 
 
-@main_blueprint.route('/projects/<int:project_id>/<string:role>')
+@main_blueprint.route('/projects/<int:project_id>/<string:role>/cases')
 @login_required
 def project_role_page(project_id, role):
     """
@@ -82,15 +82,15 @@ def project_role_page(project_id, role):
     if role == "admin":
         if user not in current_project.admins:
             flash('No permission to access admin page', category="error")
-            return redirect("/projects/" + str(project_id))
+            return redirect(f'/projects/{project_id}')
 
-        return render_template('pages/admin_page.html', data=data)
+        return render_template('pages/admin/cases.html', data=data)
 
     elif role == "review":
         if user not in current_project.admins and user not in current_project.reviewers:
             flash('No permission to access review page', category="error")
-            return redirect("/projects/" + str(project_id))
-        return render_template('pages/review_page.html', data=data)
+            return redirect(f'/projects/{project_id}')
+        return render_template('pages/review/cases.html', data=data)
 
     elif role == "segmentation":
         return render_template('pages/segmentation_page.html', data=data)
