@@ -2,6 +2,8 @@ NAME=issm
 VERSION=$(shell cat ../Version)
 PYTHON=python
 DOCKER=docker
+CWD=$(abspath $(shell pwd))
+PROJECTDIR=$(shell dirname "$(CWD)")
 
 .PHONY: build clean run daemon stop it
 
@@ -18,6 +20,7 @@ run:
 debug:
 	$(DOCKER) run --rm -it \
 		-p 8080:80 -p 5000:5000 \
+		-v $(PROJECTDIR):/issm \
 		-e DEBUG=1 \
 		-e ADMINS="admin@issm.org" \
 		--name $(NAME) \
