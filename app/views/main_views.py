@@ -7,7 +7,7 @@ from flask import Blueprint, redirect, render_template, flash
 from flask import request, url_for
 from flask_user import current_user, login_required
 
-from app import db
+from app import db, current_project
 from app.models.project_models import Project
 from app.models.user_models import User, UserProfileForm
 from app.views.forms import ProjectForm
@@ -42,8 +42,7 @@ def project_redirect(project_id):
     This function is used to redirect the user to the correct page, i.e. as admin, reviewer or user, depending
     on his role in the current project
     """
-    # Find the role of this user in the project
-    current_project = db.session.query(Project).filter(Project.id == project_id).first()
+
     if current_user in current_project.role_admins:
         return redirect(f'/projects/{current_project.id}/admin/cases')
     elif current_user in current_project.role_reviewers:
@@ -63,8 +62,6 @@ def project_role_page(project_id, role):
     checks that the user is authorised to access the chosen project in this role and returns the according
     page, if allowed.
     """
-    # Find the current project
-    current_project = db.session.query(Project).filter(Project.id == project_id).first()
 
     # Data for various forms
     project_form = ProjectForm()
@@ -75,10 +72,8 @@ def project_role_page(project_id, role):
     
     if role == "admin":
         return render_template('pages/admin/cases.html', data=data)
-
     elif role == "review":
         return render_template('pages/review/cases.html', data=data)
-
     elif role == "segmentation":
         return render_template('pages/segmentation/cases.html', data=data)
 

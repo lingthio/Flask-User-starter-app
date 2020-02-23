@@ -2,9 +2,9 @@
 # a Python package so it can be accessed using the 'import' statement.
 
 from datetime import datetime
-import os
+import os, re
 
-from flask import Flask
+from flask import Flask, request
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
@@ -12,6 +12,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_user import UserManager
 from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
+from werkzeug.local import LocalProxy
 
 # Instantiate Flask
 app = Flask(__name__)
@@ -22,6 +23,25 @@ db = SQLAlchemy()
 mail = Mail()
 migrate = Migrate()
 flask_admin = Admin(url='/admin/flask_admin')
+
+
+# add current_project globally
+from app.models.project_models import Project
+id_finder = re.compile('^\/projects\/(?P<project_id>\d*)')
+def _get_project():
+    r = id_finder.match(request.path)
+    if not r: # not a valid project path
+        return None
+    if r.group('project_id') == '': # project id not set
+        return None
+    project_id = int(r.group('project_id'))
+    return db.session.query(Project).filter(Project.id == project_id).first()
+current_project = LocalProxy(lambda: _get_project())
+
+# add current_project to template engine
+def _project_context_processor():
+    return dict(current_project=_get_project())
+app.context_processor(_project_context_processor)
 
 
 # Initialize Flask Application

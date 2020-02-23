@@ -40,7 +40,8 @@
 
     // Save meta data like project id, user id and role for later usage
     {% if data %}
-    let project_id = {{data.current_project.id}};
+    let project_id = {{current_project.id}};
+    let user_id = {{current_user.id}};
     {% endif %}
 
 </script>

@@ -8,6 +8,7 @@ from sqlalchemy import or_, asc, desc
 
 from app import app
 from app import db
+from app import current_project
 from app.models.data_pool_models import Image, ManualSegmentation, ContrastType, Modality
 from app.models.project_models import Project
 from app.models.user_models import User
@@ -20,6 +21,7 @@ def project_overview():
     Return all project objects the current user is part of or all projects if the user is admin
     """
     # If the user is admin, return all projects
+    print('Print Statement:', current_project)
     roles = current_user.roles
     if any(r.name == "admin" for r in roles):
         projects = db.session.query(Project).all()

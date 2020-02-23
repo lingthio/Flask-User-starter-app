@@ -21,8 +21,7 @@ from nibabel import FileHolder, Nifti1Image
 from nibabel.dataobj_images import DataobjImage
 from nibabel.filebasedimages import SerializableImage
 
-from app import app
-from app import db
+from app import app, db
 from app.models.data_pool_models import Image, ManualSegmentation
 from app.models.project_models import Project
 
