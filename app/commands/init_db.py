@@ -15,6 +15,10 @@ from app.models.data_pool_models import Image, ManualSegmentation, AutomaticSegm
 from app.models.project_models import Project
 from app.models.user_models import User, Role
 
+from tqdm import trange
+import numpy as np
+import nibabel as nib
+
 
 class InitDbCommand(Command):
     """ Initialize the database."""
@@ -43,7 +47,7 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
     reviewer = find_or_create_user('Reviewer', 'Reviewer', 'reviewer@issm.org', 'reviewer', [user_role])
     user = find_or_create_user('User', 'User', 'user@issm.org', 'user', [user_role])
 
-    # Create projects
+    # Create project sample data
     projects = []
     for project_index in range(n_projects):
         project = Project(short_name="proj_" + str(project_index),
@@ -54,29 +58,20 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
         projects.append(project)
         db.session.add(project)
 
-        # Add Images and segmentations
-        images = [Image(project=project, name='Image_' + str(project_index) + '_' + str(i) + '.nii.gz') for i in
-                  range(n_images_per_project)]
-        man_segmentations = [ManualSegmentation(project=project, image=image) for image in images]
-        auto_segmentations = [AutomaticSegmentation(project=project, image=image) for image in images]
-        db.session.add_all(images + man_segmentations + auto_segmentations)
 
-        # Create directories
-        image_directory_path = os.path.join(c_app.config['DATA_PATH'], project.short_name, 'images')
-        segmentation_directory_path = os.path.join(c_app.config['DATA_PATH'], project.short_name, 'masks')
-        if not os.path.exists(image_directory_path):
-            os.makedirs(image_directory_path, exist_ok=True)
-        if not os.path.exists(segmentation_directory_path):
-            os.makedirs(segmentation_directory_path, exist_ok=True)
+        for i in trange(n_images_per_project, desc='generating sample data'):
+            image = Image(project=project, name=f'Image_{project_index}_{i}')
+            man_seg = ManualSegmentation(project=project, image=image)
+            auto_seg = AutomaticSegmentation(project=project, image=image)
 
-        # Create fake data
-        for image in images:
-            # Create fake images and segmentations
-            for directory_path in [image_directory_path, segmentation_directory_path]:
-                file_path = os.path.join(directory_path, image.name)
-                open(file_path, 'a').close()
+            db.session.add_all([image, man_seg, auto_seg])
+            db.session.flush()
 
-    db.session.commit()
+            auto_seg.nii = nib.Nifti1Image(np.zeros((100,100,100)), np.eye(4))
+            man_seg.nii = nib.Nifti1Image(np.zeros((100,100,100)), np.eye(4))
+            image.nii = nib.Nifti1Image(np.zeros((100,100,100)), np.eye(4))
+
+            db.session.commit()
 
 
 def find_or_create_role(name, label):

@@ -1,14 +1,8 @@
 function downloadCase(rowObject) {
-    let project_id = rowObject["project_id"];
-    let image_name = rowObject["name"];
     console.log("mist");
     $.ajax({
-        url: '/data/download_case_data',
+        url: '/project/' + project_id + '/case/' + rowObject['id'] + '/download',
         type: 'GET',
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader('project_id', project_id);
-            xhr.setRequestHeader('image_name', image_name);
-        },
         xhrFields: {
             responseType: 'blob'
         },
@@ -31,10 +25,10 @@ function downloadCase(rowObject) {
 }
 
 // Function to make call to API after row has been updated
-function sendRowUpdateToServer(rowObject) {
+function _sendRowUpdateToServer(rowObject, server_url) {
     $.ajax({
         type: 'POST',
-        url: '/data/update_image_meta_data',
+        url: server_url.replace('%ID%', rowObject['id']),
 
         data: JSON.stringify(rowObject),
         success: function (data) {

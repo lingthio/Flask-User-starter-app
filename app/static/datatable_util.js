@@ -2,10 +2,7 @@
 let generalTable = {
     serverSide: true,
     ajax: {
-        url: "/data/projects_data",
-        beforeSend: function (request) {
-            request.setRequestHeader("project_id", project_id);
-        },
+        url: '',
         data: function (args) {
             return {"args": JSON.stringify(args)};
         }

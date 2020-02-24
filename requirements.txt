@@ -21,3 +21,5 @@ uwsgi==2.0.18
 Werkzeug==1.0.0
 nibabel==3.0.1
 numpy==1.18.1
+
+tqdm

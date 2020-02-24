@@ -8,7 +8,6 @@
 
     <title>Image Segmentation Study Manager</title>
 
-
     <!-- JS libraries-->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
@@ -27,6 +26,7 @@
     <script src="{{ url_for('static', filename='datatable_util.js') }}"></script>
 
 </head>
+
 <script>
     // Setup ajax calls to flask server
     let csrftoken = "{{ csrf_token() }}";
@@ -38,12 +38,9 @@
         }
     });
 
-    // Save meta data like project id, user id and role for later usage
-    {% if data %}
+    // Save meta data like project id and user id for later usage
     let project_id = {{current_project.id}};
     let user_id = {{current_user.id}};
-    {% endif %}
-
 </script>
 
 <body>

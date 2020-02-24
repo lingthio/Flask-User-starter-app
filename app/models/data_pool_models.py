@@ -1,9 +1,10 @@
+from os import path, makedirs
 import enum
 from datetime import datetime
-
 from sqlalchemy import Enum, UniqueConstraint
-
 from app import db
+from flask import current_app as c_app
+import nibabel as nib
 
 
 class StatusEnum(enum.Enum):
@@ -71,12 +72,28 @@ class DataPool(db.Model):
 
     # Relationships
     project = db.relationship('project_models.Project', back_populates='data_pool_objects')
-    # project = db.relationship('Project', backref=db.backref('data_pool', lazy='dynamic'))
 
     __mapper_args__ = {
         'polymorphic_identity': 'datapool',
         'polymorphic_on': type
     }
+
+    def __get_fn__(self):
+        assert self.id != None, 'you need to flush or commit the data pool object before accessing nifti data'
+        basepath = path.join(c_app.config['DATA_PATH'], self.project.short_name)
+        if not path.exists(basepath):
+            makedirs(basepath, exist_ok=True)
+        return path.join(basepath, f'{self.id}.nii.gz')
+
+    def __get_nii__(self):
+        return nib.load(self.__get_fn__())
+    
+    def __set_nii__(self, nii):
+        nii.to_filename(self.__get_fn__())
+        nii.uncache()
+    
+    nii = property(__get_nii__, __set_nii__)
+
 
 
 class Image(DataPool):

@@ -2,7 +2,15 @@
 
 {% block content %}
 <script type="text/javascript" class="init">
+    
+    var role = 'admin';
+    var sendRowUpdateToServer = function (rowObject) { return _sendRowUpdateToServer(rowObject, 
+                                '/project/{{current_project.id}}/case/%ID%/update_meta_data') };
+    
     $(document).ready(function () {
+
+        generalTable['ajax']['url'] = '/project/{{current_project.id}}/case/data/admin';
+
         // Define custom table columns and add them to general data columns
         let columns = [
             {
