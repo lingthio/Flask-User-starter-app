@@ -14,14 +14,13 @@ from app.models.project_models import Project
 from app.models.user_models import User
 
 
-@app.route("/data/projects_overview")
+@app.route('/data/project_overview')
 @login_required
 def project_overview():
     """
     Return all project objects the current user is part of or all projects if the user is admin
     """
     # If the user is admin, return all projects
-    print('Print Statement:', current_project)
     roles = current_user.roles
     if any(r.name == "admin" for r in roles):
         projects = db.session.query(Project).all()

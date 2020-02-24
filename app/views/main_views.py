@@ -19,23 +19,23 @@ main_blueprint = Blueprint('main', __name__, template_folder='templates')
 @login_required
 def default():
     """
-    Return the projects overview page that contains all projects the current user is part of
+    Return the project overview page that contains all projects the current user is part of
     """
     # Find the role of this user in the project
-    return redirect("/projects/overview")
+    return redirect("/project/overview")
 
 
-@main_blueprint.route('/projects/overview')
+@main_blueprint.route('/project/overview')
 @login_required
-def get_projects_overview_page():
+def get_project_overview_page():
     """
-    Return the projects overview page that contains all projects the current user is part of
+    Return the project overview page that contains all projects the current user is part of
     """
     # Find the role of this user in the project
-    return render_template("pages/projects_overview.html")
+    return render_template("pages/project_overview.html")
 
 
-@main_blueprint.route('/projects/<int:project_id>')
+@main_blueprint.route('/project/<int:project_id>')
 @login_required
 def project_redirect(project_id):
     """
@@ -44,17 +44,17 @@ def project_redirect(project_id):
     """
 
     if current_user in current_project.role_admins:
-        return redirect(f'/projects/{current_project.id}/admin/cases')
+        return redirect(f'/project/{current_project.id}/admin/cases')
     elif current_user in current_project.role_reviewers:
-        return redirect(f'/projects/{current_project.id}/review/cases')
+        return redirect(f'/project/{current_project.id}/review/cases')
     elif current_user in current_project.role_users:
-        return redirect(f'/projects/{current_project.id}/segmentation/cases')
+        return redirect(f'/project/{current_project.id}/segmentation/cases')
     else:
         flash('You are no member of this project.', category="error")
-        return redirect(f'/projects/overview')
+        return redirect(f'/project/overview')
 
 
-@main_blueprint.route('/projects/<int:project_id>/<string:role>/cases')
+@main_blueprint.route('/project/<int:project_id>/<string:role>/cases')
 @login_required
 def project_role_page(project_id, role):
     """

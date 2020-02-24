@@ -27,7 +27,7 @@ flask_admin = Admin(url='/admin/flask_admin')
 
 # add current_project globally
 from app.models.project_models import Project
-id_finder = re.compile('^\/projects\/(?P<project_id>\d*)')
+id_finder = re.compile('^\/project\/(?P<project_id>\d*)')
 def _get_project():
     r = id_finder.match(request.path)
     if not r: # not a valid project path
