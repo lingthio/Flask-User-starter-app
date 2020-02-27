@@ -19,11 +19,12 @@ from nibabel.filebasedimages import SerializableImage
 
 from app import app, db, current_project
 from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
+from app.utils import project_admin_required, project_reviewer_required, project_user_required
 
 
-@app.route('/project/<int:project_id>/case/data/<role>')
-@login_required
-def case_data(project_id, role):
+@app.route('/project/<int:project_id>/case/data')
+@project_user_required
+def case_data(project_id):
     """
     Get all entries of the DataPool tables according to the project, role and user
     """
@@ -38,15 +39,15 @@ def case_data(project_id, role):
     filter_query = filter_query.join(ManualSegmentation, Image.id == ManualSegmentation.image_id)
     filter_query = filter_query.join(Modality, isouter=True).join(ContrastType, isouter=True)
     r = request
-    if role == "segmentation":
-        # Find assigned and open cases
-        filter_query = filter_query.filter(
-            or_(ManualSegmentation.assignee_id == current_user.id,
-                ManualSegmentation.status.in_(["open_for_segmentation", "submitted", "rejected"])))
-    if role == "validation":
-        # Find submitted cases
-        filter_query = filter_query.filter(
-            ManualSegmentation.status == "submitted")
+    #if role == "segmentation":
+    #    # Find assigned and open cases
+    #    filter_query = filter_query.filter(
+    #        or_(ManualSegmentation.assignee_id == current_user.id,
+    #            ManualSegmentation.status.in_(["open_for_segmentation", "submitted", "rejected"])))
+    #if role == "validation":
+    #    # Find submitted cases
+    #    filter_query = filter_query.filter(
+    #        ManualSegmentation.status == "submitted")
 
     # Add sorting
     sorting_column_id = datatable_parameters["order"][0]["column"]
@@ -77,24 +78,42 @@ def case_data(project_id, role):
     project_users = current_project.users
     project_users = [user.as_dict() for user in project_users]
 
-    data = {
-        "draw": datatable_parameters["draw"],
-        "recordsTotal": records_total,
-        "recordsFiltered": records_filtered,
-        "project_users": project_users,
-        "project": current_project.as_dict(),
-        "data": [entry.as_dict() for entry in records],
+    contrast_types_dict = [{'label': cm.name, 'value': cm.id} for cm in current_project.contrast_types]
+    contrast_types_dict.insert(0, {'label': 'NA', 'value': None})
+
+    data = [record.as_dict() for record in records]
+    for entry in data:
+        # dummy fields for image / mask upload
+        entry['upload_image'] = None
+        entry['upload_mask'] = None
+        entry['new_message'] = None
+
+    response = {
+        'draw': datatable_parameters["draw"],
+        'recordsTotal': records_total,
+        'recordsFiltered': records_filtered,
+        'project_users': project_users,
+        'data': data,
+        'options': {'contrast_type': contrast_types_dict}
     }
 
-    return jsonify(data)
+    return jsonify(response)
 
 
-@app.route('/project/<int:project_id>/case/<int:case_id>/update_meta_data', methods=['POST'])
+@app.route('/project/<int:project_id>/case/update', methods=['POST'])
 @login_required
-def update_case_meta_data(project_id, case_id):
+def update_case_meta_data(project_id):
     """
     View for handling changes to datapool objects (assignments etc.)
     """
+
+    data = request.form
+    print('---------------')
+    print(request.data)
+    print(request.form)
+    print('===============')
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
     image_object = request.json
     segmentation_object = image_object["manual_segmentation"]
 

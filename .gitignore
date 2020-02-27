@@ -115,6 +115,6 @@ ENV/
 # Application-specific ignores
 # ----------------------------
 
-app.sqlite
-app/local_settings.py
-
+/app.sqlite
+/app/local_settings.py
+/app/static/datatable_editor
