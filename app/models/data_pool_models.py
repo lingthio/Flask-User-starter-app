@@ -1,9 +1,10 @@
+from os import path, makedirs
 import enum
 from datetime import datetime
-
 from sqlalchemy import Enum, UniqueConstraint
-
 from app import db
+from flask import current_app as c_app
+import nibabel as nib
 
 
 class StatusEnum(enum.Enum):
@@ -16,9 +17,9 @@ class StatusEnum(enum.Enum):
 
 
 class SplitEnum(enum.Enum):
-    train = "train"
-    validation = "validation"
-    test = "test"
+    train = 'train'
+    validation = 'validation'
+    test = 'test'
 
 
 class Message(db.Model):
@@ -71,12 +72,28 @@ class DataPool(db.Model):
 
     # Relationships
     project = db.relationship('project_models.Project', back_populates='data_pool_objects')
-    # project = db.relationship('Project', backref=db.backref('data_pool', lazy='dynamic'))
 
     __mapper_args__ = {
         'polymorphic_identity': 'datapool',
         'polymorphic_on': type
     }
+
+    def __get_fn__(self):
+        assert self.id != None, 'you need to flush or commit the data pool object before accessing nifti data'
+        basepath = path.join(c_app.config['DATA_PATH'], self.project.short_name)
+        if not path.exists(basepath):
+            makedirs(basepath, exist_ok=True)
+        return path.join(basepath, f'{self.id}.nii.gz')
+
+    def __get_nii__(self):
+        return nib.load(self.__get_fn__())
+    
+    def __set_nii__(self, nii):
+        nii.to_filename(self.__get_fn__())
+        nii.uncache()
+    
+    nii = property(__get_nii__, __set_nii__)
+
 
 
 class Image(DataPool):
@@ -113,12 +130,12 @@ class Image(DataPool):
     manual_segmentation = db.relationship('ManualSegmentation', uselist=False,
                                           foreign_keys='ManualSegmentation.image_id',
                                           back_populates='image',
-                                          cascade="all, delete-orphan",
+                                          cascade='all, delete-orphan',
                                           passive_deletes=True)
     automatic_segmentation = db.relationship('AutomaticSegmentation', uselist=False,
                                              foreign_keys='AutomaticSegmentation.image_id',
                                              back_populates='image',
-                                             cascade="all, delete-orphan",
+                                             cascade='all, delete-orphan',
                                              passive_deletes=True)
     contrast_type = db.relationship('ContrastType', foreign_keys=[contrast_type_id], uselist=False)
     modality = db.relationship('Modality', foreign_keys=[modality_id], uselist=False)
@@ -126,14 +143,14 @@ class Image(DataPool):
     def as_dict(self):
         result = {c.name: getattr(self, c.name) for c in DataPool.__table__.columns + Image.__table__.columns}
         if self.manual_segmentation is not None:
-            result["manual_segmentation"] = self.manual_segmentation.as_dict()
+            result['manual_segmentation'] = self.manual_segmentation.as_dict()
         if self.automatic_segmentation is not None:
-            result["automatic_segmentation"] = self.automatic_segmentation.as_dict()
-        if result["split"] is not None:
-            result["split"] = self.split.value
-        result["project"] = self.project.long_name
-        result["modality"] = "" if self.modality is None else self.modality.name
-        result["contrast_type"] = "" if self.contrast_type is None else self.contrast_type.name
+            result['automatic_segmentation'] = self.automatic_segmentation.as_dict()
+        if result['split'] is not None:
+            result['split'] = self.split.value
+        result['project'] = self.project.long_name
+        result['modality'] = '' if self.modality is None else self.modality.name
+        result['contrast_type'] = '' if self.contrast_type is None else self.contrast_type.name
         return result
 
     __mapper_args__ = {
@@ -147,7 +164,7 @@ class ManualSegmentation(DataPool):
     image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'),
                          nullable=False, unique=True)
 
-    status = db.Column(Enum(StatusEnum), nullable=False, default="new")
+    status = db.Column(Enum(StatusEnum), nullable=False, default='new')
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     assigned_date = db.Column(db.DateTime, nullable=True)
     validated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
@@ -167,12 +184,12 @@ class ManualSegmentation(DataPool):
                   DataPool.__table__.columns + ManualSegmentation.__table__.columns}
 
         if self.assignee is not None:
-            result["assignee"] = self.assignee.as_dict()
+            result['assignee'] = self.assignee.as_dict()
         if self.validated_by is not None:
-            result["validated_by"] = self.validated_by.as_dict()
+            result['validated_by'] = self.validated_by.as_dict()
         if self.status is not None:
-            result["status"] = self.status.value
-        result["messages"] = [m.as_dict() for m in self.messages]
+            result['status'] = self.status.value
+        result['messages'] = [m.as_dict() for m in self.messages]
         return result
 
     __mapper_args__ = {
