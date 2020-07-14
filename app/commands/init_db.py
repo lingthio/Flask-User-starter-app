@@ -6,14 +6,17 @@
 
 import os
 import shutil
+import logging
 
 from flask_script import Command
 
 from flask import current_app as c_app
-from app import db
+from app import app, db
 from app.models.data_pool_models import Image, ManualSegmentation, AutomaticSegmentation
 from app.models.project_models import Project
 from app.models.user_models import User, Role
+
+from app.controllers import user_controller, project_controller, data_pool_controller
 
 from tqdm import trange
 import numpy as np
@@ -43,20 +46,20 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
     user_role = find_or_create_role('user', u'User')
 
     # Add users
-    admin = find_or_create_user('Admin', 'Admin', 'admin@issm.org', 'admin', [admin_role, user_role])
-    reviewer = find_or_create_user('Reviewer', 'Reviewer', 'reviewer@issm.org', 'reviewer', [user_role])
-    user = find_or_create_user('User', 'User', 'user@issm.org', 'user', [user_role])
+    admin = user_controller.find_or_create_user('Admin', 'Admin', 'admin@issm.org', 'admin', [admin_role, user_role])
+    reviewer = user_controller.find_or_create_user('Reviewer', 'Reviewer', 'reviewer@issm.org', 'reviewer', [user_role])
+    user = user_controller.find_or_create_user('User', 'User', 'user@issm.org', 'user', [user_role])
 
     # Create project sample data
     projects = []
     for project_index in range(n_projects):
-        project = Project(short_name="proj_" + str(project_index),
-                          long_name="Project_" + str(project_index), active=True)
-        project.admins.append(admin)
-        project.reviewers.append(reviewer)
-        project.users.append(user)
+
+        short_name = "proj_" + str(project_index)
+        long_name = "Project_" + str(project_index)
+
+        project = project_controller.create_project(short_name=short_name, long_name=long_name, admins = [admin], reviewers = [reviewer], users = [user])
+
         projects.append(project)
-        db.session.add(project)
 
 
         for i in trange(n_images_per_project, desc='generating sample data'):
@@ -74,25 +77,16 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
             db.session.commit()
 
 
+"""
+Find existing role or create new role
+"""
 def find_or_create_role(name, label):
-    """ Find existing role or create new role """
     role = Role.query.filter(Role.name == name).first()
+
     if not role:
         role = Role(name=name, label=label)
         db.session.add(role)
+        db.session.commit()
+
     return role
 
-
-def find_or_create_user(first_name, last_name, email, password, roles=None):
-    """ Find existing user or create new user """
-    user = User.query.filter(User.email == email).first()
-    if not user:
-        user = User(email=email,
-                    first_name=first_name,
-                    last_name=last_name,
-                    password=password,
-                    active=True)
-        if roles:
-            user.roles.extend(roles)
-        db.session.add(user)
-    return user

@@ -12,7 +12,7 @@ from app.models.project_models import Project
 from app.models.user_models import User, UserProfileForm
 from app.views.forms import ProjectForm
 
-main_blueprint = Blueprint('main', __name__, template_folder='templates')
+main_blueprint = Blueprint('view.main', __name__, template_folder='templates')
 
 
 @main_blueprint.route('/')
@@ -79,6 +79,7 @@ def project_role_page(project_id, role):
 
 
 @main_blueprint.route('/users')
+@login_required
 def users_page():
     return render_template('pages/users_page.html')
 

@@ -10,7 +10,7 @@ from gzip import GzipFile
 
 import flask
 import nibabel
-from flask import request, redirect, jsonify, flash
+from flask import Blueprint, request, redirect, jsonify, flash
 from flask_user import login_required
 from sqlalchemy import or_, asc, desc
 from sqlalchemy import DateTime, Date
@@ -22,23 +22,35 @@ from app import app, db, current_project
 from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
 from app.utils import project_admin_required, project_reviewer_required, project_user_required
 
+from app.controllers import data_pool_controller
 
-@app.route('/project/<int:project_id>/case/data')
+# Define the blueprint: 'data_pool_service', set its url prefix: app.url/data_pool
+data_pool_service = Blueprint('data_pool_service', __name__, url_prefix='/data_pool')
+
+"""
+Get all entries of the DataPool tables according to the project, role and user
+"""
+@data_pool_service.route('/project/<int:project_id>/datatable', methods = ['PUT', 'POST'])
 @project_user_required
-def case_data(project_id):
-    """
-    Get all entries of the DataPool tables according to the project, role and user
-    """
+def images_datatable(project_id):
 
-    datatable_parameters = json.loads(request.values.get("args"))
+    app.logger.info("images_datatable")
+    # See https://datatables.net/manual/server-side for all included parameters
+    datatable_parameters = json.loads(request.data)
+
     offset = datatable_parameters["start"]
     limit = datatable_parameters["length"]
 
     # Build query
     query = db.session.query(Image)
-    filter_query = query.filter(Image.project_id == current_project.id)
+
+    # only Images to requested project_id
+    filter_query = query.filter(Image.project_id == project_id)
+    # Database JOIN on Manual Segmentation
     filter_query = filter_query.join(ManualSegmentation, Image.id == ManualSegmentation.image_id)
+    # Database Outter JOIN Modality and ContrastType
     filter_query = filter_query.join(Modality, isouter=True).join(ContrastType, isouter=True)
+
     r = request
     #if role == "segmentation":
     #    # Find assigned and open cases
@@ -51,23 +63,36 @@ def case_data(project_id):
     #        ManualSegmentation.status == "submitted")
 
     # Add sorting
-    sorting_column_id = datatable_parameters["order"][0]["column"]
-    sorting_column_name = datatable_parameters["columns"][sorting_column_id]["name"]
-    sorting_direction = datatable_parameters["order"][0]["dir"]
-    sorting_direction = asc if sorting_direction == "asc" else desc
-    if sorting_column_name == "status":
+    order_by_directives = datatable_parameters["order"]
+
+    # only take the first column we should order by
+    first_order_by = order_by_directives[0]
+    first_order_by_column_id = first_order_by["column"]
+    first_order_by_dir = first_order_by["dir"]
+
+    columns = datatable_parameters["columns"]
+
+    first_oder_by_column = columns[first_order_by_column_id]
+    first_oder_by_column_name = first_oder_by_column["name"]
+
+    app.logger.info(f"Order by {first_oder_by_column_name} {first_order_by_dir}")
+
+    sorting_direction = asc if first_order_by_dir == "asc" else desc
+
+    # Ordering only enabled for columns "status", "name", "image_valid"
+    if first_oder_by_column_name == "status":
         filter_query = filter_query.order_by(sorting_direction(ManualSegmentation.status))
-    elif sorting_column_name == "name":
+    elif first_oder_by_column_name == "name":
         filter_query = filter_query.order_by(sorting_direction(Image.name))
-    elif sorting_column_name == "image_valid":
+    elif first_oder_by_column_name == "image_valid":
         filter_query = filter_query.order_by(sorting_direction(Image.is_valid))
 
     # Searching
+    searchable_columns = [Image.name, Image.patient_name, Modality.name, ContrastType.name, Image.accession_number]
     search_input = datatable_parameters["search"]["value"]
     if search_input != "":
-        search_input = "%{}%".format(search_input)
-        searchable_columns = [Image.name, Image.patient_name, Modality.name, ContrastType.name, Image.accession_number]
-        filters = [column.like(search_input) for column in searchable_columns]
+        # Search in all searchable columns
+        filters = [column.like(f"%{search_input}%") for column in searchable_columns]
         filter_query = filter_query.filter(or_(*filters))
 
     # Limit records
@@ -76,8 +101,7 @@ def case_data(project_id):
     records_filtered = filter_query.count()
 
     # Also attach the project and its users of the project
-    project_users = current_project.users
-    project_users = [user.as_dict() for user in project_users]
+    project_users = [user.as_dict() for user in current_project.users]
 
     contrast_types_dict = [{'label': cm.name, 'value': cm.id} for cm in current_project.contrast_types]
     contrast_types_dict.insert(0, {'label': 'NA', 'value': None})
@@ -101,7 +125,7 @@ def case_data(project_id):
     return jsonify(response)
 
 
-@app.route('/project/<int:project_id>/case/update', methods=['POST'])
+@data_pool_service.route('/project/<int:project_id>/case/update', methods=['POST'])
 @login_required
 def update_case_meta_data(project_id):
     """
@@ -113,7 +137,6 @@ def update_case_meta_data(project_id):
     app.logger.info(request.data)
     app.logger.info(request.form)
     app.logger.info('===============')
-
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
     image_object = request.json
@@ -167,7 +190,7 @@ def update_case_meta_data(project_id):
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/project/<int:project_id>/case/<int:case_id>/send_message', methods=['GET'])
+@data_pool_service.route('/project/<int:project_id>/case/<int:case_id>/send_message', methods=['GET'])
 @login_required
 def message(project_id, case_id):
     """
@@ -185,7 +208,7 @@ def message(project_id, case_id):
     return message
 
 
-@app.route('/project/<int:project_id>/case/upload', methods=['POST'])
+@data_pool_service.route('/project/<int:project_id>/case/upload', methods=['POST'])
 @login_required
 def upload_case(project_id):
     """
@@ -231,7 +254,7 @@ def upload_case(project_id):
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/project/<int:project_id>/case/<int:case_id>/delete', methods=["POST"])
+@data_pool_service.route('/project/<int:project_id>/case/<int:case_id>/delete', methods=["POST"])
 @login_required
 def delete_case(project_id, case_id):
     """
@@ -252,7 +275,7 @@ def delete_case(project_id, case_id):
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/project/<int:project_id>/case/<int:case_id>/upload_segmentation', methods=['POST'])
+@data_pool_service.route('/project/<int:project_id>/case/<int:case_id>/upload_segmentation', methods=['POST'])
 @login_required
 def upload_case_segmentation(project_id, case_id):
     """
@@ -307,7 +330,7 @@ def upload_case_segmentation(project_id, case_id):
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/project/<int:project_id>/case/<int:case_id>/download', methods=['GET'])
+@data_pool_service.route('/project/<int:project_id>/case/<int:case_id>/download', methods=['GET'])
 @login_required
 def download_case(project_id, case_id):
     """

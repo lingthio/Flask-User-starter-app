@@ -1,18 +1,17 @@
-from flask import Blueprint, redirect, render_template, current_app
-from flask import request, url_for
-from flask.json import jsonify
+from flask import Blueprint, render_template
+
 from flask_user import current_user, login_required, roles_required
 from app import db, flask_admin
+
 from flask_admin.contrib.sqla import ModelView
 from app.models.user_models import User, Role
 from app.models.project_models import Project
 from app.models.data_pool_models import DataPool, Image
 
-admin_blueprint = Blueprint('bp_admin', __name__, template_folder='templates')
-
+admin_blueprint = Blueprint('view.admin', __name__, template_folder='templates', url_prefix="admin")
 
 # The Admin page is accessible to users with the 'admin' role
-@admin_blueprint.route('/admin')
+@admin_blueprint.route('/')
 @login_required
 @roles_required('admin')  # Limits access to users with the 'admin' role
 def admin_page():

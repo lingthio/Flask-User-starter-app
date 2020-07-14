@@ -6,8 +6,10 @@
         $('#contrastTypeContainer').empty();
         $('#modalitiesContainer').empty();
 
+        var creating_new_project = projectObj == null;
+
         // If projectObj is null, a new project needs to be created
-        if (projectObj == null) {
+        if (creating_new_project) {
             $('#project_form_title').html("New Project");
             $('#project_form_shortname').val("");
             $('#project_form_longname').val("");
@@ -46,6 +48,7 @@
         let userSelect = $("#newUserSelect");
         $(userSelect).empty();
         for (let userObj of allUsers) {
+            console.log("append user option");
             $(userSelect).append($('<option>', {
                 text: userObj["email"]
             }));
@@ -60,31 +63,28 @@
 
         // Submit button
         $('#submitBtn').click(function (e) {
+            e.preventDefault();
+
+            let url = '/api/project' + (creating_new_project ? "" : "?id=" + projectObj["id"]);
+            let type = creating_new_project ? "POST" : "PUT";
+
             let form = document.querySelector('#projectForm');
             let formData = new FormData(form);
 
             $.ajax({
-                url: '/data/update_projects_metadata',
-                type: 'POST',
+                url: url,
+                type: type,
                 data: formData,
-                beforeSend: function (xhr) {
-                    let project_id = "";
-                    if (projectObj != null) {
-                        project_id = projectObj["id"]
-                    }
-                    xhr.setRequestHeader('project_id', project_id);
-                },
                 contentType: false,
                 processData: false,
                 success: function () {
                     location.reload();
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    location.reload();
+                    console.log(XMLHttpRequest, textStatus, errorThrown);
+                    alert(textStatus)
                 }
             });
-
-            e.preventDefault();
         });
 
         $('#projectConfigModal').modal('show');
@@ -101,6 +101,7 @@
             "                                </button>\n" +
             "                            </div>\n" +
             "                        </div>";
+        console.log("append addContrastType");
         $(container).append(newEntry);
         newEntry = $(container).children().last();
 
@@ -121,6 +122,7 @@
             "                                </button>\n" +
             "                            </div>\n" +
             "                        </div>";
+        console.log("append addModalitiy");
         $(container).append(newEntry);
         newEntry = $(container).children().last();
 
@@ -151,6 +153,7 @@
             "                                </button>\n" +
             "                            </div>\n" +
             "                        </div>";
+        console.log("append addUser");
         $(userContainer).append(newEntry);
         newEntry = $(userContainer).children().last();
 

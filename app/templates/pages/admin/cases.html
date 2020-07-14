@@ -8,113 +8,113 @@
     var table_def = [
         {
             type: 'readonly',
-            label: 'ID',
+            title: 'ID',
             data: 'id',
             name: 'contrast_type_id',
             visible: false
         },
         {
-            label: 'Name',
+            title: 'Name',
             data: 'name'
         },
         {
-            label: 'Accession Number',
+            title: 'Accession Number',
             data: 'accession_number'
         },
         {
             type: 'readonly',
-            label: 'Status',
+            title: 'Status',
             data: 'manual_segmentation.status'
         },
         {
             type: 'select',
-            label: 'Split',
+            title: 'Split',
             data: 'split'
         },
         {  
-            label: 'Body Region',
+            title: 'Body Region',
             data: 'body_region'
         },
         {
-            label: 'Modality',
+            title: 'Modality',
             data: 'modality'
         },
         {
             type: 'select',
-            label: 'Contrast',
+            title: 'Contrast',
             data: 'contrast_type'
         },
         {
-            label: 'Series Name',
+            title: 'Series Name',
             data: 'series_name',
             visible: false
         },
         {
-            label: 'Series Description',
+            title: 'Series Description',
             data: 'series_description',
             visible: false
         },
         {
-            label: 'Series Number',
+            title: 'Series Number',
             data: 'series_number',
             visible: false
         },
         {
-            label: 'Series Instance UID',
+            title: 'Series Instance UID',
             data: 'series_instance_uid',
             visible: false
         },
         {
-            label: 'Patient Name',
+            title: 'Patient Name',
             data: 'patient_name',
             visible: false
         },
         {
             type: 'datetime',
-            label: 'DOB',
+            title: 'DOB',
             data: 'patient_dob',
             visible: false
         },
         {
             type: 'datetime',
-            label: 'Insert Date',
+            title: 'Insert Date',
             data: 'insert_date',
             visible: false
         },
         {
             type: 'datetime',
-            label: 'Updated',
+            title: 'Updated',
             data: 'last_updated',
             visible: false
         },
         {
-            label: 'Institution',
+            title: 'Institution',
             data: 'institution',
             visible: false
         },
         {
-            label: 'Custom 1',
+            title: 'Custom 1',
             data: 'custom_1',
             visible: false
         },
         {
-            label: 'Custom 2',
+            title: 'Custom 2',
             data: 'custom_2',
             visible: false
         },
         {
-            label: 'Custom 3',
+            title: 'Custom 3',
             data: 'custom_3',
             visible: false
         },
         {
             type: 'upload',
-            label: 'Image',
+            title: 'Image',
             data: 'upload_image'
         },
         {
             type: 'upload',
-            label: 'Mask',
+            title: 'Mask',
             data: 'upload_mask'
         },
     ];
@@ -137,10 +137,11 @@
             select: true,
             stateSave: true,
             ajax: {
-                url: '/project/{{current_project.id}}/case/data',
-                data: function (args) {
-                    return {"args": JSON.stringify(args)};
-                    }
+                url: '/api/data_pool/project/' + project_id + '/datatable',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: (args) => JSON.stringify(args),
             },
 
             columns: table_def,

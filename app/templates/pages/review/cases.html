@@ -3,42 +3,132 @@
 {% block content %}
 <script type="text/javascript" class="init">
 
+    var table_def = [
+        {
+            title: 'Name',
+            data: 'name'
+        },
+        {
+            title: 'Patient Name',
+            data: 'patient_name',
+            visible: false
+        },
+        {
+            title: 'Modality',
+            data: 'modality'
+        },
+        
+        {
+            type: 'select',
+            title: 'Contrast',
+            data: 'contrast_type'
+        },
+        {
+            title: 'Accession Number',
+            data: 'accession_number'
+        },
+        {
+            type: 'datetime',
+            title: 'Insert Date',
+            data: 'insert_date',
+            visible: false
+        },
+        {
+            type: 'datetime',
+            title: 'Updated',
+            data: 'last_updated',
+            visible: false
+        },
+        // Missing: Last Message
+        {
+            type: 'readonly',
+            title: 'Status',
+            data: 'manual_segmentation.status'
+        },
+        {
+            type: 'readonly',
+            title: 'ID',
+            data: 'id',
+            name: 'contrast_type_id',
+            visible: false
+        },
+        {
+            type: 'select',
+            title: 'Split',
+            data: 'split'
+        },
+        {  
+            title: 'Body Region',
+            data: 'body_region'
+        },
+        {
+            title: 'Series Name',
+            data: 'series_name',
+            visible: false
+        },
+        {
+            title: 'Series Description',
+            data: 'series_description',
+            visible: false
+        },
+        {
+            title: 'Series Number',
+            data: 'series_number',
+            visible: false
+        },
+        {
+            title: 'Series Instance UID',
+            data: 'series_instance_uid',
+            visible: false
+        },
+        {
+            type: 'upload',
+            title: 'Image',
+            data: 'upload_image'
+        },
+        {
+            type: 'upload',
+            title: 'Mask',
+            data: 'upload_mask'
+        },
+    ];
+
     $(document).ready(function () {
-        // Table definition
-        let columns = [
-            {name: 'status', data: null, render: function(data){return createStatusLabel(data, false);}},
-            {
-                data: null,
-                render: createUserAssignSelect
-            },
-            {
-                data: null,
-                render: createSplitAssignSelect
-            },
-            {
-                data: null,
-                render: function (data, type, row) {
-                    return '<button class="btn btn-danger reviewButton">Review</i></button>';
-                }
-            },
-            {
-                data: null,
-                render: function (data, type, row) {
-                    return '<button style="margin-left: 30px" class="btn btn-primary dataDownloadButton">Download</button>';
 
-                }
-            },
-
-        ];
+        setup_data_table(table_def, '#datatable', '#toggle_columns');
 
         // Initialize table
-        generalTable["columns"] = generalTable["columns"].concat(columns);
-        $('#datatable').DataTable(generalTable);
+        datatable = $('#datatable').DataTable( {
+            serverSide: true,
+            dom: "Bfrtip",
+            select: true,
+            stateSave: true,
+            ajax: {
+                url: '/api/data_pool/project/' + project_id + '/datatable',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: (args) => JSON.stringify(args),
+                // uncomment following lines to print result, but it will not appear in the table then!
+                // success: (data) => {
+                //     console.log(data);
+                //     return data;
+                // }
+            },
 
-        // Buttons/checkboxes functionality
-        $('#datatable').on('draw.dt', function () {
-            registerDatatableElements();
-        });
+            columns: table_def,
+            columnDefs: table_def, 
+            
+            buttons: [
+                    { extend: 'pageLength'},
+                    { extend:'colvis' },
+            ]
+        } );
+
+        // // Buttons/checkboxes functionality
+        // $('#datatable').on('draw.dt', function () {
+        //     registerDatatableElements();
+        // });
 
     });
 
@@ -46,21 +136,7 @@
 <table id="datatable" class="table table-striped table-hover dt-responsive nowrap">
     <thead>
     <tr>
-        <th></th>
-        <th> Name</th>
-        <th> Patient Name</th>
-        <th> Modality</th>
-        <th> Contrast Type</th>
-        <th> Accession Number</th>
-        <th> Insert Date</th>
-        <th> Last Updated</th>
-        <th> Last Message</th>
-
-        <th> Status</th>
-        <th> Assign</th>
-        <th> Split</th>
-        <th> Review</th>
-        <th> Data</th>
+        <!-- table headers are added programmatically -->
     </tr>
     </thead>
 </table>

@@ -2,6 +2,10 @@
     function showNewUserModal() {
         $('#newUserModal').modal('show');
     }
+
+    function submitButtonClicked() {
+        
+    }
 </script>
 
 <div class="modal fade" id="newUserModal" tabindex="-1" role="dialog">
@@ -16,7 +20,7 @@
             </div>
 
             <div class="modal-body">
-                <form action="/data/new_user" method="post">
+                <form action="/api/user" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
                     <!-- User info -->

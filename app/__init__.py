@@ -3,6 +3,7 @@
 
 from datetime import datetime
 import os, re
+import logging
 
 from flask import Flask, request
 from flask_script import Manager
@@ -14,8 +15,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_admin import Admin
 from werkzeug.local import LocalProxy
 
-# Instantiate Flask
-app = Flask(__name__)
+app = None
 
 # Instantiate Flask extensions
 csrf_protect = CSRFProtect()
@@ -24,30 +24,46 @@ mail = Mail()
 migrate = Migrate()
 flask_admin = Admin(url='/admin/flask_admin')
 
+from app.controllers import project_controller
 
 # add current_project globally
-from app.models.project_models import Project
-id_finder = re.compile('^\/project\/(?P<project_id>\d*)')
-def _get_project():
-    r = id_finder.match(request.path)
-    if not r: # not a valid project path
+def _get_current_project():
+    global app
+
+    id_finder = re.compile(r'.*?\/project\/(?P<project_id>\d+)\/')
+    matches = id_finder.match(request.path)
+
+    if not matches:  # not a valid project path
+        app.logger.info(f"Path has no project id {request.path}")
         return None
-    if r.group('project_id') == '': # project id not set
-        return None
-    project_id = int(r.group('project_id'))
-    return db.session.query(Project).filter(Project.id == project_id).first()
-current_project = LocalProxy(lambda: _get_project())
+
+    id_group = matches.group('project_id')
+    project_id = int(id_group)
+    
+    # app.logger.info(f"{request.path} has project id {id_group} or as int {project_id}")
+
+    current_project = project_controller.find_project(id = project_id)
+
+    return current_project
+
+current_project = LocalProxy(lambda: _get_current_project())
 
 # add current_project to template engine
 def _project_context_processor():
-    return dict(current_project=_get_project())
-app.context_processor(_project_context_processor)
-
+    return dict(current_project=_get_current_project())
 
 # Initialize Flask Application
 def create_app(extra_config_settings={}):
     """Create a Flask application.
     """
+
+    global app
+
+    # Instantiate Flask
+    app = Flask(__name__)
+
+    # make "current_project" referrable in templates
+    app.context_processor(_project_context_processor)
 
     # Load common settings
     app.config.from_object('app.settings')
@@ -71,9 +87,15 @@ def create_app(extra_config_settings={}):
     # Setup WTForms CSRFProtect
     csrf_protect.init_app(app)
 
+    # Register REST Api
+    from app.services import register_blueprints as register_api
+    register_api(app, url_prefix="/api")
+    
     # Register views
-    from .views import register_blueprints
-    register_blueprints(app)
+    from app.views import register_blueprints as register_view
+    register_view(app, url_prefix="")
+
+    app.logger.info(app.url_map)
 
     # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
     from wtforms.fields import HiddenField

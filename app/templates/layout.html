@@ -9,7 +9,7 @@
     <title>Image Segmentation Study Manager</title>
 
     <!-- JS libraries-->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="{{ url_for('static', filename='jquery-3.4.1.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
@@ -52,7 +52,9 @@
     });
 
     // Save meta data like project id and user id for later usage
-    let project_id = {{current_project.id}};
+    {% if current_project.id is defined %}
+        let project_id = {{current_project.id}};
+    {% endif %} 
     let user_id = {{current_user.id}};
 </script>
 

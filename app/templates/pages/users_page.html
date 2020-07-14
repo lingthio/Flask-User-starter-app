@@ -4,7 +4,8 @@
 <script type="text/javascript" class="init">
     $(document).ready(function () {
         let datatableDefinition = {
-            ajax: {url: "/data/all_users"},
+            ajax: {url: "/api/user/all",
+            dataSrc: "users"},
             columns: [
                 {name: 'First Name', data: 'first_name'},
                 {name: 'Last Name', data: 'last_name'},
@@ -28,10 +29,8 @@
                 console.log(userObject);
 
                 $.ajax({
-                    beforeSend: function (request) {
-                        request.setRequestHeader("user_id", userObject["id"]);
-                    },
-                    url: '/data/delete_user',
+                    url: '/api/user?id=' + userObject["id"],
+                    type: 'DELETE',
                     success: function (data) {
                         location.reload();
                     },
