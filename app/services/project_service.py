@@ -14,6 +14,8 @@ from app.models.user_models import User
 
 from app.controllers import project_controller, user_controller
 
+from app.utils import technical_admin_required, project_admin_required, project_reviewer_required, project_user_required
+
 # Define the blueprint: 'project_service', set its url prefix: app.url/project
 project_service = Blueprint('project_service', __name__, url_prefix='/project')
 
@@ -40,6 +42,7 @@ Update the project: names, description and users
 """
 @project_service.route("", methods=['POST'])
 @login_required
+@technical_admin_required
 def create_project():
 
     # check, if the request is fired by a form or by ajax call
@@ -63,6 +66,7 @@ Update the project: names, description and users
 """
 @project_service.route("", methods=['PUT', 'POST'])
 @login_required
+@project_admin_required
 def create_or_update_project():
 
     # project ID needs to be in the url like /project?id=1
@@ -216,6 +220,7 @@ Deletes the project
 """
 @project_service.route("", methods=['DELETE'])
 @login_required
+@project_admin_required
 def delete_project():
     # project ID needs to be in the url like /project?id=1
     project_id = request.args.get('id')

@@ -32,7 +32,8 @@
                     url: '/api/user?id=' + userObject["id"],
                     type: 'DELETE',
                     success: function (data) {
-                        location.reload();
+                        $('#userDatatable').DataTable().ajax.reload();
+                        //location.reload();
                     },
                     error: function (e) {
                         console.log(e);
@@ -61,7 +62,10 @@
     </thead>
 </table>
 
+{% if is_technical_admin %}
 <button class="btn btn-primary" id="addUserButton">Add User</button>
+{% endif %}
+
 {% endblock %}
 
 {% block forms %}

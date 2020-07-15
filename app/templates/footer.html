@@ -1,0 +1,35 @@
+
+<footer class="footer">
+    <div class="container" style="max-width: unset;">
+        <div class="row" style="padding: 30px">
+
+            <table>
+                <tr>
+                    <td>Version</td>
+                    <td>{{ config.VERSION }}</td>
+                </tr>
+                <tr>
+                    <td>Copyright</td>
+                    <td>© 2020 Medical School Hanover</td>
+                </tr>
+                <tr>
+                    <td>Technical Admin</td>
+                    <td>{{'True' if is_technical_admin else 'False'}}</td>
+                </tr>
+                <tr>
+                    <td>Project Admin</td>
+                    <td>{{'True' if is_project_admin else 'False'}}</td>
+                </tr>
+                <tr>
+                    <td>Project Reviewer</td>
+                    <td>{{'True' if is_project_reviewer else 'False'}}</td>
+                </tr>
+                <tr>
+                    <td>Project User</td>
+                    <td>{{'True' if is_project_user else 'False'}}</td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+</footer>

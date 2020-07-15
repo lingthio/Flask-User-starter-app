@@ -20,7 +20,8 @@ from nibabel.filebasedimages import SerializableImage
 
 from app import app, db, current_project
 from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
-from app.utils import project_admin_required, project_reviewer_required, project_user_required
+
+from app.utils import technical_admin_required, project_admin_required, project_reviewer_required, project_user_required
 
 from app.controllers import data_pool_controller
 

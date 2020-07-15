@@ -1,8 +1,7 @@
 import json
 import os
 
-from app import db
-from app import current_project
+from app import db, current_project
 
 from app.models.project_models import Project
 from app.models.user_models import User

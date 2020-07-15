@@ -2,20 +2,26 @@
 # a Python package so it can be accessed using the 'import' statement.
 
 from datetime import datetime
-import os, re
+import os
 import logging
 
-from flask import Flask, request
 from flask_script import Manager
+
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_migrate import Migrate, MigrateCommand
-from flask_user import UserManager
 from flask_wtf.csrf import CSRFProtect
+from flask_scss import Scss
+
+from flask_user import UserManager, current_user
 from flask_admin import Admin
+
 from werkzeug.local import LocalProxy
 
 app = None
+current_project = None
+user_manager = None
 
 # Instantiate Flask extensions
 csrf_protect = CSRFProtect()
@@ -24,46 +30,17 @@ mail = Mail()
 migrate = Migrate()
 flask_admin = Admin(url='/admin/flask_admin')
 
-from app.controllers import project_controller
-
-# add current_project globally
-def _get_current_project():
-    global app
-
-    id_finder = re.compile(r'.*?\/project\/(?P<project_id>\d+)\/')
-    matches = id_finder.match(request.path)
-
-    if not matches:  # not a valid project path
-        app.logger.info(f"Path has no project id {request.path}")
-        return None
-
-    id_group = matches.group('project_id')
-    project_id = int(id_group)
-    
-    # app.logger.info(f"{request.path} has project id {id_group} or as int {project_id}")
-
-    current_project = project_controller.find_project(id = project_id)
-
-    return current_project
-
-current_project = LocalProxy(lambda: _get_current_project())
-
-# add current_project to template engine
-def _project_context_processor():
-    return dict(current_project=_get_current_project())
-
 # Initialize Flask Application
 def create_app(extra_config_settings={}):
     """Create a Flask application.
     """
 
-    global app
+    global app, current_project, user_manager
 
     # Instantiate Flask
     app = Flask(__name__)
 
-    # make "current_project" referrable in templates
-    app.context_processor(_project_context_processor)
+    app.logger.info("Created Flask Application")
 
     # Load common settings
     app.config.from_object('app.settings')
@@ -71,6 +48,13 @@ def create_app(extra_config_settings={}):
     app.config.from_object('app.local_settings')
     # Load extra settings from extra_config_settings param
     app.config.update(extra_config_settings)
+
+    # import utils here, because they need the initialized app variable
+    from app import utils
+
+    current_project = LocalProxy(lambda: utils.get_current_project())
+
+    Scss(app, static_dir='app/static', asset_dir='app/assets')
 
     # Setup Flask-SQLAlchemy
     db.init_app(app)
@@ -115,9 +99,8 @@ def create_app(extra_config_settings={}):
     # Setup Flask-User
     user_manager = UserManager(app, db, User)
 
-    @app.context_processor
-    def context_processor():
-        return dict(user_manager=user_manager)
+    # registers all jinja template extensions
+    from app import template_extensions
 
     return app
 

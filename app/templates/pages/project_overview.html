@@ -86,7 +86,9 @@
     </table>
 
     <div>
+        {% if is_technical_admin %}
         <button class="btn btn-primary" id="addProjectButton">Add Project</button>
+        {% endif %}
         <button class="btn btn-primary" id="addUsersButton" onclick="window.location.href = '/users'">Users</button>
     </div>
 

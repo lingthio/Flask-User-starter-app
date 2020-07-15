@@ -136,6 +136,7 @@
             dom: "Bfrtip",
             select: true,
             stateSave: true,
+
             ajax: {
                 url: '/api/data_pool/project/' + project_id + '/datatable',
                 type: 'POST',
@@ -146,6 +147,8 @@
 
             columns: table_def,
             columnDefs: table_def, 
+
+            scrollX: true,
             
             buttons: [
                     { extend: 'pageLength'},
@@ -161,7 +164,7 @@
 </script>
 
 
-<table id="datatable" class="table table-striped table-hover dt-responsive nowrap">
+<table id="datatable" class="table table-striped table-hover nowrap">
     <thead>
     <tr>
         <!-- table headers are added programmatically -->

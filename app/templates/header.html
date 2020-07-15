@@ -1,0 +1,162 @@
+<header class="header">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <!-- <div class="collapse navbar-collapse" id="navbarSupportedContent"> -->
+        <div class="container" style="max-width: unset;">
+
+            <img id="logo" style="height: 100px" src="{{ url_for('static', filename='favicon.png') }}">
+
+            <div class="navbar-collapse collapse">
+
+                <ul class="navbar-nav menu m-auto header__menu">
+
+                {% if is_technical_admin %}
+                <!-- To Flask Administration Page -->
+                <li class="nav-item dropdown submenu" style="margin-right: 5rem">
+                    <a 
+                    active-class="active"
+                    href="/admin/flask_admin" 
+                    class="nav-link"
+                    aria-haspopup="true" 
+                    aria-expanded="true"
+                    exact
+                    >Flask Admin</a>
+                </li>
+                {% endif %}
+
+                <!-- All Projects -->
+                <li class="nav-item dropdown submenu" style="margin-right: 0.5rem">
+                    <a 
+                    href="/project/overview" 
+                    class="nav-link dropdown-toggle"
+                    role="button" 
+                    aria-haspopup="true" 
+                    aria-expanded="false"
+                    >Projects</a>
+
+                    <ul role="menu" class="dropdown-menu">
+                        {% for project in all_projects %}
+
+                            {% if project.long_name is defined %}
+                            <li class="nav-item">
+                                <a 
+                                active-class="active"
+                                class="nav-link"
+                                href="/project/{{project.id}}"
+                                >{{ project.long_name }}</a>
+                            </li>
+                            {% endif %}
+
+                        {% if all_projects|length > 5 %}
+                        <li>... {{ len(all_projects) - 5 }} more</li>
+                        {% endif %}
+
+                        {% endfor %}
+                    </ul>
+                </li>
+
+                <!-- project specific navigation -->
+                {% if current_project.id is defined %}
+                
+                    <!-- Administrate project -->
+                    {% if is_project_admin %}
+                    <li class="nav-item dropdown submenu">
+                        <a 
+                        active-class="active"
+                        class="nav-link dropdown-toggle"
+                        role="button" 
+                        aria-haspopup="true" 
+                        aria-expanded="false"
+                        exact
+                        >Admin</a>
+
+                        <ul role="menu" class="dropdown-menu">
+                            <li class="nav-item">
+                                <a 
+                                active-class="active"
+                                class="nav-link"
+                                href="/project/{{current_project.id}}/admin/cases"
+                                >Cases</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a 
+                                active-class="active"
+                                class="nav-link"
+                                href="/project/{{current_project.id}}/admin/models"
+                                >Models</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if is_project_reviewer %}
+                    <!-- Review Project -->
+                    <li class="nav-item dropdown submenu">
+                        <a 
+                        active-class="active"
+                        class="nav-link dropdown-toggle"
+                        role="button" 
+                        aria-haspopup="true" 
+                        aria-expanded="false"
+                        exact
+                        >Review</a>
+
+                        <ul role="menu" class="dropdown-menu">
+                            <li class="nav-item">
+                                <a 
+                                active-class="active"
+                                class="nav-link"
+                                href="/project/{{current_project.id}}/review/cases"
+                                >Cases</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if is_project_user %}
+                    <!-- Segmentation -->
+                    <li class="nav-item dropdown submenu">
+                        <a 
+                        active-class="active"
+                        class="nav-link dropdown-toggle"
+                        role="button" 
+                        aria-haspopup="true" 
+                        aria-expanded="false"
+                        exact
+                        >Segmentation</a>
+
+                        <ul role="menu" class="dropdown-menu">
+                            <li class="nav-item">
+                                <a 
+                                active-class="active"
+                                class="nav-link"
+                                href="/project/{{current_project.id}}/segmentation/cases"
+                                >Cases</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                {% endif %}
+
+                </ul>
+
+            </div>
+            
+            {% if is_logged_in %}
+                <span style="margin-right: 1.5rem">{{ current_user.first_name }}</span>
+                <button class="btn" style="margin-right: 0.5rem">
+                    <a href="{{ url_for('user.logout') }}">Sign Out</a>
+                </button>
+            {% else %}
+                <button class="btn" style="margin-right: 0.5rem">
+                    <a href="{{ url_for('user.login') }}">Login</a>
+                </button>
+            {% endif %}
+            <img id="mhh_logo" style="height: 100px;" src="{{ url_for('static', filename='mhh_logo.png') }}">
+
+            
+        </div>
+        <!-- </div> -->
+    </nav>
+  </header>

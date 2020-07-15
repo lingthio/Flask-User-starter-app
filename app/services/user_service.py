@@ -8,10 +8,12 @@ from flask import Blueprint, request, jsonify, redirect
 from flask_login import current_user
 from flask_user import login_required
 
-from app.controllers import user_controller
-
 from app import app, db
 from app.models.user_models import User
+
+from app.controllers import user_controller
+
+from app.utils import technical_admin_required, project_admin_required, project_reviewer_required, project_user_required
 
 
 # Define the blueprint: 'user_service', set its url prefix: app.url/user
@@ -37,6 +39,7 @@ Add new user
 """
 @user_service.route("", methods=["POST"])
 @login_required
+@technical_admin_required
 def new_user():
 
     # check, if the request is fired by a form or by ajax call
@@ -98,6 +101,7 @@ Delete user with specified id from database
 """
 @user_service.route("", methods=['DELETE'])
 @login_required
+@technical_admin_required
 def delete_user_by_id():
 
     user_id = request.args.get('id')

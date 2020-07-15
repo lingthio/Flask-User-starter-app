@@ -8,10 +8,12 @@ Flask==1.1.1
 Flask-Login==0.4.0
 Flask-Migrate==2.0.2
 Flask-Script==2.0.5
-Flask-SQLAlchemy==2.4.0
+Flask-SQLAlchemy==2.4.4
 Flask-WTF==0.14.3
 Flask-User==1.0.1.5
+email_validator==1.1.1
 Flask-Admin==1.5.5
+Flask-Scss==0.5
 
 # Automated tests
 pytest==3.0.5
