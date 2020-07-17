@@ -15,34 +15,41 @@
         },
         {
             title: 'Name',
-            data: 'name'
+            data: 'name',
+            create: true,
         },
         {
             title: 'Accession Number',
             data: 'accession_number'
         },
         {
-            type: 'readonly',
+            type: 'select',
             title: 'Status',
+            name: 'status',
             data: 'manual_segmentation.status'
         },
         {
             type: 'select',
             title: 'Split',
-            data: 'split'
+            data: 'split',
+            create: true,
         },
         {  
             title: 'Body Region',
-            data: 'body_region'
+            data: 'body_region',
+            create: true,
         },
         {
+            type: 'select',
             title: 'Modality',
-            data: 'modality'
+            data: 'modality',
+            create: true,
         },
         {
             type: 'select',
             title: 'Contrast',
-            data: 'contrast_type'
+            data: 'contrast_type',
+            create: true,
         },
         {
             title: 'Series Name',
@@ -67,13 +74,15 @@
         {
             title: 'Patient Name',
             data: 'patient_name',
-            visible: false
+            visible: false,
+            create: true,
         },
         {
-            type: 'datetime',
+            type: 'date',
             title: 'DOB',
             data: 'patient_dob',
-            visible: false
+            visible: false,
+            create: true,
         },
         {
             type: 'datetime',
@@ -90,7 +99,8 @@
         {
             title: 'Institution',
             data: 'institution',
-            visible: false
+            visible: false,
+            create: true,
         },
         {
             title: 'Custom 1',
@@ -110,55 +120,101 @@
         {
             type: 'upload',
             title: 'Image',
-            data: 'upload_image'
+            data: 'upload_image',
+            create: true,
         },
         {
             type: 'upload',
             title: 'Mask',
-            data: 'upload_mask'
+            data: 'upload_mask',
+            create: true,
         },
     ];
  
 
     $(document).ready(function () {
 
-        setup_data_table(table_def, '#datatable', '#toggle_columns');
+        /*
+        setup_data_table has to load data from the backend which is normally done asynchronous.
+        This means, it returns an Array of Promises which include the API Calls to the backend.
 
-        editor = new $.fn.dataTable.Editor( {
-            ajax: '/project/{{current_project.id}}/case/update',
-            table: '#datatable',
-            idSrc:  'id',
-            fields: table_def
-        } );
+        When those are fulfilled, we can instantiate the editor with the fields.
 
-        datatable = $('#datatable').DataTable( {
-            serverSide: true,
-            dom: "Bfrtip",
-            select: true,
-            stateSave: true,
+        */
+        Promise.all(setup_data_table(table_def, '#datatable', '#toggle_columns')).then(() => {
 
-            ajax: {
-                url: '/api/data_pool/project/' + project_id + '/datatable',
-                type: 'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: (args) => JSON.stringify(args),
-            },
+            editor = new $.fn.dataTable.Editor({
+                ajax: {
+                    create: {
+                        type: 'POST',
+                        url:  '/api/data_pool/project/' + project_id + '/case'
+                    },
+                    edit: {
+                        type: 'PUT',
+                        url:  '/api/data_pool/project/' + project_id + '/case?id=_id_'
+                    },
+                    remove: {
+                        type: 'DELETE',
+                        url:  '/api/data_pool/project/' + project_id + '/case?id=_id_'
+                    }
+                },
+                table: '#datatable',
+                idSrc:  'id',
+                //fields: table_def.filter(column => column.create)
+                fields: table_def
+            });
 
-            columns: table_def,
-            columnDefs: table_def, 
+            editor.on('initCreate', function() {
+                editor.show(); //Shows all fields
 
-            scrollX: true,
-            
-            buttons: [
-                    { extend: 'pageLength'},
-                    { extend:'colvis' },
-                    { extend: 'create', editor: editor },
-                    { extend: 'edit',   editor: editor },
-                    { extend: 'remove', editor: editor }
-            ]
-        } );
+                table_def.forEach(field => {
+                    // Only fields with the attribute create(: true) are shown
+                    if(!field.create) {
+                        editor.hide(field.name);
+                    }
+                });
+            });
 
+            editor.on('initEdit', function() {
+                editor.show(); //Shows all fields
+
+                // TODO decide, which fields should be hidden
+            });
+
+            console.log(editor);
+
+            console.log(table_def);
+
+        }).then(() => {
+            datatable = $('#datatable').DataTable( {
+                serverSide: true,
+                dom: "Bfrtip",
+                select: true,
+                stateSave: true,
+    
+                ajax: {
+                    url: '/api/data_pool/project/' + project_id + '/datatable',
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: (args) => JSON.stringify(args),
+                    // success: (data) => console.log(data),
+                },
+    
+                columns: table_def,
+                columnDefs: table_def, 
+    
+                scrollX: true,
+                
+                buttons: [
+                        { extend: 'pageLength'},
+                        { extend:'colvis' },
+                        { extend: 'create', editor: editor },
+                        { extend: 'edit',   editor: editor },
+                        { extend: 'remove', editor: editor }
+                ]
+            });
+        });
     });
 
 </script>

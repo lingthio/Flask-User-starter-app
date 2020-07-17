@@ -15,19 +15,19 @@ from app.controllers import user_controller, project_controller
 
 # add current_project globally
 def get_current_project():
-    app.logger.info(f"get_current_project: {app}")
+    app.logger.debug(f"get_current_project: {app}")
 
     id_finder = re.compile(r'.*?\/project\/(?P<project_id>\d+)')
     matches = id_finder.match(request.path)
 
     if not matches:  # not a valid project path
-        app.logger.info(f"Path has no project id {request.path}")
+        app.logger.debug(f"Path has no project id {request.path}")
         return None
 
     id_group = matches.group('project_id')
     project_id = int(id_group)
     
-    # app.logger.info(f"{request.path} has project id {id_group} or as int {project_id}")
+    # app.logger.debug(f"{request.path} has project id {id_group} or as int {project_id}")
 
     current_project = project_controller.find_project(id = project_id)
 

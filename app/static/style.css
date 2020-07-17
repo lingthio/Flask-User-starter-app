@@ -1,10 +1,8 @@
 p, i, span, time, div, center {
   color: #333 !important; }
-  p:hover, i:hover, span:hover, time:hover, div:hover, center:hover {
-    background-color: unset !important; }
-    p.text, i.text, span.text, time.text, div.text, center.text {
-      color: #333 !important;
-      background-color: unset !important; }
+  p.text, i.text, span.text, time.text, div.text, center.text {
+    color: #333 !important;
+    background-color: white !important; }
 
 .text, .link {
   color: #333 !important; }
@@ -25,14 +23,14 @@ p, i, span, time, div, center {
     background-color: #888; }
 
 .btn-primary {
-  color: unset !important; }
+  color: #333 !important; }
 
   .btn-secondary {
-    color: unset !important;
+    color: #333 !important;
     background-color: #ddd; }
 
     .btn-success {
-      color: unset !important; }
+      color: #333 !important; }
 
       .alert {
         margin-bottom: 0 !important; }
@@ -40,10 +38,10 @@ p, i, span, time, div, center {
         a {
           color: #333 !important; }
           a:hover {
-            background-color: unset !important; }
+            background-color: transparent !important; }
             a.text {
               color: #333 !important;
-              background-color: unset !important; }
+              background-color: transparent !important; }
               a :link {
                 color: #333 !important; }
 

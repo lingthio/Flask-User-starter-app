@@ -19,7 +19,7 @@ from nibabel.dataobj_images import DataobjImage
 from nibabel.filebasedimages import SerializableImage
 
 from app import app, db, current_project
-from app.models.data_pool_models import Image, ManualSegmentation, Message, Modality, ContrastType
+from app.models.data_pool_models import StatusEnum, SplitEnum, Image, ManualSegmentation, Message, Modality, ContrastType
 
 from app.utils import technical_admin_required, project_admin_required, project_reviewer_required, project_user_required
 
@@ -29,9 +29,65 @@ from app.controllers import data_pool_controller
 data_pool_service = Blueprint('data_pool_service', __name__, url_prefix='/data_pool')
 
 """
+Get all Status values for Images
+"""
+@data_pool_service.route("/statusEnum/all")
+@login_required
+def get_all_image_status_values():
+
+    data = {
+        "status_enum": [statusEnum.as_dict() for statusEnum in StatusEnum]
+    }
+
+    return jsonify(data)
+
+"""
+Get all Split values for Images
+"""
+@data_pool_service.route("/splitEnum/all")
+@login_required
+def get_all_image_split_values():
+
+    data = {
+        "split_enum": [splitEnum.as_dict() for splitEnum in SplitEnum]
+    }
+
+    return jsonify(data)
+
+"""
+Get all Modalities of a project
+"""
+@data_pool_service.route("/project/<int:project_id>/modalities")
+@login_required
+def get_modalities_of_project(project_id):
+
+    modalities = data_pool_controller.get_all_modalities_for_project(project_id = project_id)
+
+    data = {
+        "modalities": [modality.as_dict() for modality in modalities]
+    }
+
+    return jsonify(data)
+
+"""
+Get all ContrastTypes of a project
+"""
+@data_pool_service.route("/project/<int:project_id>/contrast_types")
+@login_required
+def get_contrast_types_of_project(project_id):
+
+    contrast_types = data_pool_controller.get_all_contrast_types_for_project(project_id = project_id)
+
+    data = {
+        "contrast_types": [contrast_type.as_dict() for contrast_type in contrast_types]
+    }
+
+    return jsonify(data)
+
+"""
 Get all entries of the DataPool tables according to the project, role and user
 """
-@data_pool_service.route('/project/<int:project_id>/datatable', methods = ['PUT', 'POST'])
+@data_pool_service.route('/project/<int:project_id>/datatable', methods = ['POST'])
 @project_user_required
 def images_datatable(project_id):
 
@@ -101,12 +157,15 @@ def images_datatable(project_id):
     records_total = query.count()
     records_filtered = filter_query.count()
 
+    app.logger.info(records[0].as_dict())
+
     # Also attach the project and its users of the project
     project_users = [user.as_dict() for user in current_project.users]
 
-    contrast_types_dict = [{'label': cm.name, 'value': cm.id} for cm in current_project.contrast_types]
-    contrast_types_dict.insert(0, {'label': 'NA', 'value': None})
+    # contrast_types_dict = [{'label': cm.name, 'value': cm.id} for cm in current_project.contrast_types]
+    # contrast_types_dict.insert(0, {'label': 'NA', 'value': None})
 
+    # TODO add values for these fields
     data = [record.as_dict() for record in records]
     for entry in data:
         # dummy fields for image / mask upload
@@ -120,13 +179,13 @@ def images_datatable(project_id):
         'recordsFiltered': records_filtered,
         'project_users': project_users,
         'data': data,
-        'options': {'contrast_type': contrast_types_dict}
+        # 'options': {'contrast_type': contrast_types_dict}
     }
 
     return jsonify(response)
 
 
-@data_pool_service.route('/project/<int:project_id>/case/update', methods=['POST'])
+@data_pool_service.route('/project/<int:project_id>/case', methods=['PUT'])
 @login_required
 def update_case_meta_data(project_id):
     """

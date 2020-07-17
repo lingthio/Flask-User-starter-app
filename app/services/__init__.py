@@ -10,8 +10,10 @@ from .user_service import user_service
 all_services = [data_pool_service, project_service, user_service]
 
 
-def register_blueprints(app, url_prefix = "/api"):
+def register_blueprints(app, url_prefix = "/api", exempt_from_csrf = False, csrf_protect = None):
 
     for service in all_services:
         app.register_blueprint(service, url_prefix=url_prefix + service.url_prefix)
+        if exempt_from_csrf:
+            csrf_protect.exempt(service)
 

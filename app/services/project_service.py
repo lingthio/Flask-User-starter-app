@@ -12,7 +12,7 @@ from app.models.data_pool_models import Image, ManualSegmentation, ContrastType,
 from app.models.project_models import Project
 from app.models.user_models import User
 
-from app.controllers import project_controller, user_controller
+from app.controllers import data_pool_controller, project_controller, user_controller
 
 from app.utils import technical_admin_required, project_admin_required, project_reviewer_required, project_user_required
 
@@ -28,41 +28,49 @@ def all_projects():
 
     projects = project_controller.get_available_projects()
 
-    projects = [p.as_dict() for p in projects]
-
     data = {
-        "projects": projects
+        "projects": [p.as_dict() for p in projects]
     }
 
     return jsonify(data)
 
-
 """
-Update the project: names, description and users
+Returns the project specified by the project_id
 """
-@project_service.route("", methods=['POST'])
+@project_service.route('', methods=['GET'])
 @login_required
-@technical_admin_required
-def create_project():
+def get_project_by_id():
 
-    # check, if the request is fired by a form or by ajax call
-    is_form_request = hasattr(request, 'form')
+     # project ID needs to be in the url like /project?id=1
+    project_id = request.args.get('id')
 
-    app.logger.info(f"create_project: is form request {is_form_request}")
-
-    project_data = None
-    if is_form_request:
-        project_data = request.form
+    if not project_id:
+        return abort(401, "Error: No project id provided. ( like /project?id=1 )")
     else:
-        project_data = json.loads(request.data)
+        try:
+            project_id = int(project_id)
+        except ValueError:
+            return abort(401, "Error: No integer as project id provided. ( like /project?id=1 )")
 
-    app.logger.info(project_data)
+    app.logger.info(f"Requested project with id {project_id}")
 
-    return redirect(request.referrer)
+    projects = project_controller.get_available_projects()
 
+    requested_project = None
+
+    for project in projects:
+        if project.id == project_id:
+            requested_project = project
+            break
+
+    data = {
+        "project": requested_project.as_dict() if requested_project else None,
+    }
+
+    return jsonify(data)
 
 """
-Update the project: names, description and users
+Create or Update the project: names, description, users, modalities, contrast_types
 """
 @project_service.route("", methods=['PUT', 'POST'])
 @login_required
@@ -180,19 +188,19 @@ def create_or_update_project():
 
         # Delete old modalities
         for modality in project.modalities:
-            modality = project_controller.find_modality(id = modality.id)
+            modality = data_pool_controller.find_modality(id = modality.id)
 
             if modality:
-                project_controller.delete_modality(modality)
+                data_pool_controller.delete_modality(modality)
 
         project.modalities.clear()
 
         # Delete old contrast types
         for contrast_type in project.contrast_types:
-            contrast_type = project_controller.find_contrast_type(id = contrast_type.id)
+            contrast_type = data_pool_controller.find_contrast_type(id = contrast_type.id)
 
             if contrast_type:
-                project_controller.delete_contrast_type(contrast_type)
+                data_pool_controller.delete_contrast_type(contrast_type)
         
         project.contrast_types.clear()
 
@@ -202,11 +210,11 @@ def create_or_update_project():
 
     # Create new modalities
     for modality in modalities:
-        modality = project_controller.create_modality(name = modality, project_id = project.id)
+        modality = data_pool_controller.create_modality(name = modality, project_id = project.id)
 
     # Create new contrast types
     for contrast_type in contrast_types:
-        contrast_type = project_controller.create_contrast_type(name = contrast_type, project_id = project.id)
+        contrast_type = data_pool_controller.create_contrast_type(name = contrast_type, project_id = project.id)
 
     data = {
         "project": project.as_dict()

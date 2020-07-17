@@ -8,13 +8,9 @@ div,
 center {
   color: #333 !important;
 
-  &:hover {
-    background-color: unset !important;
-  }
-
   &.text {
     color: #333 !important;
-    background-color: unset !important;
+    background-color: white !important;
   }
 }
 
@@ -50,16 +46,16 @@ center {
 }
 
 .btn-primary {
-  color: unset !important;
+  color: #333 !important;
 }
 
 .btn-secondary {
-  color: unset !important;
+  color: #333 !important;
   background-color: #ddd;
 }
 
 .btn-success {
-  color: unset !important;
+  color: #333 !important;
 }
 
 .alert {
@@ -70,12 +66,12 @@ a {
   color: #333 !important;
 
   &:hover {
-    background-color: unset !important;
+    background-color: transparent !important;
   }
 
   &.text {
     color: #333 !important;
-    background-color: unset !important;
+    background-color: transparent !important;
   }
 
   :link {

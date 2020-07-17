@@ -19,6 +19,8 @@ from flask_admin import Admin
 
 from werkzeug.local import LocalProxy
 
+logging.getLogger().setLevel(logging.INFO)
+
 app = None
 current_project = None
 user_manager = None
@@ -73,13 +75,14 @@ def create_app(extra_config_settings={}):
 
     # Register REST Api
     from app.services import register_blueprints as register_api
-    register_api(app, url_prefix="/api")
+    register_api(app, url_prefix="/api", exempt_from_csrf = True, csrf_protect = csrf_protect)
+    csrf_protect
     
     # Register views
     from app.views import register_blueprints as register_view
     register_view(app, url_prefix="")
 
-    app.logger.info(app.url_map)
+    # app.logger.info(app.url_map)
 
     # Define bootstrap_is_hidden_field for flask-bootstrap's bootstrap_wtf.html
     from wtforms.fields import HiddenField
@@ -101,6 +104,31 @@ def create_app(extra_config_settings={}):
 
     # registers all jinja template extensions
     from app import template_extensions
+
+    # enable CSRF-Protection for all view urls and only exclude /user and /api
+
+    print("Blueprints:")
+    for blueprint in app.iter_blueprints():
+        # app.logger.info(blueprint.name)
+        if blueprint.name == 'user' or blueprint.name == 'flask_user':
+            """
+            This Solution doesn't work. The UserManager endpoints are still CSRF protected.
+            See below this for a solution which works
+            """
+            app.logger.info("Exempting blueprint " + blueprint.name + " from CSRF Check")
+            # csrf_protect.exempt(blueprint)
+
+    """
+    Perhaps just remove CSRF check from all requests 
+    via WTF_CSRF_CHECK_DEFAULT to False
+    
+    and only add it to the view requests:
+    """
+    @app.before_request
+    def check_csrf():
+        if not request.path.startswith('/user') and not request.path.startswith('/api'):
+            app.logger.debug(f"CSRF protecting path {request.path}")
+            csrf_protect.protect()
 
     return app
 

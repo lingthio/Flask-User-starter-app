@@ -92,15 +92,16 @@
 
     function addContrastType(name) {
         let container = $('#contrastTypeContainer');
-        let newEntry = "<div class=\"form-row align-items-center\">\n" +
-            "                            <div class=\"col-sm-6\">\n" +
-            "                                <input id=\"userField\" class=\"form-control\" name=\"contrast_types[]\" type=\"text\" value=\"" + name + "\" readonly>\n" +
-            "                            </div>\n" +
-            "                            <div class=\"col-sm-2\">\n" +
-            "                                <button class=\"btn btn-remove contrastTypeRemoveBtn\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
-            "                                </button>\n" +
-            "                            </div>\n" +
-            "                        </div>";
+        let newEntry = `
+        <div class='form-row align-items-center'>
+            <div class='col-sm-6'>
+                <input id='userField' class='form-control' name='contrast_types[]' type='text' value='` + name + `' style="background: transparent; border: none;" readonly>
+            </div>
+            <div class='col-sm-2'>
+                <button class='btn btn-remove contrastTypeRemoveBtn' type='button'><i class='fas fa-minus'></i>
+                </button>
+            </div>
+        </div>`;
         console.log("append addContrastType");
         $(container).append(newEntry);
         newEntry = $(container).children().last();
@@ -113,15 +114,17 @@
 
     function addModalitiy(name) {
         let container = $('#modalitiesContainer');
-        let newEntry = "<div class=\"form-row align-items-center\">\n" +
-            "                            <div class=\"col-sm-4\">\n" +
-            "                                <input id=\"userField\" class=\"form-control\" name=\"modalities[]\" type=\"text\" value=\"" + name + "\" readonly>\n" +
-            "                            </div>\n" +
-            "                            <div class=\"col-sm-2\">\n" +
-            "                                <button class=\"btn btn-remove modalityRemoveBtn\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
-            "                                </button>\n" +
-            "                            </div>\n" +
-            "                        </div>";
+        let newEntry = `
+        <div class='form-row align-items-center'>
+            <div class='col-sm-4'>
+                <input id='userField' class='form-control' name='modalities[]' type='text' value='` + name + `' style="background: transparent; border: none;" readonly>
+            </div>
+            <div class='col-sm-2'>
+                <button class='btn btn-remove modalityRemoveBtn' type='button'><i class='fas fa-minus'></i>
+                </button>
+            </div>
+        </div>
+        `;
         console.log("append addModalitiy");
         $(container).append(newEntry);
         newEntry = $(container).children().last();
@@ -149,7 +152,7 @@
             "                                </select>\n" +
             "                            </div>\n" +
             "                            <div class=\"col-auto\">\n" +
-            "                                <button id=\"rmButton\" class=\"btn btn-remove\" type=\"button\"><i class=\"fa fa-minus\"></i>\n" +
+            "                                <button id=\"rmButton\" class=\"btn btn-remove\" type=\"button\"><i class=\"fas fa-minus\"></i>\n" +
             "                                </button>\n" +
             "                            </div>\n" +
             "                        </div>";
@@ -215,6 +218,7 @@
     });
 
 </script>
+
 <div class="modal fade" tabindex="-1" id="projectConfigModal" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -252,7 +256,7 @@
                     <div class="form-group" style="display: flex;">
                         <div style="flex: 0 0 50%;">
                             <label>Contrast Types</label>
-                            <div id="contrastTypeContainer" style="padding-left: 10px;">
+                            <div id="contrastTypeContainer">
 
                             </div>
                             <div class="form-row align-items-center">
@@ -261,14 +265,14 @@
                                 </div>
                                 <div class="col-auto">
                                     <button type="button" class="btn btn-add" id="newContrastTypeBtn"><i
-                                            class="fa fa-plus-circle fa-2x"
+                                            class="fas fa-plus"
                                             style="color: #0099CC;"></i></button>
                                 </div>
                             </div>
                         </div>
                         <div style="flex: 1;">
                             <label>Modalities</label>
-                            <div id="modalitiesContainer" style="padding-left: 10px;">
+                            <div id="modalitiesContainer">
 
                             </div>
                             <div class="form-row align-items-center">
@@ -277,7 +281,7 @@
                                 </div>
                                 <div class="col-auto">
                                     <button type="button" class="btn btn-add" id="newModalityBtn"><i
-                                            class="fa fa-plus-circle fa-2x"
+                                            class="fas fa-plus"
                                             style="color: #0099CC;"></i></button>
                                 </div>
                             </div>
@@ -307,7 +311,7 @@
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-add" id="addUserButton"><i
-                                    class="fa fa-plus-circle fa-2x"
+                                    class="fas fa-plus"
                                     style="color: #0099CC;"></i></button>
                         </div>
                     </div>

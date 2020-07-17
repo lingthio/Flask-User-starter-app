@@ -10,6 +10,8 @@ APP_SYSTEM_ERROR_SUBJECT_LINE = APP_NAME + " system error"
 
 # Flask settings
 CSRF_ENABLED = True
+WTF_CSRF_ENABLED = False # see __init__.py => check_csrf()
+WTF_CSRF_CHECK_DEFAULT = False
 
 # Flask-SQLAlchemy settings
 SQLALCHEMY_TRACK_MODIFICATIONS = False
