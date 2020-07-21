@@ -1,6 +1,8 @@
 import json
 import os
 
+from flask import current_app as app
+
 from flask_user import current_user
 
 from app.models.data_pool_models import Modality, ContrastType

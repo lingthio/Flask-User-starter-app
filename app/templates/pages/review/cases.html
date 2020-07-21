@@ -2,139 +2,390 @@
 
 {% block content %}
 <script type="text/javascript" class="init">
+var datatable;
+    var editor; // use a global for the submit and return data
+
+    // for later ajax calls (upload of mask image)
+    var current_case = {};
 
     var table_def = [
         {
-            title: 'Name',
-            data: 'name'
-        },
-        {
-            title: 'Patient Name',
-            data: 'patient_name',
+            type: 'readonly',
+            title: 'ID',
+            data: 'id',
             visible: false
         },
         {
-            title: 'Modality',
-            data: 'modality'
-        },
-        
-        {
-            type: 'select',
-            title: 'Contrast',
-            data: 'contrast_type'
+            title: 'Name',
+            data: 'name',
+            create: true,
         },
         {
             title: 'Accession Number',
             data: 'accession_number'
         },
         {
+            type: 'select',
+            title: 'Status',
+            name: 'status',
+            data: 'manual_segmentation.status'
+        },
+        {
+            type: 'select',
+            title: 'Split',
+            data: 'split',
+        },
+        {  
+            title: 'Body Region',
+            data: 'body_region',
+            create: true,
+            visible: false,
+        },
+        {
+            type: 'select',
+            title: 'Modality',
+            data: 'modality',
+            create: true,
+        },
+        {
+            type: 'select',
+            title: 'Contrast',
+            data: 'contrast_type',
+            create: true,
+        },
+        {
+            title: 'Series Name',
+            data: 'series_name',
+            visible: false,
+        },
+        {
+            title: 'Series Description',
+            data: 'series_description',
+            visible: false,
+        },
+        {
+            title: 'Series Number',
+            data: 'series_number',
+            visible: false,
+        },
+        {
+            title: 'Series Instance UID',
+            data: 'series_instance_uid',
+            visible: false,
+        },
+        {
+            title: 'Patient Name',
+            data: 'patient_name',
+            visible: false,
+            create: true,
+        },
+        {
+            type: 'date',
+            title: 'DOB',
+            data: 'patient_dob',
+            visible: false,
+            create: true,
+        },
+        {
             type: 'datetime',
             title: 'Insert Date',
             data: 'insert_date',
-            visible: false
+            visible: false,
         },
         {
             type: 'datetime',
             title: 'Updated',
             data: 'last_updated',
-            visible: false
-        },
-        // Missing: Last Message
-        {
-            type: 'readonly',
-            title: 'Status',
-            data: 'manual_segmentation.status'
+            visible: false,
         },
         {
-            type: 'readonly',
-            title: 'ID',
-            data: 'id',
-            name: 'contrast_type_id',
-            visible: false
+            title: 'Institution',
+            data: 'institution',
+            visible: false,
+            create: true,
         },
         {
-            type: 'select',
-            title: 'Split',
-            data: 'split'
-        },
-        {  
-            title: 'Body Region',
-            data: 'body_region'
-        },
-        {
-            title: 'Series Name',
-            data: 'series_name',
+            title: 'Custom 1',
+            data: 'custom_1',
             visible: false
         },
         {
-            title: 'Series Description',
-            data: 'series_description',
+            title: 'Custom 2',
+            data: 'custom_2',
             visible: false
         },
         {
-            title: 'Series Number',
-            data: 'series_number',
-            visible: false
-        },
-        {
-            title: 'Series Instance UID',
-            data: 'series_instance_uid',
+            title: 'Custom 3',
+            data: 'custom_3',
             visible: false
         },
         {
             type: 'upload',
             title: 'Image',
-            data: 'upload_image'
+            data: 'upload_image',
+            create: true,
+            ajax: {
+                // endpoint used, to upload a new case file
+                // this is done before the actual case is created in the database
+                url: '/api/data_pool/project/' + project_id + '/case/image',
+                type: 'POST',
+            },
+            // in the update screen the same endpoint is used and not changeable, 
+            // but we can add data to the request like the ID which is set then
+            ajaxData: (formData) => {
+                if(editor.field('id').get() != '') {
+                    formData.append('id', editor.field('id').get());
+                }
+            }
         },
         {
             type: 'upload',
             title: 'Mask',
-            data: 'upload_mask'
+            data: 'upload_mask',
+            create: false, // a mask can only be added to existing images to reduce complexity in code
+            ajax: {
+                // endpoint used, to upload a new or updated case mask file
+                url: '/api/data_pool/project/' + project_id + '/case/segmentation?type=manual',
+                type: 'POST',
+                idSrc:  'id',
+                data: () => {
+                    console.log(this.url);
+                }
+            },
+            ajaxData: (formData) => {
+                if(editor.field('id').get() != '') {
+                    formData.append('id', editor.field('id').get());
+                }
+            }
         },
     ];
+ 
 
     $(document).ready(function () {
 
-        setup_data_table(table_def, '#datatable', '#toggle_columns');
+        /*
+        setup_data_table has to load data from the backend which is normally done asynchronous.
+        This means, it returns an Array of Promises which include the API Calls to the backend.
 
-        // Initialize table
-        datatable = $('#datatable').DataTable( {
-            serverSide: true,
-            dom: "Bfrtip",
-            select: true,
-            stateSave: true,
-            ajax: {
-                url: '/api/data_pool/project/' + project_id + '/datatable',
-                type: 'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                data: (args) => JSON.stringify(args),
-                // uncomment following lines to print result, but it will not appear in the table then!
-                // success: (data) => {
-                //     console.log(data);
-                //     return data;
-                // }
-            },
+        When those are fulfilled, we can instantiate the editor with the fields.
 
-            columns: table_def,
-            columnDefs: table_def, 
+        */
+        Promise.all(setup_data_table(table_def, '#datatable', '#toggle_columns')).then(() => {
 
-            scrollX: true,
+            table_def.forEach(config =>  {
+                if(config.type == 'upload') {
+                    console.log(config);
+                }
+            })
+
+            editor = new $.fn.dataTable.Editor({
+                ajax: {
+                    edit: {
+                        type: 'PUT',
+                        url:  '/api/data_pool/project/' + project_id + '/case?ids=_id_'
+                    },
+                },
+                table: '#datatable',
+                idSrc:  'id',
+                fields: table_def
+            });
+
+            // used for: see below
+            var editor_modus = null;
+
+            editor.on('initCreate', () => {
+                editor_modus = "create";
+                handle_initCreate(editor);
+            });
+
+            editor.on('initEdit', (e, node, data) => {
+                editor_modus = 'edit';
+                handle_initEdit(editor, table_def, e, node, data);
+            });
+
+            /* 
+            if image was uploaded in CREATE screen but the data was not confirmed,
+            then we want to delete that data again. (Dismiss)
+
+            Therefore we need to store the ID of the data created when the image is uploaded.
+            This id is stored in currently_creating_case_id or is null otherwise.
+            */
+             var currently_creating_case_id = null;
+
+            //  the server sends us the image id if we uploaded it
+            $( editor.field( 'upload_image' ).input() ).on( 'upload.editor', function (e, val) {
+                if(editor_modus == "create") {
+                    currently_creating_case_id = val;
+                }
+            } );
+
+            // if we submitted the form normally we don't want to delete the image anymore
+            editor.on('postSubmit', function(e, responseJson, data, action) {
+                console.log(responseJson);
+                currently_creating_case_id = null;
+            })
+
+
+            editor.on('closed', function() {
+                // if currently_creating_case_id is not null and we have to delete the image again
+                if(Number.isInteger(currently_creating_case_id)) {
+                    $.ajax({
+                        url: "/api/data_pool/project/" + project_id + "/case?ids=" + currently_creating_case_id,
+                        type: "DELETE"
+                    }).then(() => {
+                        console.log("Deleted image with id " + currently_creating_case_id);
+                        currently_creating_case_id = null;
+                    },
+                    (response) => {
+                        alert("Could not delete image again");
+                        console.log(response);
+                    })
+                }
+            });
+
+            // ############################
+            // ### Define Review Editor ###
+            // ############################
             
-            buttons: [
+            // select specific fields from general configuration
+            review_table_def = table_def.filter(field_config => 
+                [
+                    "id",
+                    "name",
+                    "insert_date",
+                    "last_updated",
+                ].indexOf(field_config.name) != -1
+            );
+            
+            // disable input on those fields
+            review_table_def.forEach(field_config => {
+                field_config.attr = {disabled: true};
+            });
+
+            // fields for review which can be edited
+            review_table_def.push(...[
+                table_def.filter(fc => fc.name == 'status').map(status_field_config => {
+                    // allow for the reviewer only to select 'reject' or 'accept'
+                    var filtered_options = status_field_config.options.filter(option => 
+                            ["rejected", "accepted"].indexOf(option.value) != -1
+                        );
+
+                    var config_copy = Object.assign({}, status_field_config);
+                    
+                    config_copy.options = filtered_options;
+
+                    return config_copy;
+                })[0],
+                // messages
+                // implemented as hidden field which is later being replaced in the DOM
+                {
+                    targets: -1,
+                    data: null,
+                    type: 'hidden',
+                    name: 'messages',
+                },
+                // new message to append to the messages of the manual_segmentation.messages
+                {
+                    title: 'New Message',
+                    label: 'New Message',
+                    data: 'new_message',
+                    name: 'new_message',
+                    type: 'textarea'
+                }
+            ]);
+
+            reviewEditor = new $.fn.dataTable.Editor({
+                ajax: {
+                    // no create or delete functions!
+                    edit: {
+                        type: 'PUT',
+                        url:  '/api/data_pool/project/' + project_id + '/case/_id_/review'
+                    },
+                },
+                table: '#datatable',
+                idSrc:  'id',
+                fields: review_table_def
+            });
+
+            reviewEditor.on('open', function(e, mode, action) {
+                // replace the messages div with the actual messages
+                if(action == 'edit') {
+                    var messages_field = reviewEditor.field('messages');
+                    console.log(messages_field);
+
+                    var container = messages_field.dom.container[0];
+                    console.log(container);
+
+                    container.style = "display: block;";
+
+                    var selectedRows = datatable.rows( { selected: true } );
+                    var messages = selectedRows.data()[0].manual_segmentation.messages;
+                    
+                    console.log("Messages", messages);
+
+                    // inject the messages of the manual_segmentation into hidden field
+                    container.innerHTML = renderMessages(messages)
+                }
+            });
+
+            reviewEditor.on('initEdit', (e, node, data) => handle_initEdit(reviewEditor, review_table_def, e, node, data));
+
+        }).then(() => {
+            datatable = $('#datatable').DataTable( {
+                serverSide: true,
+                dom: "Bfrtip",
+                select: true,
+                stateSave: true,
+    
+                ajax: {
+                    url: '/api/data_pool/project/' + project_id + '/datatable',
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: (args) => JSON.stringify(args),
+                },
+    
+                columns: table_def,
+                columnDefs: table_def, 
+    
+                scrollX: true,
+                
+                buttons: [
                     { extend: 'pageLength'},
                     { extend:'colvis' },
-            ]
-        } );
+                    { extend: 'edit',   editor: editor },
+                    { 
+                        text: 'Review',
+                        extend: 'editSingle',
+                        editor: reviewEditor,
+                        enabled: false
+                    },
+                ]
+            });
 
-        // // Buttons/checkboxes functionality
-        // $('#datatable').on('draw.dt', function () {
-        //     registerDatatableElements();
-        // });
+            datatable.on( 'select deselect', function () {
+                var selectedRows = datatable.rows( { selected: true } );
 
+                // 3. button is "Review"-Button
+                var review_button = datatable.button(3);
+
+                // disable per default, enable, if the current row has status == 'Submitted'
+                review_button.disable();
+        
+                // Multiselect is not supported per default
+                if(selectedRows.count() == 1) {
+                    var data = selectedRows.data()[0];
+                    if(data.manual_segmentation.status == 'Submitted') {
+                        review_button.enable();
+                    }
+                }
+            } );
+        });
     });
 
+    
 </script>
+
 <table id="datatable" class="table table-striped table-hover nowrap">
     <thead>
     <tr>

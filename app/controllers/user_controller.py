@@ -1,6 +1,8 @@
 import logging
 
-from app import app, db
+from flask import current_app as app
+
+from app import db
 
 from app.models.user_models import User, Role
 

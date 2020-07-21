@@ -3,14 +3,18 @@
 {% block content %}
 <script type="text/javascript" class="init">
 
+    var datatable;
     var editor; // use a global for the submit and return data
 
+    /** Table definition for general purpose
+     * The field create is used to distinguish, if the field should be shown on Create button clicked
+     * (see datatable_util.js > function handle_initCreate)
+     */
     var table_def = [
         {
             type: 'readonly',
             title: 'ID',
             data: 'id',
-            name: 'contrast_type_id',
             visible: false
         },
         {
@@ -32,7 +36,6 @@
             type: 'select',
             title: 'Split',
             data: 'split',
-            create: true,
         },
         {  
             title: 'Body Region',
@@ -122,12 +125,36 @@
             title: 'Image',
             data: 'upload_image',
             create: true,
+            ajax: {
+                // endpoint used, to upload a new case file
+                // this is done before the actual case is created in the database
+                url: '/api/data_pool/project/' + project_id + '/case/image',
+                type: 'POST',
+            },
+            // in the update screen the same endpoint is used and not changeable, 
+            // but we can add data to the request like the ID which is set then
+            ajaxData: (formData) => {
+                if(editor.field('id').get() != '') {
+                    formData.append('id', editor.field('id').get());
+                }
+            }
         },
         {
             type: 'upload',
             title: 'Mask',
             data: 'upload_mask',
-            create: true,
+            create: false, // a mask can only be added to existing images to reduce complexity in code
+            ajax: {
+                // endpoint used, to upload a new or updated case mask file
+                url: '/api/data_pool/project/' + project_id + '/case/segmentation?type=manual',
+                type: 'POST',
+                idSrc:  'id',
+            },
+            ajaxData: (formData) => {
+                if(editor.field('id').get() != '') {
+                    formData.append('id', editor.field('id').get());
+                }
+            }
         },
     ];
  
@@ -143,6 +170,12 @@
         */
         Promise.all(setup_data_table(table_def, '#datatable', '#toggle_columns')).then(() => {
 
+            table_def.forEach(config =>  {
+                if(config.type == 'upload') {
+                    console.log(config);
+                }
+            })
+
             editor = new $.fn.dataTable.Editor({
                 ajax: {
                     create: {
@@ -151,41 +184,74 @@
                     },
                     edit: {
                         type: 'PUT',
-                        url:  '/api/data_pool/project/' + project_id + '/case?id=_id_'
+                        url:  '/api/data_pool/project/' + project_id + '/case?ids=_id_'
                     },
                     remove: {
                         type: 'DELETE',
-                        url:  '/api/data_pool/project/' + project_id + '/case?id=_id_'
+                        url:  '/api/data_pool/project/' + project_id + '/case?ids=_id_'
                     }
                 },
                 table: '#datatable',
                 idSrc:  'id',
-                //fields: table_def.filter(column => column.create)
                 fields: table_def
             });
 
-            editor.on('initCreate', function() {
-                editor.show(); //Shows all fields
+            // used for: see below
+            var editor_modus = null;
 
-                table_def.forEach(field => {
-                    // Only fields with the attribute create(: true) are shown
-                    if(!field.create) {
-                        editor.hide(field.name);
-                    }
-                });
+            editor.on('initCreate', () => {
+                editor_modus = "create";
+                handle_initCreate(editor);
             });
 
-            editor.on('initEdit', function() {
-                editor.show(); //Shows all fields
-
-                // TODO decide, which fields should be hidden
+            editor.on('initEdit', (e, node, data) => {
+                editor_modus = 'edit';
+                handle_initEdit(editor, table_def, e, node, data);
             });
 
-            console.log(editor);
+            /* 
+            if image was uploaded in CREATE screen but the data was not confirmed,
+            then we want to delete that data again. (Dismiss)
 
-            console.log(table_def);
+            Therefore we need to store the ID of the data created when the image is uploaded.
+            This id is stored in currently_creating_case_id or is null otherwise.
+            */
+             var currently_creating_case_id = null;
+
+            //  the server sends us the image id if we uploaded it
+            $( editor.field( 'upload_image' ).input() ).on( 'upload.editor', function (e, val) {
+                if(editor_modus == "create") {
+                    currently_creating_case_id = val;
+                }
+            } );
+
+            // if we submitted the form normally we don't want to delete the image anymore
+            editor.on('postSubmit', function(e, responseJson, data, action) {
+                console.log(responseJson);
+                currently_creating_case_id = null;
+            })
+
+
+            editor.on('closed', function() {
+                // if currently_creating_case_id is not null and we have to delete the image again
+                if(Number.isInteger(currently_creating_case_id)) {
+                    $.ajax({
+                        url: "/api/data_pool/project/" + project_id + "/case?ids=" + currently_creating_case_id,
+                        type: "DELETE"
+                    }).then(() => {
+                        console.log("Deleted image with id " + currently_creating_case_id);
+                        currently_creating_case_id = null;
+                    },
+                    (response) => {
+                        alert("Could not delete image again");
+                        console.log(response);
+                    })
+                }
+            });
 
         }).then(() => {
+            // instantiate the datatable after the editor is instantiated
+
             datatable = $('#datatable').DataTable( {
                 serverSide: true,
                 dom: "Bfrtip",
@@ -216,6 +282,8 @@
             });
         });
     });
+
+
 
 </script>
 

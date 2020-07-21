@@ -144,14 +144,14 @@
             </div>
             
             {% if is_logged_in %}
-                <span style="margin-right: 1.5rem">{{ current_user.first_name }}</span>
-                <button class="btn" style="margin-right: 0.5rem">
-                    <a href="{{ url_for('user.logout') }}">Sign Out</a>
-                </button>
+            <span style="margin-right: 1.5rem">{{ current_user.first_name }}</span>
+            <a href="{{ url_for('user.logout') }}">
+                <button class="btn" style="margin-right: 0.5rem">Sign Out</button>
+            </a>
             {% else %}
-                <button class="btn" style="margin-right: 0.5rem">
-                    <a href="{{ url_for('user.login') }}">Login</a>
-                </button>
+            <a href="{{ url_for('user.login') }}">
+                <button class="btn" style="margin-right: 0.5rem">Login</button>
+            </a>
             {% endif %}
             <!-- <img id="mhh_logo" style="height: 75px;" src="{{ url_for('static', filename='mhh_logo.png') }}"> -->
 

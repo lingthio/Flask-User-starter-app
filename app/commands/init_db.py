@@ -22,6 +22,7 @@ from tqdm import trange
 import numpy as np
 import nibabel as nib
 
+logging.getLogger().setLevel(logging.INFO)
 
 class InitDbCommand(Command):
     """ Initialize the database."""
@@ -61,14 +62,20 @@ def setup_example_data(n_projects=2, n_images_per_project=50):
 
         projects.append(project)
 
+        automatic_segmentation_model = data_pool_controller.create_automatic_segmentation_model(project_id = project.id)
 
         for i in trange(n_images_per_project, desc='generating sample data'):
-            image = Image(project=project, name=f'Image_{project_index}_{i}')
-            man_seg = ManualSegmentation(project=project, image=image)
-            auto_seg = AutomaticSegmentation(project=project, image=image)
 
-            db.session.add_all([image, man_seg, auto_seg])
-            db.session.flush()
+            image = data_pool_controller.create_image(project = project, name = f'Image_{project_index}_{i}')
+            man_seg = data_pool_controller.create_manual_segmentation(project = project, image_id = image.id)
+            auto_seg = data_pool_controller.create_automatic_segmentation(project = project, image_id = image.id, model_id = automatic_segmentation_model.id)
+
+            # image = Image(project=project, name=f'Image_{project_index}_{i}')
+            # man_seg = ManualSegmentation(project=project, image=image)
+            # auto_seg = AutomaticSegmentation(project=project, image=image)
+
+            # db.session.add_all([image, man_seg, auto_seg])
+            # db.session.flush()
 
             auto_seg.nii = nib.Nifti1Image(np.zeros((100,100,100)), np.eye(4))
             man_seg.nii = nib.Nifti1Image(np.zeros((100,100,100)), np.eye(4))

@@ -2,8 +2,8 @@ from os import path, makedirs
 import enum
 from datetime import datetime
 from sqlalchemy import Enum, UniqueConstraint
-from app import db
-from flask import current_app as c_app
+from app import app, db
+from flask import current_app as app
 import nibabel as nib
 
 from .config import DATE_FORMAT, DATETIME_FORMAT
@@ -88,7 +88,6 @@ class ContrastType(db.Model):
             project_id=self.project_id
         )
 
-
 class DataPool(db.Model):
     __tablename__ = 'data_pool'
     id = db.Column(db.Integer, primary_key=True)
@@ -108,10 +107,19 @@ class DataPool(db.Model):
 
     def __get_fn__(self):
         assert self.id != None, 'you need to flush or commit the data pool object before accessing nifti data'
-        basepath = path.join(c_app.config['DATA_PATH'], self.project.short_name)
-        if not path.exists(basepath):
-            makedirs(basepath, exist_ok=True)
-        return path.join(basepath, f'{self.id}.nii.gz')
+
+        image_path = None
+
+        if self.type == 'image':
+            image_path = self.project.get_image_path(image_type = 'raw', model_id = None, image_id = self.id)
+        elif self.type == 'manual_segmentation':
+            image_path = self.project.get_image_path(image_type = self.type, model_id = None, image_id = self.id)
+        elif self.type == 'automatic_segmentation':
+            image_path = self.project.get_image_path(image_type = self.type, model_id = self.model_id, image_id = self.id)
+        else:
+            app.logger.error(f"Unrecognized DataPool type {self.type}")
+
+        return image_path
 
     def __get_nii__(self):
         return nib.load(self.__get_fn__())
@@ -122,14 +130,10 @@ class DataPool(db.Model):
     
     nii = property(__get_nii__, __set_nii__)
 
-
-
-
-
 class Image(DataPool):
     __tablename__ = 'data_pool_images'
     id = db.Column(db.Integer, db.ForeignKey('data_pool.id'), primary_key=True)
-    name = db.Column(db.Unicode(255), nullable=False, server_default='', unique=True)
+    name = db.Column(db.Unicode(255), nullable=False, server_default='')
 
     institution = db.Column(db.Unicode(255), nullable=True, server_default='')
     accession_number = db.Column(db.Unicode(255), nullable=True, server_default='')
@@ -242,6 +246,17 @@ class ManualSegmentation(DataPool):
         'polymorphic_identity': 'manual_segmentation',
     }
 
+class AutomaticSegmentationModel(db.Model):
+    __tablename__ = 'data_pool_automatic_segmentation_models'
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False, )
+
+    # Relationships
+    project = db.relationship('project_models.Project', back_populates='automatic_segmentation_models')
+
+    def as_dict(self):
+        return dict(id = self.id,
+                    project_id = self.project_id)
 
 class AutomaticSegmentation(DataPool):
     __tablename__ = 'data_pool_automatic_segmentations'
@@ -249,11 +264,10 @@ class AutomaticSegmentation(DataPool):
     image_id = db.Column(db.Integer, db.ForeignKey('data_pool_images.id', ondelete='CASCADE'),
                          nullable=False, unique=True)
 
-    # model_id     = db.Column(db.Integer, db.ForeignKey('models.id'), nullable=True)
+    model_id = db.Column(db.Integer, db.ForeignKey('data_pool_automatic_segmentation_models.id'), nullable=False)
 
     # Relationships
-    image = db.relationship('Image', foreign_keys=[image_id],
-                            uselist=False, back_populates='automatic_segmentation')
+    image = db.relationship('Image', foreign_keys=[image_id], uselist=False, back_populates='automatic_segmentation')
 
     def as_dict(self):
         result = {c.name: getattr(self, c.name) for c in

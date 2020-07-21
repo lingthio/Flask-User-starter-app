@@ -23,6 +23,23 @@ center {
   color: #333;
 }
 
+.message {
+    margin-left: auto;
+    max-width: 70%;
+    
+    padding: 0.5rem;
+
+    background-color: #FAA;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+
+    &.other {
+      margin-left: unset;
+      margin-right: auto;
+      background-color: white;
+    }
+}
+
 // Bootstrap overrides
 
 .btn {
@@ -566,9 +583,9 @@ a:link {
 
 .screen_section {
   background-color: #fff;
-  min-height: 650px;
-  min-height: 60vh;
-  // height: 100vh;
+  min-height: 800px;
+  // min-height: 60vh;
+  height: 90vh;
   width: 100%;
   padding: 30px;
   display: block;

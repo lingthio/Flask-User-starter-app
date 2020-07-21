@@ -75,6 +75,14 @@ function buildSelect(id, options, activeOption, isEditable) {
   return select;
 }
 
+// From here on: Author: jkriegel
+
+/**
+ * Default REST Fail is used to AJAX calls to display errors in console
+ * @param {*} request
+ * @param {*} status
+ * @param {*} errorThrown
+ */
 function defaultRESTFail(request, status, errorThrown) {
   console.log(
     this.url + " responded with " + request.status,
@@ -82,4 +90,22 @@ function defaultRESTFail(request, status, errorThrown) {
     "\n",
     request.responseText
   );
+}
+
+/*
+    Reducing keys like manual_segmentation.status and the object data { manual_segmentation: { status: "abc" }}
+    to the value of status
+
+    field_config.data = 'manual_segmentation.status'
+    data = { manual_segmentation: { status: "abc" }}
+    afterwards: start[1] = "abc"
+    */
+function getDeepElementFromObject(deepKey, object) {
+  start = [deepKey.split("."), object];
+
+  while (start[0].length > 0) {
+    start = [start[0].splice(1, start[0].length - 1), start[1][start[0]]];
+  }
+
+  return start[1];
 }

@@ -10,11 +10,23 @@ p, i, span, time, div, center {
   .input {
     color: #333; }
 
-    .btn {
-      border: grey solid 2px !important;
-      background-color: #ddd; }
-      .btn:hover {
-        background-color: #888 !important; }
+    .message {
+      margin-left: auto;
+      max-width: 70%;
+      padding: 0.5rem;
+      background-color: #FAA;
+      border-radius: 10px;
+      margin-bottom: 1rem; }
+      .message.other {
+        margin-left: unset;
+        margin-right: auto;
+        background-color: white; }
+
+.btn {
+  border: grey solid 2px !important;
+  background-color: #ddd; }
+  .btn:hover {
+    background-color: #888 !important; }
 
 .btn-group .btn {
   border: grey solid 2px !important;
@@ -398,8 +410,8 @@ html {
 
   .screen_section {
     background-color: #fff;
-    min-height: 650px;
-    min-height: 60vh;
+    min-height: 800px;
+    height: 90vh;
     width: 100%;
     padding: 30px;
     display: block;
