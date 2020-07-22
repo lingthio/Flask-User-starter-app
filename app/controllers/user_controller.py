@@ -47,7 +47,11 @@ def create_user(first_name, last_name, email, password, roles=None):
                 active=True)
 
     if roles:
-            user.roles.extend(roles)
+        user.roles.extend(roles)
+    else:
+        user_role = Role.query.filter(Role.name == 'user').first()
+        if user_role is not None:
+            user.roles.append(user_role)
 
     db.session.add(user)
     db.session.commit()

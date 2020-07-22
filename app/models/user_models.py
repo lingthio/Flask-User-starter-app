@@ -44,7 +44,7 @@ class User(db.Model, UserMixin):
         return result
 
     def __repr__(self):
-        return f'{self.first_name} {self.last_name} (f{self.email})'
+        return f'{self.first_name} {self.last_name} ({self.email})'
     
     def __eq__(self, other):
         if not isinstance(other, self.__class__):

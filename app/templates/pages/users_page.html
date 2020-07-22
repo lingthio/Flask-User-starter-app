@@ -13,7 +13,15 @@
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return '<button class="btn btn-add deleteUserButton"><i class="fa fa-trash" style="font-size:36px;"></i></button>'
+                        {% if is_technical_admin %}
+                            if(data.id != user_id) {
+                                return '<button class="btn btn-add deleteUserButton"><i class="fa fa-trash" style="font-size:36px;"></i></button>'
+                            } else {
+                                return "";
+                            }
+                        {% else %}
+                            return "";
+                        {% endif %}
                     }
                 },
             ],

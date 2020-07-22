@@ -56,7 +56,7 @@ def new_user():
     first_name = user_data["first_name"]
     last_name = user_data["last_name"]
     email = user_data["email"]
-    password = user_data["email"]
+    password = user_data["password"]
 
     user = user_controller.find_or_create_user(first_name=first_name, last_name=last_name, email=email, password=password)
 

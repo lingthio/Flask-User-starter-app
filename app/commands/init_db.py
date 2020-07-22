@@ -24,6 +24,9 @@ import nibabel as nib
 
 logging.getLogger().setLevel(logging.INFO)
 
+admin_role = None
+user_role = None
+
 class InitDbCommand(Command):
     """ Initialize the database."""
 
@@ -31,20 +34,33 @@ class InitDbCommand(Command):
         init_db()
         print('Database has been initialized.')
 
+#  Adding roles
+def create_roles():
+    global admin_role, user_role
+    admin_role = find_or_create_role('admin', u'Admin')
+    user_role = find_or_create_role('user', u'User')
 
-def init_db():
+def init_db(create_example_data = True):
     """ Initialize the database."""
+
+    # init db file if not existing...
+    db.create_all()
+
+    # reset database (if tables were already existing)
     db.drop_all()
     db.create_all()
-    setup_example_data()
+
+    if create_example_data:
+        setup_example_data()
 
 
 def setup_example_data(n_projects=2, n_images_per_project=50):
     """ Set up example projects with users, images and segmentations """
 
-    # Adding roles
-    admin_role = find_or_create_role('admin', u'Admin')
-    user_role = find_or_create_role('user', u'User')
+    global admin_role, user_role
+
+    if admin_role is None and user_role is None:
+        create_roles()
 
     # Add users
     admin = user_controller.find_or_create_user('Admin', 'Admin', 'admin@issm.org', 'admin', [admin_role, user_role])

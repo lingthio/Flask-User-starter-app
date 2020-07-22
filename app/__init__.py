@@ -107,19 +107,8 @@ def create_app(extra_config_settings={}):
 
     # enable CSRF-Protection for all view urls and only exclude /user and /api
 
-    print("Blueprints:")
-    for blueprint in app.iter_blueprints():
-        # app.logger.info(blueprint.name)
-        if blueprint.name == 'user' or blueprint.name == 'flask_user':
-            """
-            This Solution doesn't work. The UserManager endpoints are still CSRF protected.
-            See below this for a solution which works
-            """
-            app.logger.info("Exempting blueprint " + blueprint.name + " from CSRF Check")
-            # csrf_protect.exempt(blueprint)
-
     """
-    Perhaps just remove CSRF check from all requests 
+    remove CSRF check from all requests with settings.py
     via WTF_CSRF_CHECK_DEFAULT to False
     
     and only add it to the view requests:
@@ -129,6 +118,37 @@ def create_app(extra_config_settings={}):
         if not request.path.startswith('/user') and not request.path.startswith('/api'):
             app.logger.debug(f"CSRF protecting path {request.path}")
             csrf_protect.protect()
+
+
+    # for key in app.config:
+    #     app.logger.info(f"{key} {app.config[key]}")
+
+    if not app.debug:
+        users = []
+
+        with app.app_context():
+            # init db
+            db.create_all()
+
+            from app.models.user_models import User
+            users = db.session.query(User).all()
+
+            # check if there are already technical users existing (if so, then this is not the first boot)
+            no_technical_admin = False if any(user if any(role.name == 'admin' for role in user.roles) else None for user in users) else True
+
+            app.logger.info(f"No technical admin present? {no_technical_admin}")
+
+            # create default admin if no user exist
+            if no_technical_admin:
+                from app.commands.init_db import create_roles
+                create_roles()
+
+                # create the default flask admin
+                from app.models.user_models import Role
+                from app.controllers import user_controller
+                all_roles = Role.query.all()
+                # app.logger.info(f"Creating admin with attributes: 'Admin', 'Admin', {app.config['ADMIN']}, {app.config['ADMIN_PW']}, {all_roles}")
+                default_admin_user = user_controller.create_user('Admin', 'Admin', app.config['ADMIN'], app.config['ADMIN_PW'], all_roles)
 
     return app
 
@@ -149,7 +169,7 @@ def init_email_error_handler(app):
     secure = () if app.config.get('MAIL_USE_TLS') else None
 
     # Retrieve app settings from app.config
-    to_addr_list = app.config['ADMINS']
+    to_addr_list = app.config['ADMIN']
     subject = app.config.get('APP_SYSTEM_ERROR_SUBJECT_LINE', 'System Error')
 
     # Setup an SMTP mail handler for error-level messages

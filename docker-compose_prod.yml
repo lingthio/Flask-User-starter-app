@@ -1,0 +1,35 @@
+# For Productive
+version: "3"
+
+services:
+  issm:
+    image: issm:0.1
+    restart: "always"
+    container_name: issm
+    ports:
+      - "8080:80"
+    volumes:
+      # mount data (database & images) to outside of container
+      - ./data:/data
+    environment:
+      - DEBUG=0
+      - SECRET_KEY="changeme"
+      # Database
+      - DATABASE_URI=sqlite:////data/issm.sqlite
+      # default admin user when no user exists
+      - ADMIN=admin@issm.org 
+      - ADMIN_PW=admin
+      #  Flask-User Settings
+      - APP_NAME=issm
+      - EMAIL_SENDER_NAME=Anonymous
+      - EMAIL_SENDER_EMAIL=no-one@anonymous.org
+      #  Flask-Mail Settings
+      - MAIL_SERVER=""
+      - MAIL_PORT=587
+      - MAIL_USE_SSL=0
+      - MAIL_USE_TLS=1
+      - MAIL_USERNAME=""
+      - MAIL_PASSWORD=""
+      #  Sendgrid Settings
+      - SENDGRID_API_KEY=""
+      

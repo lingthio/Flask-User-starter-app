@@ -1,0 +1,41 @@
+# For Development
+version: "3"
+
+services:
+  issm:
+    image: issm:latest
+    restart: "always"
+    container_name: issm
+    entrypoint: ""
+    command: /bin/sh -c "./manage.py init_db && ./manage.py runserver --host=0.0.0.0" #for testing
+    ports:
+      - "5000:5000"
+    volumes:
+        # mounted project for development purposes
+      - ./app:/issm/app
+      - ./docker/local_settings.py:/issm/app/local_settings.py # see Dockerfile, the file is per default copied, but we override the app dir for development
+      - ./manage.py:/issm/manage.py
+      # mount data (database & images) to outside of container
+      - ./data:/data
+    environment:
+      - DEBUG=1
+      - SECRET_KEY="changeme"
+      # Database
+      - DATABASE_URI=sqlite:////data/issm.sqlite
+      # default admin user when no user exists
+      - ADMIN=admin@issm.org 
+      - ADMIN_PW=admin
+      #  Flask-User Settings
+      - APP_NAME=issm
+      - EMAIL_SENDER_NAME=Anonymous
+      - EMAIL_SENDER_EMAIL=no-one@anonymous.org
+      #  Flask-Mail Settings
+      - MAIL_SERVER=""
+      - MAIL_PORT=587
+      - MAIL_USE_SSL=0
+      - MAIL_USE_TLS=1
+      - MAIL_USERNAME=""
+      - MAIL_PASSWORD=""
+      #  Sendgrid Settings
+      - SENDGRID_API_KEY=""
+      

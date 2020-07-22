@@ -1,5 +1,5 @@
 # Debian 10 distribution with Python 3.8.4 installed
-FROM python:3.7-slim
+FROM python:3.8.4-slim
 MAINTAINER Hinrich Winther <winther.hinrich@mh-hannover.de>
 
 RUN apt-get update
@@ -13,18 +13,20 @@ WORKDIR /issm
 
 RUN mkdir -p /data
 
+ADD requirements.txt /issm
+
+RUN pip install -r requirements.txt
+
 # Don't copy the complete current directory in order to make caching work when running docker build
 ADD app /issm/app
 ADD migrations /issm/migrations
 ADD tests /issm/tests
 
-COPY ./*.py ./*.ini Version requirements.txt /issm/
+COPY ./*.py ./*.ini Version /issm/
 
 COPY docker/local_settings.py app/local_settings.py
 COPY docker/uwsgi.ini /issm/uwsgi.ini
 COPY docker/nginx.conf /etc/nginx/sites-enabled/default
-
-RUN pip install -r requirements.txt
 
 # reduce image size
 RUN apt-get --purge autoremove -y && \

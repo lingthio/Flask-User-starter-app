@@ -118,3 +118,6 @@ ENV/
 /app.sqlite
 /app/local_settings.py
 /app/static/datatable_editor
+
+# ignore data folder which is mounted per default from the docker-compose file
+/data
