@@ -148,7 +148,6 @@
                 // endpoint used, to upload a new or updated case mask file
                 url: '/api/data_pool/project/' + project_id + '/case/segmentation?type=manual',
                 type: 'POST',
-                idSrc:  'id',
             },
             ajaxData: (formData) => {
                 if(editor.field('id').get() != '') {

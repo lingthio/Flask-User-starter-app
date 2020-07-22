@@ -7,8 +7,7 @@ RUN apt-get install -y \
     gcc \
     nginx
 
-# Should not be necessary?
-#EXPOSE 80
+EXPOSE 80
 
 WORKDIR /issm
 
